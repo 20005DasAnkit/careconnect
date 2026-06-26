@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { User, ChevronDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+
 
 export default function Dashboard() {
     const [doctors, setDoctors] = useState([]);
@@ -7,6 +10,11 @@ export default function Dashboard() {
     const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
+
+const navigate = useNavigate();
+
+const userName = localStorage.getItem("name") || "My Account";
+
 
     useEffect(() => {
         loadData();
@@ -56,17 +64,34 @@ export default function Dashboard() {
                             For Business <span className="text-xs">▾</span>
                         </a>
                     </nav>
+                    <div className="hidden lg:flex items-center gap-5">
 
-                    <div className="hidden lg:flex items-center gap-6 font-[system-ui,sans-serif] text-[15px]">
-                        <a href="#" className="hover:underline">Log in</a>
-                        <a
-                            href="/patient/doctors"
-                            className="bg-[#16332B] text-white px-6 py-3 rounded-full font-medium hover:bg-[#0F231D] transition"
-                        >
-                            Sign up
-                        </a>
-                        <button aria-label="Search" className="text-lg">⌕</button>
-                    </div>
+  <button className="text-xl">
+    ⌕
+  </button>
+
+  <button
+    onClick={() => navigate("/patient/profile")}
+    className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
+  >
+    <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
+      <User size={18} />
+    </div>
+
+    <div className="text-left">
+      <p className="text-sm font-semibold">
+        {userName}
+      </p>
+
+      <p className="text-xs text-gray-500">
+        My Profile
+      </p>
+    </div>
+
+  </button>
+
+</div>
+
 
                     <button
                         className="lg:hidden text-2xl"

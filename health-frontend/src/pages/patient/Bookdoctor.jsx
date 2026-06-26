@@ -1,89 +1,142 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
 
-export default function DoctorBooking() {
-  const [doctors, setDoctors] = useState([]);
-  const [slots, setSlots] = useState([]);
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+export default function Appointments() {
+    const [appointments, setAppointments] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  // load doctors
-  useEffect(() => {
-    api.get("/patient/doctors")
-      .then(res => setDoctors(res.data))
-      .catch(err => console.log(err));
-  }, []);
+    useEffect(() => {
+        loadAppointments();
+    }, []);
 
-  // load slots
-  const loadSlots = (doctorId) => {
-    setSelectedDoctor(doctorId);
+    const loadAppointments = async () => {
+        try {
+            const res = await api.get("/patient/appointments");
+            setAppointments(res.data || []);
+        } catch (err) {
+            console.log(err);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-    api.get(`/patient/doctor/${doctorId}/slots`)
-      .then(res => setSlots(res.data))
-      .catch(err => console.log(err));
-  };
+    const cancelAppointment = async (id) => {
+        try {
+            await api.put(`/patient/appointment/cancel/${id}`);
+            alert("Appointment cancelled successfully");
+            loadAppointments();
+        } catch (err) {
+            console.log(err);
+            alert(err?.response?.data || "Cancel failed");
+        }
+    };
 
-  // book slot
-  const bookSlot = (slotId) => {
-    api.post("/patient/book", {
-      doctorAvailabilityId: slotId,
-      razorpayPaymentId: "demo_payment" // পরে real payment বসাবে
-    })
-    .then(res => {
-      alert("Appointment Booked!");
-      console.log(res.data);
-    })
-    .catch(err => console.log(err));
-  };
+    return (
+        <div className="space-y-6">
 
-  return (
-    <div className="min-h-screen bg-gray-100 p-6">
-
-      <h2 className="text-2xl font-bold mb-6">🧑‍⚕️ Book Doctor</h2>
-
-      {/* DOCTORS */}
-      <div className="grid md:grid-cols-3 gap-4">
-        {doctors.map(doc => (
-          <div key={doc.id} className="bg-white p-4 shadow rounded">
-            <h3 className="font-bold">{doc.name}</h3>
-            <p>{doc.specialization}</p>
-            <p>Fee: {doc.fee}</p>
-
-            <button
-              onClick={() => loadSlots(doc.id)}
-              className="mt-3 bg-blue-600 text-white px-3 py-1 rounded"
-            >
-              View Slots
-            </button>
-          </div>
-        ))}
-      </div>
-
-      {/* SLOTS */}
-      {selectedDoctor && (
-        <div className="mt-8">
-          <h3 className="text-xl font-bold mb-3">Available Slots</h3>
-
-          <div className="grid md:grid-cols-3 gap-4">
-            {slots.map(slot => (
-              <div key={slot.id} className="bg-white p-4 shadow rounded">
-
-                <p>
-                  {new Date(slot.availableFrom).toLocaleString()}
+            {/* Header */}
+            <div>
+                <h1 className="text-2xl font-bold text-gray-800">
+                    📅 My Appointments
+                </h1>
+                <p className="text-gray-500 text-sm">
+                    View and manage your doctor appointments
                 </p>
+            </div>
 
-                <button
-                  onClick={() => bookSlot(slot.id)}
-                  className="mt-3 bg-green-600 text-white px-3 py-1 rounded"
-                >
-                  Book Now
-                </button>
+            {/* Loading */}
+            {loading && (
+                <p className="text-gray-500">Loading appointments...</p>
+            )}
 
-              </div>
-            ))}
-          </div>
+            {/* Table */}
+            <div className="bg-white rounded-xl shadow overflow-x-auto">
+
+                <table className="w-full text-sm text-left">
+
+                    <thead className="bg-gray-100 text-gray-600">
+                        <tr>
+                            <th className="p-3">Doctor ID</th>
+                            <th className="p-3">Availability ID</th>
+                            <th className="p-3">Booked At</th>
+                            <th className="p-3">Status</th>
+                            <th className="p-3">Payment</th>
+                            <th className="p-3">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {appointments.map((a) => (
+                            <tr key={a.id} className="border-t">
+
+                                <td className="p-3">
+                                    {a.doctorId}
+                                </td>
+
+                                <td className="p-3">
+                                    {a.doctorAvailabilityId}
+                                </td>
+
+                                <td className="p-3">
+                                    {new Date(a.bookedAt).toLocaleString()}
+                                </td>
+
+                                {/* Status */}
+                                <td className="p-3">
+                                    <span
+                                        className={`px-2 py-1 rounded text-xs font-semibold ${a.status === "Confirmed"
+                                                ? "bg-green-100 text-green-700"
+                                                : a.status === "CancelledByUser"
+                                                    ? "bg-red-100 text-red-600"
+                                                    : "bg-yellow-100 text-yellow-700"
+                                            }`}
+                                    >
+                                        {a.status}
+                                    </span>
+                                </td>
+
+                                {/* Payment */}
+                                <td className="p-3">
+                                    <span className="text-blue-600 font-semibold">
+                                        {a.paymentStatus}
+                                    </span>
+                                    <br />
+                                    <span className="text-xs text-gray-500">
+                                        ₹{a.advanceAmount}
+                                    </span>
+                                </td>
+
+                                {/* Action */}
+                                <td className="p-3">
+
+                                    {a.status === "Confirmed" && (
+                                        <button
+                                            onClick={() => cancelAppointment(a.id)}
+                                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"
+                                        >
+                                            Cancel
+                                        </button>
+                                    )}
+
+                                </td>
+
+                            </tr>
+                        ))}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+            {/* Empty */}
+            {!loading && appointments.length === 0 && (
+                <p className="text-gray-500">
+                    No appointments found
+                </p>
+            )}
+
         </div>
-      )}
-
-    </div>
-  );
+    );
 }

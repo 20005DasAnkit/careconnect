@@ -54,19 +54,12 @@ export default function ProductOrders() {
                   <tr key={o.orderId} className="border-b">
 
                     <td className="p-3">{o.customerName}</td>
-
                     <td className="p-3">{o.customerEmail}</td>
-
                     <td className="p-3">{o.productName}</td>
-
                     <td className="p-3">{o.quantity}</td>
-
                     <td className="p-3">₹{o.unitPrice}</td>
-
                     <td className="p-3">₹{o.total}</td>
-
                     <td className="p-3">{o.status}</td>
-
                     <td className="p-3">
                       {new Date(o.orderDate).toLocaleString()}
                     </td>

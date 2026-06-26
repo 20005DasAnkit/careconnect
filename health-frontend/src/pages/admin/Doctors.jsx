@@ -86,11 +86,9 @@ export default function Doctors() {
               <input name="fullName" onChange={handleChange} placeholder="Full Name" className="input w-full mb-2" />
               <input name="email" onChange={handleChange} placeholder="Email" className="input w-full mb-2" />
               <input name="password" type="password" onChange={handleChange} placeholder="Password" className="input w-full mb-2" />
-
               <input name="specialization" onChange={handleChange} placeholder="Specialization" className="input w-full mb-2" />
               <input name="hospitalName" onChange={handleChange} placeholder="Hospital Name" className="input w-full mb-2" />
               <input name="fee" onChange={handleChange} placeholder="Fee" className="input w-full mb-2" />
-
               <textarea name="about" onChange={handleChange} placeholder="About" className="input w-full mb-2" />
 
               <button

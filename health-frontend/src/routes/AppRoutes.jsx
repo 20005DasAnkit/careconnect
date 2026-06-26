@@ -18,6 +18,7 @@ import DoctorDashboard from "../pages/doctor/Dashboard";
 
 // Patient
 import PatientDashboard from "../pages/patient/Dashboard";
+import PatientPage from "../pages/patient/Profile";
 import DoctorBooking from "../pages/patient/Bookdoctor";
 import PatientProducts from "../pages/patient/Products";
 import AmbulanceBook from "../pages/patient/AmbulanceBook";
@@ -53,6 +54,7 @@ export default function AppRoutes() {
 
         {/* PATIENT */}
         <Route path="/patient" element={<PatientDashboard />} />
+        <Route path="/patient/Profile" element={<PatientPage />} />
         <Route path="/patient/bookdoctor" element={<DoctorBooking />} />
         <Route path="/patient/products" element={<PatientProducts />} />
         <Route path="/patient/ambulance" element={<AmbulanceBook />} />

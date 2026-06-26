@@ -5,98 +5,82 @@ import Navbar from "../../components/Navbar";
 
 export default function AmbulanceBookings() {
 
-  const [bookings, setBookings] = useState([]);
+    const [bookings, setBookings] = useState([]);
 
-  useEffect(() => {
-    load();
-  }, []);
+    useEffect(() => {
+        load();
+    }, []);
 
-  const load = async () => {
-    const res = await api.get("/admin/ambulance-bookings");
-    setBookings(res.data);
-  };
+    const load = async () => {
+        const res = await api.get("/admin/ambulance-bookings");
+        setBookings(res.data);
+    };
 
-  return (
-    <div className="flex">
+    return (
+        <div className="flex">
 
-      <Sidebar />
+            <Sidebar />
 
-      <div className="ml-64 w-full min-h-screen bg-gray-100">
+            <div className="ml-64 w-full min-h-screen bg-gray-100">
 
-        <Navbar />
+                <Navbar />
 
-        <div className="p-6">
+                <div className="p-6">
 
-          <h2 className="text-3xl font-bold mb-6">
-            Ambulance Bookings
-          </h2>
+                    <h2 className="text-3xl font-bold mb-6">
+                        Ambulance Bookings
+                    </h2>
 
-          <div className="bg-white rounded shadow overflow-x-auto">
+                    <div className="bg-white rounded shadow overflow-x-auto">
 
-            <table className="w-full">
+                        <table className="w-full">
 
-              <thead className="bg-green-700 text-white">
+                            <thead className="bg-green-700 text-white">
 
-                <tr>
+                                <tr>
 
-                  <th className="p-3">Patient</th>
+                                    <th className="p-3">Patient</th>
+                                    <th className="p-3">Email</th>
+                                    <th className="p-3">Driver</th>
+                                    <th className="p-3">Vehicle</th>
+                                    <th className="p-3">Pickup</th>
+                                    <th className="p-3">Destination</th>
+                                    <th className="p-3">Status</th>
+                                    <th className="p-3">Date</th>
 
-                  <th className="p-3">Email</th>
+                                </tr>
 
-                  <th className="p-3">Driver</th>
+                            </thead>
 
-                  <th className="p-3">Vehicle</th>
+                            <tbody>
 
-                  <th className="p-3">Pickup</th>
+                                {bookings.map(b => (
 
-                  <th className="p-3">Destination</th>
+                                    <tr key={b.bookingId} className="border-b">
+                                        <td className="p-3">{b.patientName}</td>
+                                        <td className="p-3">{b.patientEmail}</td>
+                                        <td className="p-3">{b.driverName}</td>
+                                        <td className="p-3">{b.vehicleNumber}</td>
+                                        <td className="p-3">{b.pickupLocation}</td>
+                                        <td className="p-3">{b.destinationLocation}</td>
+                                        <td className="p-3">{b.status}</td>
+                                        <td className="p-3">
+                                            {new Date(b.requestTime).toLocaleString()}
+                                        </td>
+                                    </tr>
 
-                  <th className="p-3">Status</th>
+                                ))}
 
-                  <th className="p-3">Date</th>
+                            </tbody>
 
-                </tr>
+                        </table>
 
-              </thead>
+                    </div>
 
-              <tbody>
+                </div>
 
-                {bookings.map(b => (
-
-                  <tr key={b.bookingId} className="border-b">
-
-                    <td className="p-3">{b.patientName}</td>
-
-                    <td className="p-3">{b.patientEmail}</td>
-
-                    <td className="p-3">{b.driverName}</td>
-
-                    <td className="p-3">{b.vehicleNumber}</td>
-
-                    <td className="p-3">{b.pickupLocation}</td>
-
-                    <td className="p-3">{b.destinationLocation}</td>
-
-                    <td className="p-3">{b.status}</td>
-
-                    <td className="p-3">
-                      {new Date(b.requestTime).toLocaleString()}
-                    </td>
-
-                  </tr>
-
-                ))}
-
-              </tbody>
-
-            </table>
-
-          </div>
+            </div>
 
         </div>
-
-      </div>
-
-    </div>
-  );
+    );
 }
