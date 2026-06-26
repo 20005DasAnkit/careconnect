@@ -97,11 +97,10 @@ export default function Ambulance() {
                         <button
                             key={tab}
                             onClick={() => setActiveType(tab)}
-                            className={`flex-1 h-10 rounded-full text-sm font-semibold transition ${
-                                activeType === tab
-                                    ? "bg-red-500 text-white shadow-md shadow-red-200"
-                                    : "bg-white border border-gray-200 text-gray-600 hover:border-red-200"
-                            }`}
+                            className={`flex-1 h-10 rounded-full text-sm font-semibold transition ${activeType === tab
+                                ? "bg-red-500 text-white shadow-md shadow-red-200"
+                                : "bg-white border border-gray-200 text-gray-600 hover:border-red-200"
+                                }`}
                         >
                             {tab}
                         </button>

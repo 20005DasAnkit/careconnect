@@ -13,7 +13,7 @@ public class AuthController : ControllerBase
     private readonly AppDbContext _context;
     private readonly TokenService _tokenService;
 
-    public AuthController( AppDbContext context, TokenService tokenService)
+    public AuthController(AppDbContext context, TokenService tokenService)
     {
         _context = context;
         _tokenService = tokenService;

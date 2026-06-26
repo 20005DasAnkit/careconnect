@@ -12,18 +12,18 @@ export default function Sidebar() {
         <Link to="/admin/appointments" className="hover:bg-blue-700 p-2 rounded">Appointments</Link>
         <Link to="/admin/ambulances" className="hover:bg-blue-700 p-2 rounded">Ambulance</Link>
         <Link
-  to="/admin/product-orders"
-  className="hover:bg-blue-700 p-2 rounded"
->
-  Product Orders
-</Link>
+          to="/admin/product-orders"
+          className="hover:bg-blue-700 p-2 rounded"
+        >
+          Product Orders
+        </Link>
 
-<Link
-  to="/admin/ambulance-bookings"
-  className="hover:bg-blue-700 p-2 rounded"
->
-  Ambulance Bookings
-</Link>
+        <Link
+          to="/admin/ambulance-bookings"
+          className="hover:bg-blue-700 p-2 rounded"
+        >
+          Ambulance Bookings
+        </Link>
       </div>
     </div>
   );

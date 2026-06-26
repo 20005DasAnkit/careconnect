@@ -2,336 +2,336 @@ import { useEffect, useState } from "react";
 
 export default function Profile() {
 
-  const [form, setForm] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    gender: "",
-    dob: "",
-    bloodGroup: "",
-    address: "",
-    city: "",
-    state: "",
-    country: "",
-    pinCode: "",
-  });
-
-useEffect(() => {
-  const email = localStorage.getItem("email");
-
-  const savedProfile = localStorage.getItem(`profile_${email}`);
-
-  if (savedProfile) {
-    setForm(JSON.parse(savedProfile));
-  } else {
-    setForm({
-      fullName: localStorage.getItem("name") || "",
-      email: email || "",
-      phone: "",
-      gender: "",
-      dob: "",
-      bloodGroup: "",
-      address: "",
-      city: "",
-      state: "",
-      country: "",
-      pinCode: "",
+    const [form, setForm] = useState({
+        fullName: "",
+        email: "",
+        phone: "",
+        gender: "",
+        dob: "",
+        bloodGroup: "",
+        address: "",
+        city: "",
+        state: "",
+        country: "",
+        pinCode: "",
     });
-  }
-}, []);
 
-  const handleChange = (e) => {
-    setForm({
-      ...form,
-      [e.target.name]: e.target.value,
-    });
-  };
+    useEffect(() => {
+        const email = localStorage.getItem("email");
 
-const saveProfile = () => {
-  const email = localStorage.getItem("email");
+        const savedProfile = localStorage.getItem(`profile_${email}`);
 
-  const profile = {
-    ...form,
-    email,
-  };
+        if (savedProfile) {
+            setForm(JSON.parse(savedProfile));
+        } else {
+            setForm({
+                fullName: localStorage.getItem("name") || "",
+                email: email || "",
+                phone: "",
+                gender: "",
+                dob: "",
+                bloodGroup: "",
+                address: "",
+                city: "",
+                state: "",
+                country: "",
+                pinCode: "",
+            });
+        }
+    }, []);
 
-  localStorage.setItem(
-    `profile_${email}`,
-    JSON.stringify(profile)
-  );
+    const handleChange = (e) => {
+        setForm({
+            ...form,
+            [e.target.name]: e.target.value,
+        });
+    };
 
-  localStorage.setItem("name", profile.fullName);
+    const saveProfile = () => {
+        const email = localStorage.getItem("email");
 
-  alert("Profile Saved Successfully");
-};
+        const profile = {
+            ...form,
+            email,
+        };
 
-  return (
+        localStorage.setItem(
+            `profile_${email}`,
+            JSON.stringify(profile)
+        );
 
-<div className="min-h-screen bg-[#F8F6F0] py-10">
+        localStorage.setItem("name", profile.fullName);
 
-<div className="max-w-5xl mx-auto bg-white rounded-[35px] shadow-xl border border-[#E7E1D7] p-10">
+        alert("Profile Saved Successfully");
+    };
 
-<h1
-className="text-5xl text-[#16332B]"
-style={{fontFamily:"Playfair Display"}}
->
-My Profile
-</h1>
+    return (
 
-<p className="mt-2 text-gray-500">
-Manage your account information
-</p>
+        <div className="min-h-screen bg-[#F8F6F0] py-10">
 
-<div className="mt-10 flex items-center gap-6">
+            <div className="max-w-5xl mx-auto bg-white rounded-[35px] shadow-xl border border-[#E7E1D7] p-10">
 
-<img
-src="https://i.pravatar.cc/150"
-className="w-28 h-28 rounded-full object-cover"
-/>
+                <h1
+                    className="text-5xl text-[#16332B]"
+                    style={{ fontFamily: "Playfair Display" }}
+                >
+                    My Profile
+                </h1>
 
-<div>
+                <p className="mt-2 text-gray-500">
+                    Manage your account information
+                </p>
 
-<h2 className="text-2xl font-semibold text-[#16332B]">
-{form.fullName || "Patient"}
-</h2>
+                <div className="mt-10 flex items-center gap-6">
 
-<p className="text-gray-500">
-{form.email}
-</p>
+                    <img
+                        src="https://i.pravatar.cc/150"
+                        className="w-28 h-28 rounded-full object-cover"
+                    />
 
-</div>
+                    <div>
 
-</div>
+                        <h2 className="text-2xl font-semibold text-[#16332B]">
+                            {form.fullName || "Patient"}
+                        </h2>
 
-<div className="grid md:grid-cols-2 gap-6 mt-12">
-          {/* Full Name */}
+                        <p className="text-gray-500">
+                            {form.email}
+                        </p>
 
-          <div>
+                    </div>
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Full Name
-            </label>
+                </div>
 
-            <input
-              type="text"
-              name="fullName"
-              value={form.fullName}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                <div className="grid md:grid-cols-2 gap-6 mt-12">
+                    {/* Full Name */}
 
-          </div>
+                    <div>
 
-          {/* Email */}
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Full Name
+                        </label>
 
-          <div>
+                        <input
+                            type="text"
+                            name="fullName"
+                            value={form.fullName}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Email
-            </label>
+                    </div>
 
-            <input
-              type="email"
-              name="email"
-              value={form.email}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                    {/* Email */}
 
-          </div>
+                    <div>
 
-          {/* Phone */}
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Email
+                        </label>
 
-          <div>
+                        <input
+                            type="email"
+                            name="email"
+                            value={form.email}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Phone
-            </label>
+                    </div>
 
-            <input
-              type="text"
-              name="phone"
-              value={form.phone}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                    {/* Phone */}
 
-          </div>
+                    <div>
 
-          {/* Gender */}
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Phone
+                        </label>
 
-          <div>
+                        <input
+                            type="text"
+                            name="phone"
+                            value={form.phone}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Gender
-            </label>
+                    </div>
 
-            <select
-              name="gender"
-              value={form.gender}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            >
-              <option value="">Select Gender</option>
-              <option>Male</option>
-              <option>Female</option>
-              <option>Other</option>
-            </select>
+                    {/* Gender */}
 
-          </div>
+                    <div>
 
-          {/* DOB */}
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Gender
+                        </label>
 
-          <div>
+                        <select
+                            name="gender"
+                            value={form.gender}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        >
+                            <option value="">Select Gender</option>
+                            <option>Male</option>
+                            <option>Female</option>
+                            <option>Other</option>
+                        </select>
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Date of Birth
-            </label>
+                    </div>
 
-            <input
-              type="date"
-              name="dob"
-              value={form.dob}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                    {/* DOB */}
 
-          </div>
+                    <div>
 
-          {/* Blood Group */}
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Date of Birth
+                        </label>
 
-          <div>
+                        <input
+                            type="date"
+                            name="dob"
+                            value={form.dob}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Blood Group
-            </label>
+                    </div>
 
-            <select
-              name="bloodGroup"
-              value={form.bloodGroup}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            >
-              <option value="">Select</option>
-              <option>A+</option>
-              <option>A-</option>
-              <option>B+</option>
-              <option>B-</option>
-              <option>AB+</option>
-              <option>AB-</option>
-              <option>O+</option>
-              <option>O-</option>
-            </select>
+                    {/* Blood Group */}
 
-          </div>
+                    <div>
 
-          {/* Address */}
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Blood Group
+                        </label>
 
-          <div className="md:col-span-2">
+                        <select
+                            name="bloodGroup"
+                            value={form.bloodGroup}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        >
+                            <option value="">Select</option>
+                            <option>A+</option>
+                            <option>A-</option>
+                            <option>B+</option>
+                            <option>B-</option>
+                            <option>AB+</option>
+                            <option>AB-</option>
+                            <option>O+</option>
+                            <option>O-</option>
+                        </select>
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Address
-            </label>
+                    </div>
 
-            <textarea
-              rows="4"
-              name="address"
-              value={form.address}
-              onChange={handleChange}
-              className="w-full rounded-2xl border border-[#D8D2C7] p-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                    {/* Address */}
 
-          </div>
+                    <div className="md:col-span-2">
+
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Address
+                        </label>
+
+                        <textarea
+                            rows="4"
+                            name="address"
+                            value={form.address}
+                            onChange={handleChange}
+                            className="w-full rounded-2xl border border-[#D8D2C7] p-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
+
+                    </div>
                     {/* City */}
 
-          <div>
+                    <div>
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              City
-            </label>
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            City
+                        </label>
 
-            <input
-              type="text"
-              name="city"
-              value={form.city}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                        <input
+                            type="text"
+                            name="city"
+                            value={form.city}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-          </div>
+                    </div>
 
-          {/* State */}
+                    {/* State */}
 
-          <div>
+                    <div>
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              State
-            </label>
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            State
+                        </label>
 
-            <input
-              type="text"
-              name="state"
-              value={form.state}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                        <input
+                            type="text"
+                            name="state"
+                            value={form.state}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-          </div>
+                    </div>
 
-          {/* Country */}
+                    {/* Country */}
 
-          <div>
+                    <div>
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              Country
-            </label>
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            Country
+                        </label>
 
-            <input
-              type="text"
-              name="country"
-              value={form.country}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                        <input
+                            type="text"
+                            name="country"
+                            value={form.country}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-          </div>
+                    </div>
 
-          {/* PIN Code */}
+                    {/* PIN Code */}
 
-          <div>
+                    <div>
 
-            <label className="block mb-2 text-sm font-medium text-[#16332B]">
-              PIN Code
-            </label>
+                        <label className="block mb-2 text-sm font-medium text-[#16332B]">
+                            PIN Code
+                        </label>
 
-            <input
-              type="text"
-              name="pinCode"
-              value={form.pinCode}
-              onChange={handleChange}
-              className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
-            />
+                        <input
+                            type="text"
+                            name="pinCode"
+                            value={form.pinCode}
+                            onChange={handleChange}
+                            className="w-full h-14 rounded-2xl border border-[#D8D2C7] px-5 outline-none focus:ring-4 focus:ring-green-100"
+                        />
 
-          </div>
+                    </div>
+
+                </div>
+
+                {/* Save Button */}
+
+                <div className="mt-10 flex justify-end">
+
+                    <button
+                        onClick={saveProfile}
+                        className="px-10 py-4 rounded-2xl bg-[#16332B] text-white font-semibold hover:bg-[#245242] transition-all duration-300"
+                    >
+                        Save Changes
+                    </button>
+
+                </div>
+
+            </div>
 
         </div>
 
-        {/* Save Button */}
-
-        <div className="mt-10 flex justify-end">
-
-          <button
-            onClick={saveProfile}
-            className="px-10 py-4 rounded-2xl bg-[#16332B] text-white font-semibold hover:bg-[#245242] transition-all duration-300"
-          >
-            Save Changes
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  );
+    );
 }

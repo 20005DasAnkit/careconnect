@@ -112,11 +112,10 @@ export default function Products() {
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition ${
-                                    activeCategory === cat
-                                        ? "bg-[#16332B] text-white"
-                                        : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"
-                                }`}
+                                className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeCategory === cat
+                                    ? "bg-[#16332B] text-white"
+                                    : "bg-white border border-gray-200 text-gray-600 hover:border-gray-300"
+                                    }`}
                             >
                                 {cat}
                             </button>
@@ -246,13 +245,12 @@ export default function Products() {
                                         <button
                                             onClick={() => handleOrder(p.id)}
                                             disabled={p.stock === 0 || placingId === p.id}
-                                            className={`flex-1 h-8 rounded-full text-xs font-semibold transition ${
-                                                addedIds.has(p.id)
-                                                    ? "bg-green-500 text-white"
-                                                    : p.stock === 0
+                                            className={`flex-1 h-8 rounded-full text-xs font-semibold transition ${addedIds.has(p.id)
+                                                ? "bg-green-500 text-white"
+                                                : p.stock === 0
                                                     ? "bg-gray-100 text-gray-400 cursor-not-allowed"
                                                     : "bg-[#16332B] hover:bg-[#0F231D] text-white"
-                                            }`}
+                                                }`}
                                         >
                                             {placingId === p.id ? "..." : addedIds.has(p.id) ? "✓ Ordered!" : "🛒 Order"}
                                         </button>

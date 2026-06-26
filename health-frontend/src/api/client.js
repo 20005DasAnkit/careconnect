@@ -20,7 +20,7 @@ api.interceptors.response.use(
       window.location.href = "/login";
     }
     return Promise.reject(err);
-  }
+  },
 );
 
 export default api;

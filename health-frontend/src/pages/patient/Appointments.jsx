@@ -111,11 +111,10 @@ export default function Appointments() {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${
-                                activeTab === tab
+                            className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition ${activeTab === tab
                                     ? "bg-[#16332B] text-white"
                                     : "text-gray-500 hover:text-gray-700"
-                            }`}
+                                }`}
                         >
                             {tab}
                         </button>

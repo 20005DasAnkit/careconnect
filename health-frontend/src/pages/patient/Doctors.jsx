@@ -163,8 +163,8 @@ export default function Doctors() {
                             key={item}
                             onClick={() => setActiveFilter(item)}
                             className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${activeFilter === item
-                                    ? "bg-[#16332B] text-white shadow-md shadow-[#16332B]/20"
-                                    : "bg-white border border-gray-200 text-gray-700 hover:border-gray-300 hover:shadow-sm"
+                                ? "bg-[#16332B] text-white shadow-md shadow-[#16332B]/20"
+                                : "bg-white border border-gray-200 text-gray-700 hover:border-gray-300 hover:shadow-sm"
                                 }`}
                         >
                             {item}

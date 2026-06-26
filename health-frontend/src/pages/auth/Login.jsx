@@ -17,21 +17,21 @@ export default function Login() {
     setLoading(true);
 
     try {
-const data = await loginUser({ email, password });
+      const data = await loginUser({ email, password });
 
-console.log("LOGIN RESPONSE:", data);
+      console.log("LOGIN RESPONSE:", data);
 
-login(data);
+      login(data);
 
-localStorage.setItem("token", data.token);
-localStorage.setItem("name", data.name);
-localStorage.setItem("email", data.email);
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("name", data.name);
+      localStorage.setItem("email", data.email);
 
       const payload = JSON.parse(atob(data.token.split(".")[1]));
 
       const role =
         payload[
-          "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
+        "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
         ];
 
       if (role === "Admin") navigate("/admin");
@@ -116,7 +116,7 @@ localStorage.setItem("email", data.email);
             <p className="mt-2 text-[#5D756C]">
               Welcome back to CareConnect
             </p>
-                        {/* Email */}
+            {/* Email */}
 
             <div className="mt-10">
 
@@ -239,7 +239,7 @@ localStorage.setItem("email", data.email);
               </Link>
 
             </p>
-                      </div>
+          </div>
         </div>
       </div>
 

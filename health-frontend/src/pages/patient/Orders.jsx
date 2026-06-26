@@ -140,11 +140,10 @@ export default function Orders() {
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
-                                    className={`px-4 py-3.5 text-sm font-medium whitespace-nowrap transition border-b-2 ${
-                                        activeTab === tab
+                                    className={`px-4 py-3.5 text-sm font-medium whitespace-nowrap transition border-b-2 ${activeTab === tab
                                             ? "border-[#16332B] text-[#16332B]"
                                             : "border-transparent text-gray-500 hover:text-gray-700"
-                                    }`}
+                                        }`}
                                 >
                                     {tab}
                                 </button>

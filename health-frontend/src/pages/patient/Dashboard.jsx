@@ -11,9 +11,9 @@ export default function Dashboard() {
     const [search, setSearch] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
 
-const navigate = useNavigate();
+    const navigate = useNavigate();
 
-const userName = localStorage.getItem("name") || "My Account";
+    const userName = localStorage.getItem("name") || "My Account";
 
 
     useEffect(() => {
@@ -66,31 +66,31 @@ const userName = localStorage.getItem("name") || "My Account";
                     </nav>
                     <div className="hidden lg:flex items-center gap-5">
 
-  <button className="text-xl">
-    ⌕
-  </button>
+                        <button className="text-xl">
+                            ⌕
+                        </button>
 
-  <button
-    onClick={() => navigate("/patient/profile")}
-    className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
-  >
-    <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
-      <User size={18} />
-    </div>
+                        <button
+                            onClick={() => navigate("/patient/profile")}
+                            className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
+                        >
+                            <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
+                                <User size={18} />
+                            </div>
 
-    <div className="text-left">
-      <p className="text-sm font-semibold">
-        {userName}
-      </p>
+                            <div className="text-left">
+                                <p className="text-sm font-semibold">
+                                    {userName}
+                                </p>
 
-      <p className="text-xs text-gray-500">
-        My Profile
-      </p>
-    </div>
+                                <p className="text-xs text-gray-500">
+                                    My Profile
+                                </p>
+                            </div>
 
-  </button>
+                        </button>
 
-</div>
+                    </div>
 
 
                     <button
