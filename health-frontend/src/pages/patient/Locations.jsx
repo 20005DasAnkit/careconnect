@@ -55,7 +55,7 @@ export default function Locations() {
     <div className="bg-[#FAF8F3] text-[#16332B] min-h-screen" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
 
       {/* ───────────────────── HEADER ───────────────────── */}
-      <section className="max-w-[1100px] mx-auto px-6 lg:px-10 pt-20 pb-10">
+      <section className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 pt-20 pb-10">
         <p className="text-[13px] uppercase tracking-[0.22em] text-[#3E7C59] font-semibold mb-5">
           Where we operate
         </p>
@@ -84,7 +84,7 @@ export default function Locations() {
       {/* ───────────────────── PLATFORM TOTALS ───────────────────── */}
       {!loading && coverage.length > 0 && (
         <section className="border-y border-[#E4DFD3] bg-white">
-          <div className="max-w-[1100px] mx-auto px-6 lg:px-10">
+          <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32">
             <div className="grid grid-cols-3">
               <div className="py-9 px-2 lg:px-6">
                 <Stethoscope size={18} className="text-[#3E7C59]" strokeWidth={1.75} />
@@ -113,7 +113,7 @@ export default function Locations() {
       )}
 
       {/* ───────────────────── SEARCH ───────────────────── */}
-      <section className="max-w-[1100px] mx-auto px-6 lg:px-10 py-10">
+      <section className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-10">
         <div className="relative max-w-md">
           <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35" />
           <input
@@ -127,7 +127,7 @@ export default function Locations() {
 
       {/* ───────────────────── ERROR ───────────────────── */}
       {error && (
-        <section className="max-w-[1100px] mx-auto px-6 lg:px-10 pb-6">
+        <section className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 pb-6">
           <div className="bg-[#FBEAE5] border border-[#E8B8AA] rounded-2xl p-4 flex items-center justify-between">
             <p className="text-[#9E3A20] text-sm">{error}</p>
             <button onClick={loadCoverage} className="text-[#9E3A20] text-sm font-semibold hover:underline">
@@ -138,7 +138,7 @@ export default function Locations() {
       )}
 
       {/* ───────────────────── CITY CARDS ───────────────────── */}
-      <section className="max-w-[1100px] mx-auto px-6 lg:px-10 pb-24">
+      <section className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 pb-24">
         {loading && (
           <div className="grid md:grid-cols-2 gap-6">
             {Array.from({ length: 4 }).map((_, i) => <CardSkeleton key={i} />)}
@@ -226,7 +226,7 @@ export default function Locations() {
       </section>
 
       {/* ───────────────────── CLOSING ───────────────────── */}
-      <section className="max-w-[1100px] mx-auto px-6 lg:px-10 pb-20">
+      <section className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 pb-20">
         <div className="rounded-[28px] bg-[#16332B] text-[#FAF8F3] px-10 lg:px-14 py-12 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div>
             <h2

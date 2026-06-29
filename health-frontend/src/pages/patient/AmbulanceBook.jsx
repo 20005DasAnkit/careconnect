@@ -95,7 +95,7 @@ export default function Ambulance() {
             <Toaster position="top-right" />
 
             <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-                <div className="max-w-[1100px] mx-auto px-6 lg:px-10 py-16">
+                <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-16">
 
                     {/* ───────────────────── HEADER ───────────────────── */}
                     <div className="mb-10">

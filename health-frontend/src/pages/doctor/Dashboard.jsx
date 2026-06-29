@@ -159,10 +159,9 @@ function StatCard({
 function AppointmentBadge({ status }) {
   return (
     <span
-      className={`px-3 py-1 rounded-full border text-xs font-semibold ${
-        STATUS_COLOR[status] ||
+      className={`px-3 py-1 rounded-full border text-xs font-semibold ${STATUS_COLOR[status] ||
         "bg-slate-100 text-slate-700 border-slate-200"
-      }`}
+        }`}
     >
       {status}
     </span>
@@ -189,24 +188,15 @@ function MiniBar({ value, max }) {
 export default function DoctorDashboard() {
 
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(true);
-
   const [availableFrom, setAvailableFrom] = useState("");
-const [availableTo, setAvailableTo] = useState("");
-
+  const [availableTo, setAvailableTo] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
-
   const [doctor, setDoctor] = useState({});
-
   const [appointments, setAppointments] = useState([]);
-
   const [availability, setAvailability] = useState([]);
-
   const [search, setSearch] = useState("");
-
   const [filterStatus, setFilterStatus] = useState("All");
-
   const [stats, setStats] = useState({
     totalPatients: 0,
     todayAppointments: 0,
@@ -215,9 +205,9 @@ const [availableTo, setAvailableTo] = useState("");
     cancelled: 0,
     earnings: 0,
   });
-    /* ===========================
-     Load Dashboard
-  =========================== */
+  /* ===========================
+   Load Dashboard
+=========================== */
 
   async function loadDashboard() {
     try {
@@ -234,15 +224,12 @@ const [availableTo, setAvailableTo] = useState("");
       ]);
 
       const doctorData = profileRes.data || {};
-
       const appointmentData = Array.isArray(appointmentsRes.data)
         ? appointmentsRes.data
         : [];
-
       const availabilityData = Array.isArray(availabilityRes.data)
         ? availabilityRes.data
         : [];
-
       setDoctor(doctorData);
       setAppointments(appointmentData);
       setAvailability(availabilityData);
@@ -295,7 +282,7 @@ const [availableTo, setAvailableTo] = useState("");
 
       toast.error(
         error?.response?.data?.message ||
-          "Failed to load dashboard."
+        "Failed to load dashboard."
       );
     } finally {
       setLoading(false);
@@ -326,18 +313,17 @@ const [availableTo, setAvailableTo] = useState("");
         prev.map((item) =>
           item.id === appointmentId
             ? {
-                ...item,
-                status,
-              }
+              ...item,
+              status,
+            }
             : item
         )
       );
-
       loadDashboard();
     } catch (error) {
       toast.error(
         error?.response?.data?.message ||
-          "Unable to update appointment."
+        "Unable to update appointment."
       );
     }
   }
@@ -351,29 +337,29 @@ const [availableTo, setAvailableTo] = useState("");
       prev.map((item) =>
         item.day === day
           ? {
-              ...item,
-              available: !item.available,
-            }
+            ...item,
+            available: !item.available,
+          }
           : item
       )
     );
   }
 
-async function saveAvailability() {
-  try {
-    await API.post("/doctor/availability", {
-      availableFrom,
-      availableTo,
-    });
+  async function saveAvailability() {
+    try {
+      await API.post("/doctor/availability", {
+        availableFrom,
+        availableTo,
+      });
 
-    toast.success("Availability added.");
+      toast.success("Availability added.");
 
-    loadDashboard();
-  } catch (error) {
-    console.log(error.response?.data);
-    toast.error("Failed to save availability.");
+      loadDashboard();
+    } catch (error) {
+      console.log(error.response?.data);
+      toast.error("Failed to save availability.");
+    }
   }
-}
 
   /* ===========================
      Filters
@@ -389,7 +375,6 @@ async function saveAvailability() {
         appointment.email
           ?.toLowerCase()
           .includes(search.toLowerCase());
-
       const matchesStatus =
         filterStatus === "All"
           ? true
@@ -417,27 +402,20 @@ async function saveAvailability() {
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-100 p-6">
-
         <div className="grid md:grid-cols-2 xl:grid-cols-4 gap-6">
-
           {Array.from({ length: 4 }).map((_, index) => (
             <SkeletonCard key={index} />
           ))}
 
         </div>
-
         <div className="grid xl:grid-cols-3 gap-6 mt-8">
-
           <div className="xl:col-span-2 h-[500px] rounded-3xl bg-white animate-pulse"></div>
-
           <div className="h-[500px] rounded-3xl bg-white animate-pulse"></div>
-
         </div>
-
       </div>
     );
   }
-    return (
+  return (
     <div className="min-h-screen bg-slate-100">
 
       {/* Mobile Overlay */}
@@ -460,29 +438,23 @@ async function saveAvailability() {
           ${drawerOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
         `}
       >
-
         <div className="flex flex-col h-full">
 
           {/* Logo */}
 
           <div className="p-6 border-b border-slate-700 flex items-center justify-between">
-
             <div className="flex items-center gap-3">
-
               <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center">
                 <HeartPulse size={24} />
               </div>
-
               <div>
                 <h2 className="text-xl font-bold">
                   Doctor Panel
                 </h2>
-
                 <p className="text-slate-400 text-sm">
                   Healthcare
                 </p>
               </div>
-
             </div>
 
             <button
@@ -497,13 +469,9 @@ async function saveAvailability() {
           {/* Doctor */}
 
           <div className="p-6">
-
             <div className="flex items-center gap-4">
-
               <div className="w-16 h-16 rounded-full bg-slate-700 flex items-center justify-center">
-
                 <UserCircle2 size={42} />
-
               </div>
 
               <div>
@@ -600,7 +568,7 @@ async function saveAvailability() {
               <div>
 
                 <h1 className="text-3xl font-bold text-slate-800">
-                  Welcome, Dr. {doctor.fullName}
+                  Welcome, Dr. {doctor.name}
                 </h1>
 
                 <p className="text-slate-500 mt-1">
@@ -688,7 +656,7 @@ async function saveAvailability() {
             />
 
           </div>
-                    {/* Analytics + Profile */}
+          {/* Analytics + Profile */}
 
           <div className="grid xl:grid-cols-3 gap-6 mt-8">
 
@@ -913,7 +881,7 @@ async function saveAvailability() {
             </Card>
 
           </div>
-                    {/* Recent Appointments */}
+          {/* Recent Appointments */}
 
           <Card className="mt-8 p-6">
 
@@ -1129,38 +1097,38 @@ async function saveAvailability() {
                             {appointment.status !==
                               "Completed" && (
 
-                              <button
-                                onClick={() =>
-                                  updateAppointmentStatus(
-                                    appointment.id,
-                                    "Completed"
-                                  )
-                                }
-                                className="p-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200"
-                                title="Complete"
-                              >
-                                <CheckCircle2 size={18} />
-                              </button>
+                                <button
+                                  onClick={() =>
+                                    updateAppointmentStatus(
+                                      appointment.id,
+                                      "Completed"
+                                    )
+                                  }
+                                  className="p-2 rounded-lg bg-green-100 text-green-700 hover:bg-green-200"
+                                  title="Complete"
+                                >
+                                  <CheckCircle2 size={18} />
+                                </button>
 
-                            )}
+                              )}
 
                             {appointment.status !==
                               "Cancelled" && (
 
-                              <button
-                                onClick={() =>
-                                  updateAppointmentStatus(
-                                    appointment.id,
-                                    "Cancelled"
-                                  )
-                                }
-                                className="p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200"
-                                title="Cancel"
-                              >
-                                <XCircle size={18} />
-                              </button>
+                                <button
+                                  onClick={() =>
+                                    updateAppointmentStatus(
+                                      appointment.id,
+                                      "Cancelled"
+                                    )
+                                  }
+                                  className="p-2 rounded-lg bg-red-100 text-red-700 hover:bg-red-200"
+                                  title="Cancel"
+                                >
+                                  <XCircle size={18} />
+                                </button>
 
-                            )}
+                              )}
 
                           </div>
 
@@ -1179,7 +1147,7 @@ async function saveAvailability() {
             </div>
 
           </Card>
-                    {/* Availability + Quick Overview */}
+          {/* Availability + Quick Overview */}
 
           <div className="grid xl:grid-cols-3 gap-6 mt-8">
 
@@ -1187,41 +1155,40 @@ async function saveAvailability() {
 
             <Card className="xl:col-span-2 p-6">
 
-             <input
-  type="datetime-local"
-  value={availableFrom}
-  onChange={(e) => setAvailableFrom(e.target.value)}
-/>
+              <input
+                type="datetime-local"
+                value={availableFrom}
+                onChange={(e) => setAvailableFrom(e.target.value)}
+              />
 
-<input
-  type="datetime-local"
-  value={availableTo}
-  onChange={(e) => setAvailableTo(e.target.value)}
-/>
+              <input
+                type="datetime-local"
+                value={availableTo}
+                onChange={(e) => setAvailableTo(e.target.value)}
+              />
 
-<button onClick={saveAvailability}>
-  Save
-</button>
+              <button onClick={saveAvailability}>
+                Save
+              </button>
 
               <div className="grid md:grid-cols-2 gap-4">
 
                 {(availability.length
                   ? availability
                   : DAYS.map((day) => ({
-                      day,
-                      available: false,
-                      startTime: "09:00",
-                      endTime: "17:00",
-                    }))
+                    day,
+                    available: false,
+                    startTime: "09:00",
+                    endTime: "17:00",
+                  }))
                 ).map((item) => (
 
                   <div
                     key={item.day}
-                    className={`rounded-2xl border p-5 transition ${
-                      item.available
+                    className={`rounded-2xl border p-5 transition ${item.available
                         ? "border-green-300 bg-green-50"
                         : "border-slate-200 bg-white"
-                    }`}
+                      }`}
                   >
 
                     <div className="flex justify-between items-center">
@@ -1244,19 +1211,17 @@ async function saveAvailability() {
                         onClick={() =>
                           toggleAvailability(item.day)
                         }
-                        className={`relative w-14 h-8 rounded-full transition ${
-                          item.available
+                        className={`relative w-14 h-8 rounded-full transition ${item.available
                             ? "bg-green-500"
                             : "bg-slate-300"
-                        }`}
+                          }`}
                       >
 
                         <span
-                          className={`absolute top-1 h-6 w-6 rounded-full bg-white transition-all ${
-                            item.available
+                          className={`absolute top-1 h-6 w-6 rounded-full bg-white transition-all ${item.available
                               ? "left-7"
                               : "left-1"
-                          }`}
+                            }`}
                         />
 
                       </button>
@@ -1280,10 +1245,10 @@ async function saveAvailability() {
                               prev.map((d) =>
                                 d.day === item.day
                                   ? {
-                                      ...d,
-                                      startTime:
-                                        e.target.value,
-                                    }
+                                    ...d,
+                                    startTime:
+                                      e.target.value,
+                                  }
                                   : d
                               )
                             )
@@ -1308,10 +1273,10 @@ async function saveAvailability() {
                               prev.map((d) =>
                                 d.day === item.day
                                   ? {
-                                      ...d,
-                                      endTime:
-                                        e.target.value,
-                                    }
+                                    ...d,
+                                    endTime:
+                                      e.target.value,
+                                  }
                                   : d
                               )
                             )
@@ -1501,23 +1466,23 @@ async function saveAvailability() {
                   a.status === "Confirmed"
               ).length === 0 && (
 
-                <div className="text-center py-10 text-slate-500">
+                  <div className="text-center py-10 text-slate-500">
 
-                  <CalendarDays
-                    size={48}
-                    className="mx-auto mb-3 text-slate-300"
-                  />
+                    <CalendarDays
+                      size={48}
+                      className="mx-auto mb-3 text-slate-300"
+                    />
 
-                  No upcoming appointments.
+                    No upcoming appointments.
 
-                </div>
+                  </div>
 
-              )}
+                )}
 
             </div>
 
           </Card>
-                    {/* Activity Feed */}
+          {/* Activity Feed */}
 
           <Card className="mt-8 p-6">
 

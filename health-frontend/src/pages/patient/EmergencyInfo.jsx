@@ -95,7 +95,7 @@ export default function EmergencyInfo() {
           Signature element: a literal countdown framed as the
           most important sentence on the page, not a stat grid. */}
       <section className="relative bg-[#16332B] text-[#FAF8F3] overflow-hidden">
-        <div className="max-w-[1100px] mx-auto px-6 lg:px-10 pt-28 pb-24">
+        <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 pt-28 pb-24">
 
           <p className="text-[13px] uppercase tracking-[0.22em] text-[#E8A07A] font-medium mb-8">
             Emergency care, CareConnect
@@ -161,7 +161,7 @@ export default function EmergencyInfo() {
       {/* ───────────────────── EMERGENCY LINES ─────────────────────
           A quiet, scannable strip rather than four loud icon cards. */}
       <section className="border-b border-[#E4DFD3]">
-        <div className="max-w-[1100px] mx-auto px-6 lg:px-10">
+        <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32">
           <div className="grid grid-cols-2 lg:grid-cols-4">
             {EMERGENCY_LINES.map(({ label, number, icon: Icon, tone }, i) => (
               <a
@@ -190,7 +190,7 @@ export default function EmergencyInfo() {
       {/* ───────────────────── RECOGNIZE SYMPTOMS ─────────────────────
           Interactive tab-list: one condition expanded at a time,
           mirroring how a person actually scans for "is this it?" */}
-      <section className="max-w-[1100px] mx-auto px-6 lg:px-10 py-24">
+      <section className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-24">
         <div className="grid lg:grid-cols-[280px_1fr] gap-12 lg:gap-16">
 
           <div>
@@ -266,7 +266,7 @@ export default function EmergencyInfo() {
       {/* ───────────────────── FIRST AID ─────────────────────
           Editorial two-column "field notes" rather than icon cards. */}
       <section className="bg-white border-t border-[#E4DFD3]">
-        <div className="max-w-[1100px] mx-auto px-6 lg:px-10 py-24">
+        <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-24">
 
           <div className="max-w-xl mb-14">
             <p className="text-[13px] uppercase tracking-[0.18em] text-[#3E7C59] font-semibold mb-4">
@@ -300,7 +300,7 @@ export default function EmergencyInfo() {
       </section>
 
       {/* ───────────────────── CLOSING CTA ───────────────────── */}
-      <section className="max-w-[1100px] mx-auto px-6 lg:px-10 py-20">
+      <section className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-20">
         <div className="rounded-[28px] bg-[#16332B] text-[#FAF8F3] px-10 lg:px-14 py-14 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div>
             <h2

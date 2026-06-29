@@ -652,7 +652,7 @@ export default function Dashboard() {
                 <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16 grid md:grid-cols-4 gap-10">
 
                     <div>
-                        <h2 className="text-2xl font-medium">care.</h2>
+                        <h2 className="text-2xl font-medium">CareConnect.</h2>
                         <p className="text-white/60 mt-4 font-[system-ui,sans-serif] text-[15px] leading-6">
                             Your trusted digital healthcare partner.
                         </p>
@@ -680,8 +680,8 @@ export default function Dashboard() {
 
                     <div className="font-[system-ui,sans-serif]">
                         <h3 className="font-medium mb-4 font-[Georgia,serif] text-lg">Contact</h3>
-                        <p className="text-white/60 text-[15px]">support@medicare.com</p>
-                        <p className="text-white/60 mt-3 text-[15px]">+91 XXXXX XXXXX</p>
+                        <p className="text-white/60 text-[15px]">support@careconnect.com</p>
+                        <p className="text-white/60 mt-3 text-[15px]">+91 99999 00000</p>
                     </div>
 
                 </div>
@@ -689,6 +689,7 @@ export default function Dashboard() {
                 <div className="border-t border-white/10 py-6 text-center text-white/50 font-[system-ui,sans-serif] text-sm">
                     © 2026 care. All Rights Reserved.
                 </div>
+                
             </footer>
 
         </div>
