@@ -19,7 +19,7 @@ public class AdminController : ControllerBase
     }
 
     [HttpPost("doctor")]
-    public IActionResult CreateDoctor(CreateDoctorDto dto)
+    public IActionResult CreateDoctor([FromBody] CreateDoctorDto dto)
     {
         if (string.IsNullOrWhiteSpace(dto.FullName))
             return BadRequest("Doctor name is required");
@@ -341,19 +341,23 @@ public class AdminController : ControllerBase
     [HttpGet("ambulances")]
     public IActionResult GetAmbulances()
     {
-        var ambulances = _context.Ambulances
-            .Select(a => new
+        var ambulances = (
+            from a in _context.Ambulances
+            join u in _context.Users
+                on a.UserId equals u.Id
+            select new
             {
                 a.Id,
                 a.DriverName,
+                Email = u.Email,
                 a.DriverPhone,
-                a.VehicleNumber,
-                a.UserId
-            })
-            .ToList();
+                a.VehicleNumber
+            }
+        ).ToList();
 
         return Ok(ambulances);
     }
+
     [HttpGet("appointments")]
     public IActionResult GetAppointments()
     {
@@ -458,4 +462,26 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+    [HttpPut("product/{id}/stock")]
+public IActionResult UpdateStock(int id, UpdateStockDto dto)
+{
+    var product = _context.Products.FirstOrDefault(x => x.Id == id);
+
+    if (product == null)
+        return NotFound("Product not found");
+
+    if (dto.Stock < 0)
+        return BadRequest("Stock cannot be negative");
+
+    product.Stock = dto.Stock;
+
+    _context.SaveChanges();
+
+    return Ok(new
+    {
+        Message = "Stock updated",
+        ProductId = product.Id,
+        Stock = product.Stock
+    });
+}
 }

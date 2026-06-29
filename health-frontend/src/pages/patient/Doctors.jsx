@@ -4,7 +4,7 @@ import api from "../../api/axios";
 
 const FILTERS = [
     "All", "Cardiology", "Neurology", "Orthopedic",
-    "Dermatology", "Pediatrics", "General Physician", "Dentist",
+    "Dermatology", "Pediatrics", "General Medicine", "Dental",
 ];
 
 const SORT_OPTIONS = [
@@ -14,6 +14,22 @@ const SORT_OPTIONS = [
     { value: "rating", label: "Top Rated" },
     { value: "experience", label: "Most Experienced" },
 ];
+
+// Normalizes specialization strings so "Cardiology", "Cardiologist",
+// "cardiology ", etc. are all treated as the same thing.
+// Strips common suffixes (-ist, -ology -> ology) and lowercases + trims.
+function normalizeSpecialization(value) {
+    if (!value) return "";
+    let s = value.trim().toLowerCase();
+    // "cardiologist" -> "cardiology", "neurologist" -> "neurology"
+    s = s.replace(/ologist$/, "ology");
+    // "dermatologist" -> "dermatology" already covered above
+    // "dentist" stays "dentist", "pediatrician" -> normalize common variant
+    s = s.replace(/pediatrician/, "pediatrics");
+    s = s.replace(/paediatrician/, "pediatrics");
+    s = s.replace(/paediatrics/, "pediatrics");
+    return s;
+}
 
 /* ───── skeleton ───── */
 function CardSkeleton() {
@@ -57,14 +73,19 @@ export default function Doctors() {
     };
 
     const filteredDoctors = useMemo(() => {
+        const normalizedActiveFilter = normalizeSpecialization(activeFilter);
+
         let list = doctors.filter((doc) => {
             const q = search.toLowerCase();
             const matchSearch =
                 doc.name?.toLowerCase().includes(q) ||
                 doc.specialization?.toLowerCase().includes(q) ||
                 doc.hospitalName?.toLowerCase().includes(q);
+
             const matchFilter =
-                activeFilter === "All" || doc.specialization === activeFilter;
+                activeFilter === "All" ||
+                normalizeSpecialization(doc.specialization) === normalizedActiveFilter;
+
             return matchSearch && matchFilter;
         });
 

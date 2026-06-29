@@ -9,6 +9,7 @@ export default function Dashboard() {
     const [doctors, setDoctors] = useState([]);
     const [appointments, setAppointments] = useState([]);
     const [orders, setOrders] = useState([]);
+    const [searchInput, setSearchInput] = useState("");
     const [search, setSearch] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
 
@@ -34,10 +35,32 @@ export default function Dashboard() {
             console.log(err);
         }
     };
+    const displayDoctorName = (name = "") => {
+        return name.trim().toLowerCase().startsWith("dr.")
+            ? name.trim()
+            : `Dr. ${name.trim()}`;
+    };
 
-    const filteredDoctors = doctors.filter((d) =>
-        (d.fullName || "").toLowerCase().includes(search.toLowerCase())
-    );
+    const getInitials = (name = "") => {
+        return name
+            .replace(/^dr\.?\s*/i, "")
+            .split(" ")
+            .filter(Boolean)
+            .slice(0, 2)
+            .map((n) => n[0].toUpperCase())
+            .join("");
+    };
+
+    const filteredDoctors = doctors.filter((doctor) => {
+        if (!search.trim()) return true;
+
+        const keyword = search.toLowerCase();
+
+        return (
+            (doctor.name || "").toLowerCase().includes(keyword) ||
+            (doctor.specialization || "").toLowerCase().includes(keyword)
+        );
+    });
 
     return (
         <div className="min-h-screen bg-[#FAF8F3] text-[#16332B] font-[Georgia,serif]">
@@ -58,8 +81,8 @@ export default function Dashboard() {
                         <a href="#" className="flex items-center gap-1 hover:text-[#16332B] transition">
                             For You <span className="text-xs">▾</span>
                         </a>
-                        <a href="#" className="flex items-center gap-1 hover:text-[#16332B] transition">
-                            For Family <span className="text-xs">▾</span>
+                        <a href="/patient/AboutUs" className="flex items-center gap-1 hover:text-[#16332B] transition">
+                            About Us <span className="text-xs">▾</span>
                         </a>
                         <a href="#" className="flex items-center gap-1 hover:text-[#16332B] transition">
                             For Business <span className="text-xs">▾</span>
@@ -196,8 +219,11 @@ export default function Dashboard() {
                         <input
                             type="text"
                             placeholder="Search by doctor name..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
+                            value={searchInput}
+                            onChange={(e) => {
+                                console.log("Typing:", e.target.value);
+                                setSearchInput(e.target.value);
+                            }}
                             className="border border-[#E4DFD3] rounded-full px-6 py-4 outline-none focus:ring-2 focus:ring-[#16332B]/30 bg-[#FAF8F3]"
                         />
 
@@ -208,8 +234,14 @@ export default function Dashboard() {
                             <option>Orthopedic</option>
                             <option>Dermatology</option>
                         </select>
-
-                        <button className="bg-[#16332B] text-white rounded-full font-medium px-8 hover:bg-[#0F231D] transition">
+                        <button
+                            type="button"
+                            onClick={() => {
+                                console.log("SearchInput =", searchInput);
+                                setSearch(searchInput.trim());
+                            }}
+                            className="bg-[#16332B] text-white rounded-full font-medium px-8 hover:bg-[#0F231D] transition"
+                        >
                             Search
                         </button>
                     </div>
@@ -376,15 +408,22 @@ export default function Dashboard() {
                                     key={doctor.id}
                                     className="bg-white rounded-2xl border border-[#E4DFD3] overflow-hidden hover:shadow-md transition"
                                 >
-                                    <img
-                                        src={doctor.image || stockImages[i % stockImages.length]}
-                                        className="w-full h-56 object-cover"
-                                        alt={doctor.fullName}
-                                    />
-
+                                    <div className="w-full h-56 bg-[#16332B] flex items-center justify-center">
+                                        {doctor.image ? (
+                                            <img
+                                                src={doctor.image}
+                                                alt={doctor.fullName}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-24 h-24 rounded-full bg-white text-[#16332B] flex items-center justify-center text-3xl font-bold shadow-lg">
+                                                {getInitials(doctor.fullName || doctor.name)}
+                                            </div>
+                                        )}
+                                    </div>
                                     <div className="p-6 font-[system-ui,sans-serif]">
                                         <h3 className="text-lg font-semibold font-[Georgia,serif]">
-                                            Dr. {doctor.fullName}
+                                            {doctor.name}
                                         </h3>
 
                                         <p className="text-[#16332B]/60 mt-1 text-sm">
@@ -396,12 +435,12 @@ export default function Dashboard() {
                                             <span className="ml-2 text-[#16332B]/50">(4.9)</span>
                                         </div>
 
-<Link
-    to={`/patient/bookdoctor?doctorId=${doctor.id}`}
-    className="block mt-5 bg-[#16332B] text-white text-center py-3 rounded-full font-medium hover:bg-[#0F231D] transition"
->
-    Book Appointment
-</Link>
+                                        <Link
+                                            to={`/patient/bookdoctor?doctorId=${doctor.id}`}
+                                            className="block mt-5 bg-[#16332B] text-white text-center py-3 rounded-full font-medium hover:bg-[#0F231D] transition"
+                                        >
+                                            Book Appointment
+                                        </Link>
                                     </div>
                                 </div>
                             );

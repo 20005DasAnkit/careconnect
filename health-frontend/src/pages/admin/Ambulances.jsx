@@ -156,18 +156,18 @@ export default function Ambulances() {
 
                     <div className="bg-white rounded shadow overflow-x-auto">
 
-                        <table className="w-full">
+                        <table className="w-full text-left">
 
                             <thead className="bg-blue-700 text-white">
 
                                 <tr>
 
-                                    <th className="p-3">ID</th>
-                                    <th className="p-3">Driver</th>
-                                    <th className="p-3">Email</th>
-                                    <th className="p-3">Phone</th>
-                                    <th className="p-3">Vehicle</th>
-                                    <th className="p-3">Action</th>
+                                    <th className="p-3 text-left w-16">ID</th>
+                                    <th className="p-3 text-left">Driver</th>
+                                    <th className="p-3 text-left">Email</th>
+                                    <th className="p-3 text-left">Phone</th>
+                                    <th className="p-3 text-left">Vehicle</th>
+                                    <th className="p-3 text-left">Action</th>
 
                                 </tr>
 
@@ -184,12 +184,12 @@ export default function Ambulances() {
                                             className="border-b hover:bg-gray-50"
                                         >
 
-                                            <td className="p-3">{a.id}</td>
-                                            <td className="p-3">{a.driverName}</td>
-                                            <td className="p-3">{a.email}</td>
-                                            <td className="p-3">{a.driverPhone}</td>
-                                            <td className="p-3">{a.vehicleNumber}</td>
-                                            <td className="p-3">
+                                            <td className="p-3 text-left w-16">{a.id}</td>
+                                            <td className="p-3 text-left">{a.driverName}</td>
+                                            <td className="p-3 text-left">{a.email}</td>
+                                            <td className="p-3 text-left">{a.driverPhone}</td>
+                                            <td className="p-3 text-left">{a.vehicleNumber}</td>
+                                            <td className="p-3 text-left">
 
                                                 <button
                                                     onClick={() => remove(a.id)}

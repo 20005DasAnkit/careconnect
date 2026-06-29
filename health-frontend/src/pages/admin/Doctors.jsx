@@ -32,7 +32,19 @@ export default function Doctors() {
 
   const createDoctor = async () => {
     try {
-      await api.post("/admin/doctor", form);
+      const payload = {
+  fullName: form.fullName,
+  email: form.email,
+  password: form.password,
+  specialization: form.specialization,
+  hospitalName: form.hospitalName,
+  fee: Number(form.fee), // Convert to decimal
+  about: form.about
+};
+
+console.log(payload);
+
+await api.post("/admin/doctor", payload);
       alert("Doctor created");
 
       setForm({
@@ -49,8 +61,11 @@ export default function Doctors() {
       loadDoctors();
 
     } catch (err) {
-      alert(err.response?.data || "Error creating doctor");
-    }
+  console.log("Status:", err.response?.status);
+  console.log("Response:", err.response?.data);
+
+  alert(JSON.stringify(err.response?.data, null, 2));
+}
   };
 
   const remove = async (id) => {
@@ -88,7 +103,14 @@ export default function Doctors() {
               <input name="password" type="password" onChange={handleChange} placeholder="Password" className="input w-full mb-2" />
               <input name="specialization" onChange={handleChange} placeholder="Specialization" className="input w-full mb-2" />
               <input name="hospitalName" onChange={handleChange} placeholder="Hospital Name" className="input w-full mb-2" />
-              <input name="fee" onChange={handleChange} placeholder="Fee" className="input w-full mb-2" />
+              <input
+  type="number"
+  name="fee"
+  value={form.fee}
+  onChange={handleChange}
+  placeholder="Fee"
+  className="input w-full mb-2"
+/>
               <textarea name="about" onChange={handleChange} placeholder="About" className="input w-full mb-2" />
 
               <button
