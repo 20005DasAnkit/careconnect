@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Search, ShoppingCart, Minus, Plus, Pill } from "lucide-react";
 import api from "../../api/axios";
 
-const CATEGORIES = ["All", "Tablets", "Syrups", "Injections", "Vitamins", "Skincare", "Devices"];
+const CATEGORIES = ["All", "Tablets", "Syrups", "Injections", "Vitamins", "Skincare", "Devices", "Powder"];
 
 function ProductCardSkeleton() {
     return (
@@ -44,8 +44,16 @@ export default function Products() {
 
     const filteredProducts = useMemo(() => {
         let result = products.filter((p) => {
-            const matchSearch = !search.trim() || p.name?.toLowerCase().includes(search.toLowerCase()) || p.description?.toLowerCase().includes(search.toLowerCase());
-            const matchCat = activeCategory === "All" || p.category === activeCategory;
+            const matchSearch =
+                !search.trim() ||
+                p.name?.toLowerCase().includes(search.toLowerCase()) ||
+                p.description?.toLowerCase().includes(search.toLowerCase());
+
+            // Case-insensitive category match + treat null/undefined as unassigned
+            const matchCat =
+                activeCategory === "All" ||
+                (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
+
             return matchSearch && matchCat;
         });
 
@@ -55,6 +63,17 @@ export default function Products() {
 
         return result;
     }, [products, search, activeCategory, sortBy]);
+
+    // How many products exist per category (for badge counts)
+    const categoryCounts = useMemo(() => {
+        const counts = { All: products.length };
+        CATEGORIES.slice(1).forEach((cat) => {
+            counts[cat] = products.filter(
+                (p) => p.category && p.category.toLowerCase() === cat.toLowerCase()
+            ).length;
+        });
+        return counts;
+    }, [products]);
 
     function goToOrder(product) {
         const quantity = qty[product.id] || 1;
@@ -68,7 +87,10 @@ export default function Products() {
     }
 
     return (
-        <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div
+            className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
+            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+        >
             <div className="max-w-[1200px] mx-auto px-6 lg:px-10 py-16">
 
                 {/* ───────────────────── HEADER ───────────────────── */}
@@ -95,7 +117,10 @@ export default function Products() {
                     </div>
 
                     <div className="relative max-w-xs w-full">
-                        <Search size={15} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35" />
+                        <Search
+                            size={15}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35"
+                        />
                         <input
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
@@ -108,18 +133,35 @@ export default function Products() {
                 {/* ───────────────────── FILTER + SORT ───────────────────── */}
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
                     <div className="flex flex-wrap gap-2">
-                        {CATEGORIES.map((cat) => (
-                            <button
-                                key={cat}
-                                onClick={() => setActiveCategory(cat)}
-                                className={`px-4 py-2 rounded-full text-sm font-medium transition ${activeCategory === cat
-                                    ? "bg-[#16332B] text-white"
-                                    : "bg-white border border-[#E4DFD3] text-[#16332B]/60 hover:border-[#16332B]/30"
+                        {CATEGORIES.map((cat) => {
+                            const count = categoryCounts[cat] ?? 0;
+                            const isActive = activeCategory === cat;
+                            return (
+                                <button
+                                    key={cat}
+                                    onClick={() => setActiveCategory(cat)}
+                                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition ${
+                                        isActive
+                                            ? "bg-[#16332B] text-white"
+                                            : "bg-white border border-[#E4DFD3] text-[#16332B]/60 hover:border-[#16332B]/30"
                                     }`}
-                            >
-                                {cat}
-                            </button>
-                        ))}
+                                >
+                                    {cat}
+                                    {/* show count badge — grey when inactive, white when active */}
+                                    {!loading && (
+                                        <span
+                                            className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${
+                                                isActive
+                                                    ? "bg-white/20 text-white"
+                                                    : "bg-[#EFEAE0] text-[#16332B]/50"
+                                            }`}
+                                        >
+                                            {count}
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     <select
@@ -143,7 +185,9 @@ export default function Products() {
                 {/* ───────────────────── LOADING ───────────────────── */}
                 {loading && (
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                        {Array.from({ length: 10 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+                        {Array.from({ length: 10 }).map((_, i) => (
+                            <ProductCardSkeleton key={i} />
+                        ))}
                     </div>
                 )}
 
@@ -156,9 +200,9 @@ export default function Products() {
                                 className="group bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden hover:border-[#16332B]/25 hover:shadow-[0_20px_40px_-25px_rgba(22,51,43,0.25)] transition-all duration-300"
                             >
                                 <div className="relative aspect-square bg-gradient-to-br from-[#FAF8F3] to-[#EFEAE0] flex items-center justify-center">
-                                    {p.image ? (
+                                    {p.imageUrl ? (
                                         <img
-                                            src={p.image}
+                                            src={p.imageUrl}
                                             alt={p.name}
                                             className="w-full h-full object-contain p-4 group-hover:scale-105 transition duration-300"
                                         />
@@ -182,22 +226,31 @@ export default function Products() {
                                 </div>
 
                                 <div className="p-4">
-                                    <p className="font-semibold text-[#16332B] text-sm leading-tight line-clamp-1">{p.name}</p>
+                                    <p className="font-semibold text-[#16332B] text-sm leading-tight line-clamp-1">
+                                        {p.name}
+                                    </p>
 
                                     {p.description && (
-                                        <p className="text-xs text-[#16332B]/40 mt-0.5 line-clamp-1">{p.description}</p>
+                                        <p className="text-xs text-[#16332B]/40 mt-0.5 line-clamp-1">
+                                            {p.description}
+                                        </p>
                                     )}
 
                                     <div className="flex items-center justify-between mt-2.5">
                                         <div>
                                             <span
-                                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                                style={{
+                                                    fontFamily: "'Fraunces', Georgia, serif",
+                                                    fontWeight: 500,
+                                                }}
                                                 className="text-[1.2rem]"
                                             >
                                                 ₹{p.price}
                                             </span>
                                             {p.mrp && p.mrp > p.price && (
-                                                <span className="text-xs text-[#16332B]/35 line-through ml-1.5">₹{p.mrp}</span>
+                                                <span className="text-xs text-[#16332B]/35 line-through ml-1.5">
+                                                    ₹{p.mrp}
+                                                </span>
                                             )}
                                         </div>
                                         {p.mrp && p.mrp > p.price && (
@@ -209,8 +262,14 @@ export default function Products() {
 
                                     <p className="text-xs text-[#16332B]/40 mt-1">
                                         {p.stock > 0 ? (
-                                            <span className={p.stock < 10 ? "text-[#B5562C] font-medium" : ""}>
-                                                {p.stock < 10 ? `Only ${p.stock} left` : `${p.stock} in stock`}
+                                            <span
+                                                className={
+                                                    p.stock < 10 ? "text-[#B5562C] font-medium" : ""
+                                                }
+                                            >
+                                                {p.stock < 10
+                                                    ? `Only ${p.stock} left`
+                                                    : `${p.stock} in stock`}
                                             </span>
                                         ) : (
                                             <span className="text-[#9E3A20]">Out of stock</span>
@@ -220,7 +279,12 @@ export default function Products() {
                                     <div className="mt-3.5 flex items-center gap-2">
                                         <div className="flex items-center border border-[#E4DFD3] rounded-full overflow-hidden">
                                             <button
-                                                onClick={() => setQty((q) => ({ ...q, [p.id]: Math.max(1, (q[p.id] || 1) - 1) }))}
+                                                onClick={() =>
+                                                    setQty((q) => ({
+                                                        ...q,
+                                                        [p.id]: Math.max(1, (q[p.id] || 1) - 1),
+                                                    }))
+                                                }
                                                 className="w-7 h-8 flex items-center justify-center text-[#16332B]/55 hover:bg-[#FAF8F3]"
                                             >
                                                 <Minus size={12} />
@@ -229,7 +293,15 @@ export default function Products() {
                                                 {qty[p.id] || 1}
                                             </span>
                                             <button
-                                                onClick={() => setQty((q) => ({ ...q, [p.id]: Math.min(p.stock || 99, (q[p.id] || 1) + 1) }))}
+                                                onClick={() =>
+                                                    setQty((q) => ({
+                                                        ...q,
+                                                        [p.id]: Math.min(
+                                                            p.stock || 99,
+                                                            (q[p.id] || 1) + 1
+                                                        ),
+                                                    }))
+                                                }
                                                 className="w-7 h-8 flex items-center justify-center text-[#16332B]/55 hover:bg-[#FAF8F3]"
                                             >
                                                 <Plus size={12} />
@@ -267,16 +339,22 @@ export default function Products() {
                         >
                             No products found
                         </h3>
-                        <p className="text-[#16332B]/55 mt-2 text-sm">Try a different search or category.</p>
+                        <p className="text-[#16332B]/55 mt-2 text-sm">
+                            {activeCategory !== "All"
+                                ? `No products are assigned to "${activeCategory}" yet. Try another category.`
+                                : "Try a different search term."}
+                        </p>
                         <button
-                            onClick={() => { setSearch(""); setActiveCategory("All"); }}
+                            onClick={() => {
+                                setSearch("");
+                                setActiveCategory("All");
+                            }}
                             className="mt-6 bg-[#16332B] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#0F231D] transition"
                         >
                             Reset filters
                         </button>
                     </div>
                 )}
-
             </div>
         </div>
     );

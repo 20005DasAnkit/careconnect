@@ -484,4 +484,14 @@ public IActionResult UpdateStock(int id, UpdateStockDto dto)
         Stock = product.Stock
     });
 }
+[HttpPut("product/{id}/category")]
+public IActionResult UpdateCategory(int id, [FromBody] UpdateCategoryDto dto)
+{
+    var product = _context.Products.FirstOrDefault(x => x.Id == id);
+    if (product == null) return NotFound();
+
+    product.Category = dto.Category;
+    _context.SaveChanges();
+    return Ok();
+}
 }

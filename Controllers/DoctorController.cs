@@ -111,4 +111,19 @@ public class DoctorController : ControllerBase
 
         return Ok("Status updated");
     }
+
+    [HttpGet("profile")]
+public IActionResult GetProfile()
+{
+    var userId = int.Parse(
+        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+    var doctor = _context.Doctors
+        .FirstOrDefault(x => x.UserId == userId);
+
+    if (doctor == null)
+        return NotFound("Doctor not found");
+
+    return Ok(doctor);
+}
 }
