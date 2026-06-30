@@ -5,7 +5,7 @@ import api from "../../api/axios";
 
 const FILTERS = [
     "All", "Cardiology", "Neurology", "Orthopedic",
-    "Dermatology", "Pediatrics", "General Physician", "Dentist",
+    "Dermatology", "Pediatrics", "General Medicine", "Dental",
 ];
 
 const SORT_OPTIONS = [

@@ -126,7 +126,6 @@ export default function DoctorDashboard() {
         API.get("/doctor/availability"),
       ]);
       const apptData  = Array.isArray(apptRes.data)  ? apptRes.data  : [];
-      console.log("Dashboard Appointments:", apptData);
       const availData = Array.isArray(availRes.data) ? availRes.data : [];
       setDoctor(profileRes.data || {});
       setAppointments(apptData);

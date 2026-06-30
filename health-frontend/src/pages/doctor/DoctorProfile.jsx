@@ -124,7 +124,7 @@ export default function DoctorProfile() {
             </div>
 
             <h2 style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 22, margin: "14px 0 4px", color: T.ink }}>
-              Dr. {doctor.name || doctor.name}
+              {doctor.name || doctor.name}
             </h2>
             <div style={{ display: "inline-flex", padding: "4px 12px", borderRadius: 99, background: T.terraLight, border: `1px solid ${T.terra}30` }}>
               <span style={{ fontSize: 13, fontWeight: 600, color: T.terra }}>{doctor.specialization}</span>

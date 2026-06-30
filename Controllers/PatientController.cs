@@ -54,63 +54,96 @@ public class PatientController : ControllerBase
     }
 
     [HttpPost("book")]
-    public IActionResult BookAppointment(BookAppointmentDto dto)
+public IActionResult BookAppointment(BookAppointmentDto dto)
+{
+    var userId = int.Parse(
+        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+    var slot = _context.DoctorAvailabilities
+        .FirstOrDefault(x => x.Id == dto.DoctorAvailabilityId);
+
+    if (slot == null)
+        return NotFound("Slot not found");
+
+    if (slot.IsBooked)
+        return BadRequest("Slot already booked");
+
+    var doctor = _context.Doctors.FirstOrDefault(x => x.Id == slot.DoctorId);
+    var advanceAmount = doctor != null ? Math.Round(doctor.Fee * 0.5m, 2) : 0;
+
+    slot.IsBooked = true;
+
+    var appointment = new Appointment
     {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        PatientId = userId,
+        DoctorId = slot.DoctorId,
+        DoctorAvailabilityId = slot.Id,
+        BookedAt = DateTime.UtcNow,
+        Status = "Confirmed",
 
-        var slot = _context.DoctorAvailabilities
-            .FirstOrDefault(x => x.Id == dto.DoctorAvailabilityId);
+        PaymentStatus = dto.PaymentMethod == "Online"
+            ? "Paid"
+            : "Cash",
 
-        if (slot == null)
-            return NotFound("Slot not found");
+        AdvanceAmount = dto.PaymentMethod == "Online"
+            ? advanceAmount
+            : 0,
 
-        if (slot.IsBooked)
-            return BadRequest("Slot already booked");
+        RazorpayPaymentId = dto.PaymentMethod == "Online"
+            ? "DUMMY_PAYMENT"
+            : null
+    };
 
-        if (string.IsNullOrWhiteSpace(dto.RazorpayPaymentId))
-            return BadRequest("Payment verification required before booking");
+    _context.Appointments.Add(appointment);
+    _context.SaveChanges();
 
-        var doctor = _context.Doctors.FirstOrDefault(x => x.Id == slot.DoctorId);
-        var advanceAmount = doctor != null ? Math.Round(doctor.Fee * 0.5m, 2) : 0;
-
-        slot.IsBooked = true;
-
-        var appointment = new Appointment
-        {
-            PatientId = userId,
-            DoctorId = slot.DoctorId,
-            DoctorAvailabilityId = slot.Id,
-            BookedAt = DateTime.UtcNow,
-            Status = "Confirmed",
-            PaymentStatus = "Paid",
-            AdvanceAmount = advanceAmount,
-            RazorpayPaymentId = dto.RazorpayPaymentId
-        };
-
-        _context.Appointments.Add(appointment);
-        _context.SaveChanges();
-
-        return Ok(new
-        {
-            Message = "Appointment booked successfully",
-            AppointmentId = appointment.Id,
-            AdvancePaid = advanceAmount
-        });
-    }
+    return Ok(new
+    {
+        AppointmentId = appointment.Id,
+        AdvancePaid = appointment.AdvanceAmount
+    });
+}
     [HttpGet("appointments")]
-    public IActionResult MyAppointments()
-    {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+public IActionResult MyAppointments()
+{
+    var userId = int.Parse(
+        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        var appointments = _context.Appointments
-            .Where(x => x.PatientId == userId)
-            .OrderByDescending(x => x.BookedAt)
-            .ToList();
+    var appointments =
+    (
+        from a in _context.Appointments
+        join d in _context.Doctors on a.DoctorId equals d.Id
+        join u in _context.Users on d.UserId equals u.Id
+        join s in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals s.Id
 
-        return Ok(appointments);
-    }
+        where a.PatientId == userId
+
+        orderby a.BookedAt descending
+
+        select new
+        {
+            a.Id,
+
+            DoctorId = d.Id,
+            DoctorName = u.FullName,
+            Specialization = d.Specialization,
+            Hospital = d.HospitalName,
+
+            AppointmentDate = s.AvailableFrom.Date,
+            AppointmentTime = s.AvailableFrom,
+
+            a.Status,
+            a.PaymentStatus,
+            a.AdvanceAmount,
+
+            SlotId = s.Id,
+            Place = s.Place
+        }
+
+    ).ToList();
+
+    return Ok(appointments);
+}
     [HttpGet("products")]
     public IActionResult GetProducts()
     {

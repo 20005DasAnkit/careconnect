@@ -7,5 +7,6 @@ public class DoctorAvailability
     public Doctor Doctor { get; set; }
     public DateTime AvailableFrom { get; set; }
     public DateTime AvailableTo { get; set; }
+    public string Place{get; set;} = string.Empty;
     public bool IsBooked { get; set; } = false;
 }

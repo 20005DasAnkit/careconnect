@@ -222,7 +222,7 @@ export default function Appointments() {
 
         if (search) {
             data = data.filter((item) =>
-                (`Doctor ${item.doctorId}`)
+                (item.doctorName || "")
                     .toLowerCase()
                     .includes(search.toLowerCase())
             );
@@ -544,11 +544,18 @@ export default function Appointments() {
                                                     <div>
 
                                                         <h2 className="text-xl font-bold text-slate-900">
-                                                            Dr. #{appointment.doctorId}
+                                                            {appointment.doctorName}
                                                         </h2>
 
                                                         <p className="text-gray-500 mt-1">
-                                                            General Physician
+                                                            {appointment.specialization}
+                                                        </p>
+                                                        <p className="text-sm text-gray-400 mt-1">
+                                                            {appointment.hospital}
+                                                        </p>
+
+                                                        <p className="text-sm text-[#16332B] mt-1">
+                                                            {appointment.place}
                                                         </p>
 
                                                         <div
@@ -576,7 +583,7 @@ export default function Appointments() {
                                                             <FiCalendar className="text-[#16332B]" />
 
                                                             <span className="font-semibold">
-                                                                {formatDate(appointment.bookedAt)}
+                                                                {formatDate(appointment.appointmentDate)}
                                                             </span>
 
                                                         </div>
@@ -594,7 +601,7 @@ export default function Appointments() {
                                                             <FiClock className="text-[#16332B]" />
 
                                                             <span className="font-semibold">
-                                                                {formatTime(appointment.bookedAt)}
+                                                                {formatTime(appointment.appointmentTime)}
                                                             </span>
 
                                                         </div>
@@ -682,7 +689,7 @@ export default function Appointments() {
                                                 <span>
                                                     Slot :
                                                     <span className="font-semibold text-gray-700 ml-2">
-                                                        #{appointment.doctorAvailabilityId}
+                                                        #{appointment.slotId}
                                                     </span>
                                                 </span>
 
@@ -787,4 +794,3 @@ export default function Appointments() {
         </>
     );
 }
-

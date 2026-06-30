@@ -12,19 +12,6 @@ import { toast, Toaster } from "react-hot-toast";
 
 const STEPS = ["Select slot", "Confirm", "Payment", "Done"];
 
-function loadRazorpayScript() {
-    return new Promise((resolve) => {
-        if (window.Razorpay) {
-            resolve(true);
-            return;
-        }
-        const script = document.createElement("script");
-        script.src = "https://checkout.razorpay.com/v1/checkout.js";
-        script.onload = () => resolve(true);
-        script.onerror = () => resolve(false);
-        document.body.appendChild(script);
-    });
-}
 
 function formatSlotDate(date) {
     return new Date(date).toLocaleDateString("en-IN", {
@@ -96,6 +83,7 @@ export default function BookAppointment() {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [paying, setPaying] = useState(false);
     const [appointmentResult, setAppointmentResult] = useState(null);
+    const [paymentMethod, setPaymentMethod] = useState("Online");
 
     const advanceAmount = useMemo(() => {
         if (!doctor?.fee) return 0;
@@ -142,74 +130,37 @@ export default function BookAppointment() {
         setStep(0);
     }
 
-    async function handlePayment() {
+    async function confirmBooking() {
         setPaying(true);
+
         try {
-            const scriptLoaded = await loadRazorpayScript();
-            if (!scriptLoaded) {
-                toast.error("Couldn't load payment gateway. Check your connection.");
-                setPaying(false);
-                return;
-            }
-
-            const orderRes = await api.post("/payment/create-order", {
-                amount: advanceAmount,
-                currency: "INR",
-            });
-
-            const { orderId, amount, currency, razorpayKeyId } = orderRes.data;
-
-            const options = {
-                key: razorpayKeyId,
-                order_id: orderId,
-                amount,
-                currency,
-                name: "Lakeview Hospital",
-                description: `Advance for appointment with Dr. ${doctor?.name || ""}`,
-                theme: { color: "#16332B" },
-                handler: async (response) => {
-                    await finalizeBooking(response);
-                },
-                modal: {
-                    ondismiss: () => {
-                        setPaying(false);
-                    },
-                },
-            };
-
-            const rzp = new window.Razorpay(options);
-            rzp.open();
-        } catch (err) {
-            toast.error("Couldn't start payment. Please try again.");
-            setPaying(false);
-        }
-    }
-
-    async function finalizeBooking(razorpayResponse) {
-        try {
-            const verifyRes = await api.post("/payment/verify", {
-                razorpay_order_id: razorpayResponse.razorpay_order_id,
-                razorpay_payment_id: razorpayResponse.razorpay_payment_id,
-                razorpay_signature: razorpayResponse.razorpay_signature,
-            });
-
-            if (!verifyRes.data?.verified) {
-                toast.error("Payment verification failed.");
-                setPaying(false);
-                return;
-            }
-
-            const bookRes = await api.post("/patient/book", {
+            const res = await api.post("/patient/book", {
                 doctorAvailabilityId: selectedSlot.id,
-                razorpayPaymentId: razorpayResponse.razorpay_payment_id,
+                paymentMethod: paymentMethod
             });
 
-            setAppointmentResult(bookRes.data);
+            setAppointmentResult({
+                appointmentId:
+                    res.data?.appointmentId ||
+                    res.data?.id ||
+                    Math.floor(Math.random() * 100000),
+
+                advancePaid:
+                    paymentMethod === "Online"
+                        ? advanceAmount
+                        : 0
+            });
+
+            toast.success("Appointment Booked Successfully");
             setStep(3);
-            toast.success("Appointment booked!");
+
         } catch (err) {
-            toast.error(err?.response?.data || "Booking failed after payment. Contact support.");
-        } finally {
+    console.log(err.response);
+    console.log(err.response?.data);
+    console.log(err.response?.status);
+
+    toast.error(JSON.stringify(err.response?.data));
+} finally {
             setPaying(false);
         }
     }
@@ -345,27 +296,68 @@ export default function BookAppointment() {
                         )}
 
                         {/* Step 2: Payment */}
+                        {/* Step 2: Payment */}
                         {!error && step === 2 && selectedSlot && (
                             <div>
-                                <div className="bg-[#F8F6F0] rounded-xl border border-[#E7E2D6] p-5 flex items-center justify-between">
-                                    <span className="text-sm text-[#6B6458]">Amount to pay</span>
-                                    <span className="text-2xl font-semibold text-[#16332B]">
-                                        ₹{advanceAmount}
-                                    </span>
+
+                                <div className="bg-[#F8F6F0] rounded-xl border border-[#E7E2D6] p-6">
+
+                                    <h3 className="text-lg font-semibold text-[#16332B] mb-5">
+                                        Select Payment Method
+                                    </h3>
+
+                                    <div className="space-y-4">
+
+                                        <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition ${paymentMethod === "Online"
+                                            ? "border-[#16332B] bg-[#EEF5F2]"
+                                            : "border-[#E7E2D6]"
+                                            }`}>
+                                            <div>
+                                                <h4 className="font-semibold">💳 Online Payment</h4>
+                                                <p className="text-sm text-gray-500">
+                                                    Pay advance online
+                                                </p>
+                                            </div>
+
+                                            <input
+                                                type="radio"
+                                                checked={paymentMethod === "Online"}
+                                                onChange={() => setPaymentMethod("Online")}
+                                            />
+                                        </label>
+
+                                        <label className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition ${paymentMethod === "Cash"
+                                            ? "border-[#16332B] bg-[#EEF5F2]"
+                                            : "border-[#E7E2D6]"
+                                            }`}>
+
+                                        </label>
+
+                                    </div>
+
+                                    <div className="mt-6 flex justify-between text-lg font-semibold">
+                                        <span>Total</span>
+                                        <span>
+                                            {paymentMethod === "Online"
+                                                ? `₹${advanceAmount}`
+                                                : "₹0"}
+                                        </span>
+                                    </div>
+
+                                    <button
+                                        onClick={confirmBooking}
+                                        disabled={paying}
+                                        className="w-full mt-8 bg-[#16332B] hover:bg-[#0F241D] text-white py-3 rounded-xl font-medium"
+                                    >
+                                        {paying
+                                            ? "Booking..."
+                                            : paymentMethod === "Online"
+                                                ? "Pay & Confirm"
+                                                : "Confirm Booking"}
+                                    </button>
+
                                 </div>
 
-                                <div className="flex items-center gap-2 mt-4 text-xs text-[#8B8478]">
-                                    <FiShield size={14} className="text-[#16332B]" />
-                                    Secured by Razorpay · your card details never touch our servers
-                                </div>
-
-                                <button
-                                    onClick={handlePayment}
-                                    disabled={paying}
-                                    className="w-full mt-6 bg-[#C9683F] hover:bg-[#B85A33] disabled:opacity-60 text-white py-3 rounded-xl font-medium transition"
-                                >
-                                    {paying ? "Opening payment…" : `Pay ₹${advanceAmount}`}
-                                </button>
                             </div>
                         )}
 
@@ -382,7 +374,13 @@ export default function BookAppointment() {
                                     Reference #{appointmentResult?.appointmentId}
                                 </p>
                                 <p className="text-[#8B8478] text-sm mt-1">
-                                    Advance paid: ₹{appointmentResult?.advancePaid}
+                                    Payment Method: {paymentMethod}
+                                </p>
+
+                                <p className="text-[#8B8478] text-sm">
+                                    {paymentMethod === "Online"
+                                        `Advance Paid: ₹${appointmentResult?.advancePaid}`
+                                    }
                                 </p>
 
                                 <button

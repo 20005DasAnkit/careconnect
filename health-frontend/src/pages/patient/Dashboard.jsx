@@ -85,12 +85,11 @@ export default function Dashboard() {
                     </div>
 
                     <nav className="hidden lg:flex items-center gap-9 font-[system-ui,sans-serif] text-[15px] text-[#16332B]/80">
+                        <a href="/patient/products" className="hover:text-[#16332B] transition">Medicines</a>
+                        <a href="/patient/appointments" className="flex items-center gap-1 hover:text-[#16332B] transition"> Appoinments <span className="text-xs"></span></a>
                         <a href="/patient/EmergencyInfo" className="hover:text-[#16332B] transition">Emergency Info</a>
                         <a href="/patient/Locations" className="hover:text-[#16332B] transition">Locations</a>
-                        <a href="/patient/orders" className="hover:text-[#16332B] transition">Orders</a>
-                        <a href="#" className="flex items-center gap-1 hover:text-[#16332B] transition">
-                            For You <span className="text-xs">▾</span>
-                        </a>
+                        
                         <a href="/patient/AboutUs" className="flex items-center gap-1 hover:text-[#16332B] transition">
                             AboutUs <span className="text-xs">▾</span>
                         </a>
@@ -661,10 +660,19 @@ export default function Dashboard() {
                     <div className="font-[system-ui,sans-serif]">
                         <h3 className="font-medium mb-4 font-[Georgia,serif] text-lg">Services</h3>
                         <ul className="space-y-2 text-white/60 text-[15px]">
-                            <li>Doctors</li>
-                            <li>Medicines</li>
-                            <li>Ambulance</li>
-                            <li>Appointments</li>
+                            <li>
+                                <Link to="/patient/doctors">Doctors</Link>
+                            </li>
+                            <li>
+                                <Link to="/patient/products">Medicines</Link>
+                            </li>
+
+                            <li>
+                                <Link to="/patient/ambulance">Ambulance</Link>
+                            </li>
+                            <li>
+                                <Link to="/patient/appointments">Appointments</Link>
+                            </li>
                         </ul>
                     </div>
 

@@ -27,8 +27,6 @@ public class DoctorController : ControllerBase
 
         var doctor = _context.Doctors
             .FirstOrDefault(x => x.UserId == userId);
-        Console.WriteLine($"UserId = {userId}");
-        Console.WriteLine($"DoctorId = {doctor?.Id}");
 
         if (doctor == null)
             return NotFound("Doctor not found");
@@ -37,7 +35,8 @@ public class DoctorController : ControllerBase
         {
             DoctorId = doctor.Id,
             AvailableFrom = dto.AvailableFrom,
-            AvailableTo = dto.AvailableTo
+            AvailableTo = dto.AvailableTo,
+            Place = dto.Place
         };
 
         _context.DoctorAvailabilities.Add(availability);
@@ -61,6 +60,14 @@ public class DoctorController : ControllerBase
         var data = _context.DoctorAvailabilities
             .Where(x => x.DoctorId == doctor.Id)
             .OrderBy(x => x.AvailableFrom)
+            .Select(x => new
+            {
+                x.Id,
+                x.AvailableFrom,
+                x.AvailableTo,
+                x.Place,
+                x.IsBooked
+            })
             .ToList();
 
         return Ok(data);
@@ -78,7 +85,6 @@ public class DoctorController : ControllerBase
         if (doctor == null)
             return NotFound();
         var count = _context.Appointments.Count(a => a.DoctorId == doctor.Id);
-        Console.WriteLine($"Appointment Count = {count}");
 
         var appointments = (
             from a in _context.Appointments
@@ -92,11 +98,9 @@ public class DoctorController : ControllerBase
                 PatientName = u.FullName,
                 PatientEmail = u.Email,
                 Status = a.Status,
-
                 Date = a.DoctorAvailability.AvailableFrom.Date,
-
                 Time = a.DoctorAvailability.AvailableFrom.ToString("hh:mm tt"),
-
+                Place = a.DoctorAvailability.Place,
                 BookedAt = a.BookedAt
             }
         ).ToList();
@@ -195,6 +199,7 @@ public class DoctorController : ControllerBase
 
         availability.AvailableFrom = dto.AvailableFrom;
         availability.AvailableTo = dto.AvailableTo;
+        availability.Place = dto.Place;
 
         _context.SaveChanges();
 

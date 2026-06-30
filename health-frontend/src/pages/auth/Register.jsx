@@ -16,9 +16,7 @@ export default function Register() {
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirm, setShowConfirm] = useState(false);
-
     const [loading, setLoading] = useState(false);
-
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -27,14 +25,12 @@ export default function Register() {
         confirmPassword: "",
         role: "Patient",
     });
-
     const handleChange = (e) => {
         setForm({
             ...form,
             [e.target.name]: e.target.value,
         });
     };
-
     const handleRegister = async () => {
         if (form.password !== form.confirmPassword) {
             alert("Passwords do not match");
@@ -42,7 +38,6 @@ export default function Register() {
         }
 
         setLoading(true);
-
         try {
             const payload = {
                 fullName: form.name,
@@ -50,7 +45,7 @@ export default function Register() {
                 password: form.password,
             };
 
-            console.log(payload);
+            // console.log(payload);
 
             await registerUser(payload);
 
@@ -76,11 +71,8 @@ export default function Register() {
                 {/* LEFT */}
 
                 <div className="hidden lg:flex relative overflow-hidden flex-col justify-center px-20">
-
                     <div className="absolute -top-20 -left-20 w-72 h-72 rounded-full bg-green-100 blur-3xl"></div>
-
                     <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-emerald-100 blur-3xl"></div>
-
                     <div className="relative">
 
                         <span className="uppercase tracking-[6px] text-sm font-semibold text-[#2F5E52]">
@@ -107,7 +99,6 @@ export default function Register() {
                         </p>
 
                         <div className="mt-14 rounded-[30px] border border-green-200 bg-white/60 backdrop-blur-xl shadow-xl p-8">
-
                             <h2
                                 className="text-3xl text-[#16352E]"
                                 style={{
@@ -118,7 +109,6 @@ export default function Register() {
                                 Healthcare
                                 Simplified
                             </h2>
-
                             <p className="mt-5 leading-8 text-[#58766B]">
 
                                 Register once and access
@@ -127,9 +117,7 @@ export default function Register() {
                                 records anytime.
 
                             </p>
-
                         </div>
-
                     </div>
 
                 </div>
@@ -137,7 +125,6 @@ export default function Register() {
                 {/* RIGHT */}
 
                 <div className="flex justify-center items-center px-8 py-12">
-
                     <div className="w-full max-w-md rounded-[35px] bg-white/70 backdrop-blur-xl border border-white shadow-2xl p-10">
 
                         <h2
@@ -155,8 +142,8 @@ export default function Register() {
                             Create your account
 
                         </p>
-                        {/* Full Name */}
 
+                        {/* Full Name */}
                         <div className="mt-8">
 
                             <label className="mb-2 block text-sm font-medium text-[#16352E]">
@@ -208,7 +195,6 @@ export default function Register() {
                                 />
 
                             </div>
-
                         </div>
 
                         {/* Phone */}
@@ -271,7 +257,6 @@ export default function Register() {
                                 </button>
 
                             </div>
-
                         </div>
 
                         {/* Confirm Password */}
@@ -310,7 +295,6 @@ export default function Register() {
 
                         </div>
 
-                        {/* Role */}
 
 
                         {/* Register Button */}
