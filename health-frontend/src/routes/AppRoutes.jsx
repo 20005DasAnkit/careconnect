@@ -36,6 +36,7 @@ import AmbulanceRequest from "../pages/patient/AmbulanceRequest";
 // Ambulance Driver
 import AmbulanceDashboard from "../pages/ambulance/Dashboard";
 import Ambulancerequest from "../pages/ambulance/Ambulancerequests";
+import AmbulanceProfile from "../pages/ambulance/Profile";
 
 export default function AppRoutes() {
   return (
@@ -62,8 +63,6 @@ export default function AppRoutes() {
         <Route path="/doctor/appointments" element={<DoctorAppointments />} />
         <Route path="/doctor/availability" element={<DoctorAvailabilitys />} />
         <Route path="/doctor/profile" element={<DoctorProfile />} />
-         
-        
 
         {/* PATIENT */}
         <Route path="/patient" element={<PatientDashboard />} />
@@ -81,8 +80,9 @@ export default function AppRoutes() {
         <Route path="/patient/ambulance/request" element={<AmbulanceRequest />} />
 
         {/* AMBULANCE DRIVER */}
-<Route path="/ambulance" element={<AmbulanceDashboard />} />
-<Route path="/ambulance/requests" element={<Ambulancerequest />} />
+        <Route path="/ambulance" element={<AmbulanceDashboard />} />
+        <Route path="/ambulance/requests" element={<Ambulancerequest />} />
+        <Route path="/ambulance/profile" element={<AmbulanceProfile />} />
 
       </Routes>
     </BrowserRouter>
