@@ -68,11 +68,9 @@ export default function Ambulances() {
 
     return (
         <div className="flex">
-
             <Sidebar />
 
             <div className="ml-64 w-full min-h-screen bg-gray-100">
-
                 <Navbar />
 
                 <div className="p-6">
@@ -155,24 +153,18 @@ export default function Ambulances() {
                     {/* LIST */}
 
                     <div className="bg-white rounded shadow overflow-x-auto">
-
                         <table className="w-full text-left">
-
                             <thead className="bg-blue-700 text-white">
 
                                 <tr>
-
                                     <th className="p-3 text-left w-16">ID</th>
                                     <th className="p-3 text-left">Driver</th>
                                     <th className="p-3 text-left">Email</th>
                                     <th className="p-3 text-left">Phone</th>
                                     <th className="p-3 text-left">Vehicle</th>
                                     <th className="p-3 text-left">Action</th>
-
                                 </tr>
-
                             </thead>
-
                             <tbody>
 
                                 {ambulances.length > 0 ? (
@@ -183,31 +175,23 @@ export default function Ambulances() {
                                             key={a.id}
                                             className="border-b hover:bg-gray-50"
                                         >
-
                                             <td className="p-3 text-left w-16">{a.id}</td>
                                             <td className="p-3 text-left">{a.driverName}</td>
                                             <td className="p-3 text-left">{a.email}</td>
                                             <td className="p-3 text-left">{a.driverPhone}</td>
                                             <td className="p-3 text-left">{a.vehicleNumber}</td>
                                             <td className="p-3 text-left">
-
                                                 <button
                                                     onClick={() => remove(a.id)}
                                                     className="bg-red-600 text-white px-4 py-2 rounded"
                                                 >
                                                     Delete
                                                 </button>
-
                                             </td>
-
                                         </tr>
-
                                     ))
-
                                 ) : (
-
                                     <tr>
-
                                         <td
                                             colSpan="6"
                                             className="text-center p-5"
@@ -220,11 +204,8 @@ export default function Ambulances() {
                                 )}
 
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
 
             </div>

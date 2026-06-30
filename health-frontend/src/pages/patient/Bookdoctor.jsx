@@ -155,12 +155,12 @@ export default function BookAppointment() {
             setStep(3);
 
         } catch (err) {
-    console.log(err.response);
-    console.log(err.response?.data);
-    console.log(err.response?.status);
+            console.log(err.response);
+            console.log(err.response?.data);
+            console.log(err.response?.status);
 
-    toast.error(JSON.stringify(err.response?.data));
-} finally {
+            toast.error(JSON.stringify(err.response?.data));
+        } finally {
             setPaying(false);
         }
     }
@@ -377,11 +377,11 @@ export default function BookAppointment() {
                                     Payment Method: {paymentMethod}
                                 </p>
 
-                                <p className="text-[#8B8478] text-sm">
-                                    {paymentMethod === "Online"
-                                        `Advance Paid: ₹${appointmentResult?.advancePaid}`
-                                    }
-                                </p>
+<p className="text-[#8B8478] text-sm">
+    {paymentMethod === "Online"
+        ? `Advance Paid: ₹${appointmentResult?.advancePaid}`
+        : "Advance Paid: ₹0"}
+</p>
 
                                 <button
                                     onClick={() => navigate("/patient/appointments")}

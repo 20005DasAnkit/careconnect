@@ -216,14 +216,13 @@ export default function Orders() {
                                                         <Package size={15} className="text-[#16332B]/40" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-medium text-[#16332B] group-hover:text-[#0F231D]">
-                                                            #{o.id}
+                                                        <p className="font-medium text-[#16332B]">
+                                                            {o.productName || "Medicine"}
                                                         </p>
-                                                        {o.productName && (
-                                                            <p className="text-xs text-[#16332B]/40 truncate max-w-[160px]">
-                                                                {o.productName}
-                                                            </p>
-                                                        )}
+
+                                                        <p className="text-xs text-[#16332B]/40">
+                                                            Order #{o.id}
+                                                        </p>
                                                     </div>
                                                 </div>
                                             </td>

@@ -54,96 +54,127 @@ public class PatientController : ControllerBase
     }
 
     [HttpPost("book")]
-public IActionResult BookAppointment(BookAppointmentDto dto)
-{
-    var userId = int.Parse(
-        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-    var slot = _context.DoctorAvailabilities
-        .FirstOrDefault(x => x.Id == dto.DoctorAvailabilityId);
-
-    if (slot == null)
-        return NotFound("Slot not found");
-
-    if (slot.IsBooked)
-        return BadRequest("Slot already booked");
-
-    var doctor = _context.Doctors.FirstOrDefault(x => x.Id == slot.DoctorId);
-    var advanceAmount = doctor != null ? Math.Round(doctor.Fee * 0.5m, 2) : 0;
-
-    slot.IsBooked = true;
-
-    var appointment = new Appointment
+    public IActionResult BookAppointment(BookAppointmentDto dto)
     {
-        PatientId = userId,
-        DoctorId = slot.DoctorId,
-        DoctorAvailabilityId = slot.Id,
-        BookedAt = DateTime.UtcNow,
-        Status = "Confirmed",
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        PaymentStatus = dto.PaymentMethod == "Online"
-            ? "Paid"
-            : "Cash",
+        var slot = _context.DoctorAvailabilities
+            .FirstOrDefault(x => x.Id == dto.DoctorAvailabilityId);
 
-        AdvanceAmount = dto.PaymentMethod == "Online"
-            ? advanceAmount
-            : 0,
+        if (slot == null)
+            return NotFound("Slot not found");
 
-        RazorpayPaymentId = dto.PaymentMethod == "Online"
-            ? "DUMMY_PAYMENT"
-            : null
-    };
+        if (slot.IsBooked)
+            return BadRequest("Slot already booked");
 
-    _context.Appointments.Add(appointment);
-    _context.SaveChanges();
+        var doctor = _context.Doctors
+            .FirstOrDefault(x => x.Id == slot.DoctorId);
 
-    return Ok(new
-    {
-        AppointmentId = appointment.Id,
-        AdvancePaid = appointment.AdvanceAmount
-    });
-}
-    [HttpGet("appointments")]
-public IActionResult MyAppointments()
-{
-    var userId = int.Parse(
-        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var user = _context.Users
+            .FirstOrDefault(x => x.Id == userId);
 
-    var appointments =
-    (
-        from a in _context.Appointments
-        join d in _context.Doctors on a.DoctorId equals d.Id
-        join u in _context.Users on d.UserId equals u.Id
-        join s in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals s.Id
+        decimal advanceAmount = doctor != null
+            ? Math.Round(doctor.Fee * 0.5m, 2)
+            : 0;
 
-        where a.PatientId == userId
+        decimal walletUsed = 0;
 
-        orderby a.BookedAt descending
-
-        select new
+        // Use refund balance if selected
+        if (dto.UseRefundBalance && user != null)
         {
-            a.Id,
-
-            DoctorId = d.Id,
-            DoctorName = u.FullName,
-            Specialization = d.Specialization,
-            Hospital = d.HospitalName,
-
-            AppointmentDate = s.AvailableFrom.Date,
-            AppointmentTime = s.AvailableFrom,
-
-            a.Status,
-            a.PaymentStatus,
-            a.AdvanceAmount,
-
-            SlotId = s.Id,
-            Place = s.Place
+            if (user.RefundBalance >= advanceAmount)
+            {
+                walletUsed = advanceAmount;
+                user.RefundBalance -= advanceAmount;
+                advanceAmount = 0;
+            }
+            else
+            {
+                walletUsed = user.RefundBalance;
+                advanceAmount -= user.RefundBalance;
+                user.RefundBalance = 0;
+            }
         }
 
-    ).ToList();
+        slot.IsBooked = true;
 
-    return Ok(appointments);
-}
+        var appointment = new Appointment
+        {
+            PatientId = userId,
+            DoctorId = slot.DoctorId,
+            DoctorAvailabilityId = slot.Id,
+            BookedAt = DateTime.UtcNow,
+            Status = "Confirmed",
+
+            PaymentStatus = dto.PaymentMethod == "Online"
+                ? (advanceAmount > 0 ? "Paid" : "Wallet")
+                : "Cash",
+
+            AdvanceAmount = dto.PaymentMethod == "Online"
+                ? advanceAmount
+                : 0,
+
+            RazorpayPaymentId = dto.PaymentMethod == "Online"
+                ? (advanceAmount > 0 ? "DUMMY_PAYMENT" : "WALLET_PAYMENT")
+                : null
+        };
+
+        _context.Appointments.Add(appointment);
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            AppointmentId = appointment.Id,
+            AdvancePaid = appointment.AdvanceAmount,
+            WalletUsed = walletUsed,
+            WalletBalance = user?.RefundBalance ?? 0,
+            Message = "Appointment booked successfully."
+        });
+    }
+
+    [HttpGet("appointments")]
+    public IActionResult MyAppointments()
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var appointments =
+        (
+            from a in _context.Appointments
+            join d in _context.Doctors on a.DoctorId equals d.Id
+            join u in _context.Users on d.UserId equals u.Id
+            join s in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals s.Id
+
+            where a.PatientId == userId
+
+            orderby a.BookedAt descending
+
+            select new
+            {
+                a.Id,
+
+                DoctorId = d.Id,
+                DoctorName = u.FullName,
+                Specialization = d.Specialization,
+                Hospital = d.HospitalName,
+
+                AppointmentDate = s.AvailableFrom.Date,
+                AppointmentTime = s.AvailableFrom,
+
+                a.Status,
+                a.PaymentStatus,
+                a.AdvanceAmount,
+
+                SlotId = s.Id,
+                Place = s.Place
+            }
+
+        ).ToList();
+
+        return Ok(appointments);
+    }
+
     [HttpGet("products")]
     public IActionResult GetProducts()
     {
@@ -211,6 +242,7 @@ public IActionResult MyAppointments()
             PaymentStatus = order.PaymentStatus
         });
     }
+
     [HttpGet("orders")]
     public IActionResult MyOrders()
     {
@@ -241,6 +273,7 @@ public IActionResult MyAppointments()
 
         return Ok(orders);
     }
+
     [HttpGet("ambulances")]
     public IActionResult GetAmbulances()
     {
@@ -256,9 +289,6 @@ public IActionResult MyAppointments()
     })
     .ToList());
     }
-    // Fixed city list with keyword matching against HospitalName, since
-    // no entity currently stores an explicit City field. Add more cities
-    // and keywords here as the platform expands.
     private static readonly Dictionary<string, string[]> CityKeywords = new()
     {
         ["Kolkata"] = new[] { "kolkata", "calcutta", "park street", "ballygunge", "alipore" },
@@ -267,8 +297,6 @@ public IActionResult MyAppointments()
         ["New Town"] = new[] { "new town", "rajarhat" },
     };
 
-    // Rough bounding boxes for the same cities, used to bucket ambulances
-    // by their stored lat/lng since they don't have a HospitalName to match against.
     private static readonly Dictionary<string, (double MinLat, double MaxLat, double MinLng, double MaxLng)> CityBounds = new()
     {
         ["Kolkata"] = (22.45, 22.62, 88.30, 88.42),
@@ -327,6 +355,7 @@ public IActionResult MyAppointments()
 
         return Ok(coverage);
     }
+
     [HttpPost("ambulance-request")]
     public IActionResult RequestAmbulance(CreateAmbulanceRequestDto dto)
     {
@@ -398,6 +427,7 @@ public IActionResult MyAppointments()
         "Big" => 150m,
         _ => 25m // NonAC default
     };
+
     [HttpPut("appointment/cancel/{id}")]
     public IActionResult CancelAppointment(int id)
     {
@@ -410,20 +440,42 @@ public IActionResult MyAppointments()
         if (appointment == null)
             return NotFound("Appointment not found");
 
-        var diff = DateTime.UtcNow - appointment.BookedAt;
+        var slot = _context.DoctorAvailabilities
+            .FirstOrDefault(x => x.Id == appointment.DoctorAvailabilityId);
 
-        if (diff.TotalHours > 2)
-            return BadRequest("You can cancel only within 2 hours");
+        if (slot == null)
+            return BadRequest("Appointment slot not found");
 
-        if (appointment.Status == "CancelledByAdmin")
-            return BadRequest("Already cancelled by admin");
+        var user = _context.Users.First(x => x.Id == userId);
+
+        decimal refund = 0;
+
+        var hoursLeft = (slot.AvailableFrom - DateTime.UtcNow).TotalHours;
+        Console.WriteLine($"Hours Left: {hoursLeft}");
+        Console.WriteLine($"Advance: {appointment.AdvanceAmount}");
+        Console.WriteLine($"Current Wallet: {user.RefundBalance}");
+
+        if (hoursLeft >= 1)
+        {
+            refund = Math.Round(appointment.AdvanceAmount * 0.5m, 2);
+            user.RefundBalance += refund;
+            Console.WriteLine($"Refund Added: {refund}");
+            Console.WriteLine($"New Wallet: {user.RefundBalance}");
+        }
 
         appointment.Status = "CancelledByUser";
+        slot.IsBooked = false;
 
         _context.SaveChanges();
 
-        return Ok("Appointment cancelled by user");
+        return Ok(new
+        {
+            Message = "Appointment Cancelled",
+            Refund = refund,
+            Wallet = user.RefundBalance
+        });
     }
+
     [HttpGet("ambulance-request/{id}")]
     public IActionResult GetAmbulanceRequestStatus(int id)
     {
@@ -451,6 +503,87 @@ public IActionResult MyAppointments()
             request.RequestTime,
             DriverName = ambulance != null ? ambulance.DriverName : null,
             VehicleNumber = ambulance != null ? ambulance.VehicleNumber : null
+        });
+    }
+    [HttpGet("refund-balance")]
+    public IActionResult GetRefundBalance()
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var user = _context.Users.Find(userId);
+
+        return Ok(new
+        {
+            RefundBalance = user?.RefundBalance ?? 0
+        });
+    }
+    [HttpGet("profile")]
+    public IActionResult GetProfile()
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var user = _context.Users
+            .FirstOrDefault(x => x.Id == userId);
+
+        if (user == null)
+            return NotFound("User not found");
+
+        return Ok(new
+        {
+            fullName = user.FullName,
+            email = user.Email,
+            phone = user.Phone,
+            gender = user.Gender,
+            dob = user.Dob,
+            bloodGroup = user.BloodGroup,
+            address = user.Address,
+            city = user.City,
+            state = user.State,
+            country = user.Country,
+            pinCode = user.PinCode
+        });
+    }
+
+    [HttpPut("profile")]
+    public IActionResult UpdateProfile(UpdateProfileDto dto)
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var user = _context.Users
+            .FirstOrDefault(x => x.Id == userId);
+
+        if (user == null)
+            return NotFound("User not found");
+
+        user.FullName = dto.FullName;
+        user.Phone = dto.Phone;
+        user.Gender = dto.Gender;
+        user.Dob = dto.Dob;
+        user.BloodGroup = dto.BloodGroup;
+        user.Address = dto.Address;
+        user.City = dto.City;
+        user.State = dto.State;
+        user.Country = dto.Country;
+        user.PinCode = dto.PinCode;
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            fullName = user.FullName,
+            email = user.Email,
+            phone = user.Phone,
+            gender = user.Gender,
+            dob = user.Dob,
+            bloodGroup = user.BloodGroup,
+            address = user.Address,
+            city = user.City,
+            state = user.State,
+            country = user.Country,
+            pinCode = user.PinCode
         });
     }
 }

@@ -106,6 +106,7 @@ public class AdminController : ControllerBase
 
         return Ok("Doctor removed successfully");
     }
+
     [HttpPost("product")]
     public IActionResult AddProduct(CreateProductDto dto)
     {
@@ -122,6 +123,7 @@ public class AdminController : ControllerBase
 
         return Ok(product);
     }
+
     [HttpGet("orders")]
     public IActionResult GetOrders()
     {
@@ -141,6 +143,7 @@ public class AdminController : ControllerBase
 
         return Ok(orders);
     }
+
     [HttpPost("ambulance")]
     public IActionResult CreateAmbulance(CreateAmbulanceDto dto)
     {
@@ -180,6 +183,7 @@ public class AdminController : ControllerBase
                 .OrderByDescending(x => x.RequestTime)
                 .ToList());
     }
+
     [HttpGet("dashboard")]
     public IActionResult Dashboard()
     {
@@ -206,6 +210,7 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+
     [HttpGet("recent-appointments")]
     public IActionResult RecentAppointments()
     {
@@ -229,6 +234,7 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+
     [HttpGet("recent-orders")]
     public IActionResult RecentOrders()
     {
@@ -250,6 +256,7 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+
     [HttpGet("recent-ambulance-requests")]
     public IActionResult RecentAmbulanceRequests()
     {
@@ -276,6 +283,7 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+
     [HttpGet("revenue")]
     public IActionResult Revenue()
     {
@@ -287,6 +295,7 @@ public class AdminController : ControllerBase
             TotalRevenue = totalRevenue
         });
     }
+
     [HttpGet("monthly-revenue")]
     public IActionResult MonthlyRevenue()
     {
@@ -308,6 +317,7 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+
     [HttpDelete("product/{id}")]
     public IActionResult DeleteProduct(int id)
     {
@@ -321,6 +331,7 @@ public class AdminController : ControllerBase
 
         return Ok("Product deleted");
     }
+
     [HttpDelete("appointment/{id}")]
     public IActionResult DeleteAppointment(int id)
     {
@@ -334,6 +345,7 @@ public class AdminController : ControllerBase
 
         return Ok("Appointment deleted");
     }
+
     [HttpGet("products")]
     public IActionResult GetProducts()
     {
@@ -379,6 +391,7 @@ public class AdminController : ControllerBase
 
         return Ok(appointments);
     }
+
     [HttpPut("appointment/cancel/{id}")]
     public IActionResult CancelAppointment(int id)
     {
@@ -393,6 +406,7 @@ public class AdminController : ControllerBase
 
         return Ok("Appointment cancelled");
     }
+
     [HttpDelete("ambulance/{id}")]
     public IActionResult DeleteAmbulance(int id)
     {
@@ -407,6 +421,7 @@ public class AdminController : ControllerBase
 
         return Ok("Ambulance deleted");
     }
+
     [HttpGet("ambulance-bookings")]
     public IActionResult GetAmbulanceBookings()
     {
@@ -431,6 +446,7 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+
     [HttpGet("product-orders")]
     public IActionResult GetProductOrders()
     {
@@ -447,15 +463,12 @@ public class AdminController : ControllerBase
                 OrderId = o.Id,
                 CustomerName = u.FullName,
                 CustomerEmail = u.Email,
-
                 ProductName = p.Name,
-
                 oi.Quantity,
                 oi.UnitPrice,
-
                 Total = oi.Quantity * oi.UnitPrice,
-
                 o.Status,
+                o.PaymentStatus,
                 o.OrderDate
             }
 
@@ -463,6 +476,7 @@ public class AdminController : ControllerBase
 
         return Ok(data);
     }
+
     [HttpPut("product/{id}/stock")]
     public IActionResult UpdateStock(int id, UpdateStockDto dto)
     {
@@ -485,6 +499,7 @@ public class AdminController : ControllerBase
             Stock = product.Stock
         });
     }
+
     [HttpPut("product/{id}/category")]
     public IActionResult UpdateCategory(int id, [FromBody] UpdateCategoryDto dto)
     {
@@ -494,5 +509,45 @@ public class AdminController : ControllerBase
         product.Category = dto.Category;
         _context.SaveChanges();
         return Ok();
+    }
+
+    [HttpPut("product-order/{id}/status")]
+    public IActionResult UpdateProductOrderStatus(int id, [FromBody] string status)
+    {
+        var order = _context.Orders.FirstOrDefault(x => x.Id == id);
+
+        if (order == null)
+            return NotFound("Order not found");
+
+        order.Status = status;
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Order status updated",
+            Status = order.Status
+        });
+    }
+
+    [HttpPut("product-order/{id}/payment")]
+    public IActionResult UpdatePaymentStatus(int id)
+    {
+        var order = _context.Orders.FirstOrDefault(x => x.Id == id);
+
+        if (order == null)
+            return NotFound("Order not found");
+
+        if (order.Status != "Delivered")
+            return BadRequest("Order must be delivered first");
+
+        order.PaymentStatus = "Paid";
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Payment received successfully"
+        });
     }
 }

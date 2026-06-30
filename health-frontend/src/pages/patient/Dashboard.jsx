@@ -89,12 +89,12 @@ export default function Dashboard() {
                         <a href="/patient/appointments" className="flex items-center gap-1 hover:text-[#16332B] transition"> Appoinments <span className="text-xs"></span></a>
                         <a href="/patient/EmergencyInfo" className="hover:text-[#16332B] transition">Emergency Info</a>
                         <a href="/patient/Locations" className="hover:text-[#16332B] transition">Locations</a>
-                        
+                        <a href="/patient/orders" className="flex items-center gap-1 hover:text-[#16332B] transition">
+                            Orders <span className="text-xs"></span>
+                        </a>
+
                         <a href="/patient/AboutUs" className="flex items-center gap-1 hover:text-[#16332B] transition">
                             AboutUs <span className="text-xs">▾</span>
-                        </a>
-                        <a href="#" className="flex items-center gap-1 hover:text-[#16332B] transition">
-                            For Business <span className="text-xs">▾</span>
                         </a>
                     </nav>
                     <div className="hidden lg:flex items-center gap-5">
@@ -553,9 +553,9 @@ export default function Dashboard() {
                                         className="border-t border-[#E4DFD3] hover:bg-[#FAF8F3]/60"
                                     >
                                         <td className="p-5">{order.productName}</td>
-                                        <td className="p-5">
-                                            {new Date(order.createdAt).toLocaleDateString()}
-                                        </td>
+<td className="p-5">
+    {new Date(order.orderDate).toLocaleDateString("en-IN")}
+</td>
                                         <td className="p-5">
                                             <span className="bg-[#3E7C59]/10 text-[#3E7C59] px-3 py-1 rounded-full">
                                                 {order.status}

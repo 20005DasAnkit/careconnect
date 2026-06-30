@@ -1,8 +1,3 @@
-// Install first: dotnet add package Razorpay.Api
-// appsettings.json e add koro:
-//   "Razorpay": { "KeyId": "rzp_test_xxxxx", "KeySecret": "xxxxxxxxxxxx" }
-// Free test keys: https://dashboard.razorpay.com/app/keys
-
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Razorpay.Api;

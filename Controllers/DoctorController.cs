@@ -150,6 +150,7 @@ public class DoctorController : ControllerBase
 
         return Ok(doctor);
     }
+
     [HttpGet("dashboard")]
     public IActionResult Dashboard()
     {
@@ -175,6 +176,7 @@ public class DoctorController : ControllerBase
                 x.Status == "CancelledByUser")
         });
     }
+
     [HttpPut("availability")]
     public IActionResult UpdateAvailability(UpdateAvailabilityDto dto)
     {
@@ -205,6 +207,7 @@ public class DoctorController : ControllerBase
 
         return Ok("Availability updated successfully");
     }
+
     [HttpDelete("availability/{id}")]
     public IActionResult DeleteAvailability(int id)
     {
@@ -233,6 +236,7 @@ public class DoctorController : ControllerBase
 
         return Ok("Deleted successfully");
     }
+    
     [HttpPut("profile")]
     public IActionResult UpdateProfile(UpdateDoctorProfileDto dto)
     {

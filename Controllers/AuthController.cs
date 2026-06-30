@@ -31,7 +31,7 @@ public class AuthController : ControllerBase
         {
             FullName = dto.FullName,
             Email = dto.Email,
-            PasswordHash = dto.Password, // later BCrypt korbo
+            PasswordHash = dto.Password,
             Role = "Patient"
         };
 

@@ -30,9 +30,6 @@ public class AmbulanceController : ControllerBase
         if (ambulance == null)
             return NotFound();
 
-        // Joined with AppUser to get patient name + email.
-        // NOTE: AppUser has no Phone field, so patient contact number
-        // is not available here. Add a Phone column to AppUser if needed later.
         var requests = (
             from r in _context.AmbulanceRequests
             join u in _context.Users
@@ -95,13 +92,6 @@ public class AmbulanceController : ControllerBase
 
         return Ok("Updated");
     }
-    // Add these three actions inside the existing AmbulanceController class
-    // (same controller as GetRequests / UpdateStatus). Uses the real model
-    // field names: DriverName, DriverPhone, Type, VehicleNumber.
-    //
-    // Email is intentionally NOT editable here since it's the login
-    // identifier on AppUser — change it through a dedicated account
-    // settings/verification flow, not this profile form.
 
     [HttpGet("profile")]
     public IActionResult GetProfile()

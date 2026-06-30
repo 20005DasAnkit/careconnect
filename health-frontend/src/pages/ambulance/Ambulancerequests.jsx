@@ -80,12 +80,37 @@ function RequestRow({ r, idx, onUpdate }) {
           <div style={{ fontSize: 13, color: T.ink, fontWeight: 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.pickupLocation}</div>
           <div style={{ fontSize: 12, color: T.muted, marginTop: 2, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>→ {r.destinationLocation}</div>
         </td>
-        <td style={{ padding: "15px 20px", fontSize: 13, fontWeight: 700, color: T.green, whiteSpace: "nowrap" }}>₹{r.fare}</td>
-        <td style={{ padding: "15px 20px", fontSize: 12, color: T.muted, whiteSpace: "nowrap" }}>{new Date(r.requestTime).toLocaleString()}</td>
-        <td style={{ padding: "15px 20px" }}><Badge status={r.status} /></td>
-        <td style={{ padding: "15px 20px", textAlign: "center" }}>
+
+        <td style={{ 
+            padding: "15px 20px", 
+            fontSize: 13, 
+            fontWeight: 700, 
+            color: T.green, 
+            whiteSpace: "nowrap" 
+            }}>₹{r.fare}
+        </td>
+
+        <td style={{ 
+            padding: "15px 20px", 
+            fontSize: 12, 
+            color: T.muted, 
+            whiteSpace: "nowrap" 
+            }}>{new Date(r.requestTime).toLocaleString()}
+        </td>
+
+        <td style={{ 
+            padding: "15px 20px" 
+            }}>
+                <Badge status={r.status} />
+        </td>
+
+        <td style={{ 
+            padding: "15px 20px", 
+            textAlign: "center" 
+            }}>
           {open ? <ChevronUp size={16} color={T.muted} /> : <ChevronDown size={16} color={T.muted} />}
         </td>
+        
       </tr>
 
       {open && (
