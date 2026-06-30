@@ -46,6 +46,7 @@ public class AdminController : ControllerBase
 
         var doctor = new Doctor
         {
+            name = dto.FullName,
             UserId = user.Id,
             Specialization = dto.Specialization,
             HospitalName = dto.HospitalName,
@@ -463,35 +464,35 @@ public class AdminController : ControllerBase
         return Ok(data);
     }
     [HttpPut("product/{id}/stock")]
-public IActionResult UpdateStock(int id, UpdateStockDto dto)
-{
-    var product = _context.Products.FirstOrDefault(x => x.Id == id);
-
-    if (product == null)
-        return NotFound("Product not found");
-
-    if (dto.Stock < 0)
-        return BadRequest("Stock cannot be negative");
-
-    product.Stock = dto.Stock;
-
-    _context.SaveChanges();
-
-    return Ok(new
+    public IActionResult UpdateStock(int id, UpdateStockDto dto)
     {
-        Message = "Stock updated",
-        ProductId = product.Id,
-        Stock = product.Stock
-    });
-}
-[HttpPut("product/{id}/category")]
-public IActionResult UpdateCategory(int id, [FromBody] UpdateCategoryDto dto)
-{
-    var product = _context.Products.FirstOrDefault(x => x.Id == id);
-    if (product == null) return NotFound();
+        var product = _context.Products.FirstOrDefault(x => x.Id == id);
 
-    product.Category = dto.Category;
-    _context.SaveChanges();
-    return Ok();
-}
+        if (product == null)
+            return NotFound("Product not found");
+
+        if (dto.Stock < 0)
+            return BadRequest("Stock cannot be negative");
+
+        product.Stock = dto.Stock;
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Stock updated",
+            ProductId = product.Id,
+            Stock = product.Stock
+        });
+    }
+    [HttpPut("product/{id}/category")]
+    public IActionResult UpdateCategory(int id, [FromBody] UpdateCategoryDto dto)
+    {
+        var product = _context.Products.FirstOrDefault(x => x.Id == id);
+        if (product == null) return NotFound();
+
+        product.Category = dto.Category;
+        _context.SaveChanges();
+        return Ok();
+    }
 }
