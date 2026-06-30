@@ -247,8 +247,8 @@ export default function PlaceOrder() {
                                     <button
                                         onClick={() => setPaymentMode("COD")}
                                         className={`w-full text-left rounded-xl border p-4 flex items-center gap-4 transition ${paymentMode === "COD"
-                                                ? "border-[#16332B] bg-[#F8F6F0]"
-                                                : "border-[#E7E2D6] hover:border-[#16332B]/30"
+                                            ? "border-[#16332B] bg-[#F8F6F0]"
+                                            : "border-[#E7E2D6] hover:border-[#16332B]/30"
                                             }`}
                                     >
                                         <FiTruck className="text-[#16332B] shrink-0" size={20} />
@@ -265,8 +265,8 @@ export default function PlaceOrder() {
                                     <button
                                         onClick={() => setPaymentMode("Online")}
                                         className={`w-full text-left rounded-xl border p-4 flex items-center gap-4 transition ${paymentMode === "Online"
-                                                ? "border-[#16332B] bg-[#F8F6F0]"
-                                                : "border-[#E7E2D6] hover:border-[#16332B]/30"
+                                            ? "border-[#16332B] bg-[#F8F6F0]"
+                                            : "border-[#E7E2D6] hover:border-[#16332B]/30"
                                             }`}
                                     >
                                         <FiCreditCard className="text-[#16332B] shrink-0" size={20} />

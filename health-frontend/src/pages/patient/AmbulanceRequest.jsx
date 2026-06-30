@@ -323,8 +323,8 @@ export default function AmbulanceRequest() {
                                             key={d.key}
                                             onClick={() => setDestinationKey(d.key)}
                                             className={`w-full text-left rounded-xl border p-4 transition ${destinationKey === d.key
-                                                    ? "border-[#16332B] bg-[#F8F6F0]"
-                                                    : "border-[#E7E2D6] hover:border-[#16332B]/30"
+                                                ? "border-[#16332B] bg-[#F8F6F0]"
+                                                : "border-[#E7E2D6] hover:border-[#16332B]/30"
                                                 }`}
                                         >
                                             <p className="text-sm font-medium text-[#16332B]">{d.label}</p>
@@ -390,8 +390,8 @@ export default function AmbulanceRequest() {
                                             key={v.key}
                                             onClick={() => setVehicleType(v.key)}
                                             className={`w-full text-left rounded-xl border p-4 flex items-center gap-4 transition ${vehicleType === v.key
-                                                    ? "border-[#16332B] bg-[#F8F6F0]"
-                                                    : "border-[#E7E2D6] hover:border-[#16332B]/30"
+                                                ? "border-[#16332B] bg-[#F8F6F0]"
+                                                : "border-[#E7E2D6] hover:border-[#16332B]/30"
                                                 }`}
                                         >
                                             <span className="text-2xl shrink-0">{v.icon}</span>

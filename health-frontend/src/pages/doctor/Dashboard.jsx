@@ -20,22 +20,22 @@ API.interceptors.request.use((cfg) => {
 
 /* ─── Design tokens ───────────────────────────────── */
 const T = {
-  cream:     "#F5F0E8",
+  cream: "#F5F0E8",
   creamDark: "#EDE7D9",
-  green:     "#2D5016",
-  greenMid:  "#3D6B1F",
-  greenLight:"#EBF2E3",
-  terra:     "#C4622D",
-  terraLight:"#FAF0EA",
-  ink:       "#1A1A1A",
-  muted:     "#6B7280",
-  border:    "#E2DACE",
-  white:     "#FFFFFF",
+  green: "#2D5016",
+  greenMid: "#3D6B1F",
+  greenLight: "#EBF2E3",
+  terra: "#C4622D",
+  terraLight: "#FAF0EA",
+  ink: "#1A1A1A",
+  muted: "#6B7280",
+  border: "#E2DACE",
+  white: "#FFFFFF",
 };
 
 /* ─── Status config ───────────────────────────────── */
 const STATUS = {
-  Pending:   { bg: "#FEF9C3", text: "#854D0E", border: "#FDE68A" },
+  Pending: { bg: "#FEF9C3", text: "#854D0E", border: "#FDE68A" },
   Confirmed: { bg: T.greenLight, text: T.green, border: "#BBD9A0" },
   Completed: { bg: "#DBEAFE", text: "#1E40AF", border: "#BFDBFE" },
   Cancelled: { bg: "#FEE2E2", text: "#991B1B", border: "#FECACA" },
@@ -105,12 +105,12 @@ function StatCard({ title, value, icon, accent, growth }) {
 /* ─── Main ────────────────────────────────────────── */
 export default function DoctorDashboard() {
   const navigate = useNavigate();
-  const [loading, setLoading]         = useState(true);
-  const [drawerOpen, setDrawerOpen]   = useState(false);
-  const [doctor, setDoctor]           = useState({});
+  const [loading, setLoading] = useState(true);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [doctor, setDoctor] = useState({});
   const [appointments, setAppointments] = useState([]);
   const [availability, setAvailability] = useState([]);
-  const [search, setSearch]           = useState("");
+  const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
   const [stats, setStats] = useState({
     totalPatients: 0, todayAppointments: 0,
@@ -125,7 +125,7 @@ export default function DoctorDashboard() {
         API.get("/doctor/appointments"),
         API.get("/doctor/availability"),
       ]);
-      const apptData  = Array.isArray(apptRes.data)  ? apptRes.data  : [];
+      const apptData = Array.isArray(apptRes.data) ? apptRes.data : [];
       const availData = Array.isArray(availRes.data) ? availRes.data : [];
       setDoctor(profileRes.data || {});
       setAppointments(apptData);
@@ -133,7 +133,7 @@ export default function DoctorDashboard() {
 
       const today = new Date().toDateString();
       const completed = apptData.filter(a => a.status === "Completed").length;
-      const pending   = apptData.filter(a => a.status === "Pending" || a.status === "Confirmed").length;
+      const pending = apptData.filter(a => a.status === "Pending" || a.status === "Confirmed").length;
       const cancelled = apptData.filter(a => a.status === "Cancelled").length;
       const todayAppts = apptData.filter(a => new Date(a.date).toDateString() === today).length;
       const totalPatients = new Set(apptData.map(a => a.patientId || a.patientEmail)).size;

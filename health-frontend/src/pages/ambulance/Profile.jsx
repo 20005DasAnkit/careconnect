@@ -269,16 +269,16 @@ export default function Profile() {
         <div className="grid grid-cols-1 xl:grid-cols-[340px_1fr] gap-8 items-start">
           {/* ---------------- Left sidebar card ---------------- */}
           <div
-  className="rounded-3xl overflow-hidden shadow-lg h-full"
+            className="rounded-3xl overflow-hidden shadow-lg h-full"
             style={{ backgroundColor: TOKENS.white, border: `1px solid ${TOKENS.border}` }}
           >
-<div
-  className="h-6"
-  style={{
-    backgroundColor: TOKENS.white,
-    borderBottom: `1px solid ${TOKENS.border}`,
-  }}
-></div>
+            <div
+              className="h-6"
+              style={{
+                backgroundColor: TOKENS.white,
+                borderBottom: `1px solid ${TOKENS.border}`,
+              }}
+            ></div>
 
             <div className="px-5 pb-5">
               <div

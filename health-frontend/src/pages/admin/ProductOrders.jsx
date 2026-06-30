@@ -15,40 +15,40 @@ export default function ProductOrders() {
         setOrders(res.data);
     };
 
-const updateStatus = async (id, status) => {
-    try {
-        await api.put(
-            `/admin/product-order/${id}/status`,
-            JSON.stringify(status),
-            {
-                headers: {
-                    "Content-Type": "application/json"
+    const updateStatus = async (id, status) => {
+        try {
+            await api.put(
+                `/admin/product-order/${id}/status`,
+                JSON.stringify(status),
+                {
+                    headers: {
+                        "Content-Type": "application/json"
+                    }
                 }
-            }
-        );
+            );
 
-        // Reload latest data
+            // Reload latest data
+            await load();
+
+        } catch (err) {
+            console.log(err);
+            alert("Failed to update status");
+        }
+    };
+
+    const STATUS = {
+        Pending: "bg-yellow-100 text-yellow-700",
+        Confirmed: "bg-blue-100 text-blue-700",
+        Packed: "bg-purple-100 text-purple-700",
+        "Out for Delivery": "bg-orange-100 text-orange-700",
+        Delivered: "bg-green-100 text-green-700",
+        Cancelled: "bg-red-100 text-red-700",
+    };
+
+    const markPayment = async (id) => {
+        await api.put(`/admin/product-order/${id}/payment`);
         await load();
-
-    } catch (err) {
-        console.log(err);
-        alert("Failed to update status");
-    }
-};
-
-const STATUS = {
-    Pending: "bg-yellow-100 text-yellow-700",
-    Confirmed: "bg-blue-100 text-blue-700",
-    Packed: "bg-purple-100 text-purple-700",
-    "Out for Delivery": "bg-orange-100 text-orange-700",
-    Delivered: "bg-green-100 text-green-700",
-    Cancelled: "bg-red-100 text-red-700",
-};
-
-const markPayment = async (id) => {
-    await api.put(`/admin/product-order/${id}/payment`);
-    await load();
-};
+    };
 
     return (
         <div className="flex">
@@ -94,78 +94,78 @@ const markPayment = async (id) => {
                                         <td className="p-3">{o.quantity}</td>
                                         <td className="p-3">₹{o.unitPrice}</td>
                                         <td className="p-3">₹{o.total}</td>
-<td className="p-3">
-    <div className="flex flex-col gap-2">
+                                        <td className="p-3">
+                                            <div className="flex flex-col gap-2">
 
-        <span
-            className={`px-3 py-1 rounded-full text-xs font-semibold w-fit ${STATUS[o.status]}`}
-        >
-            {o.status}
-        </span>
+                                                <span
+                                                    className={`px-3 py-1 rounded-full text-xs font-semibold w-fit ${STATUS[o.status]}`}
+                                                >
+                                                    {o.status}
+                                                </span>
 
-        {o.status === "Pending" && (
-            <button
-                onClick={() => updateStatus(o.orderId, "Confirmed")}
-                className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
-            >
-                ✓ Accept
-            </button>
-        )}
+                                                {o.status === "Pending" && (
+                                                    <button
+                                                        onClick={() => updateStatus(o.orderId, "Confirmed")}
+                                                        className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded"
+                                                    >
+                                                        ✓ Accept
+                                                    </button>
+                                                )}
 
-        {o.status === "Confirmed" && (
-            <button
-                onClick={() => updateStatus(o.orderId, "Packed")}
-                className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
-            >
-                📦 Pack
-            </button>
-        )}
+                                                {o.status === "Confirmed" && (
+                                                    <button
+                                                        onClick={() => updateStatus(o.orderId, "Packed")}
+                                                        className="bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded"
+                                                    >
+                                                        📦 Pack
+                                                    </button>
+                                                )}
 
-        {o.status === "Packed" && (
-            <button
-                onClick={() => updateStatus(o.orderId, "Out for Delivery")}
-                className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded"
-            >
-                🚚 Dispatch
-            </button>
-        )}
+                                                {o.status === "Packed" && (
+                                                    <button
+                                                        onClick={() => updateStatus(o.orderId, "Out for Delivery")}
+                                                        className="bg-orange-500 hover:bg-orange-600 text-white px-3 py-1 rounded"
+                                                    >
+                                                        🚚 Dispatch
+                                                    </button>
+                                                )}
 
-        {o.status === "Out for Delivery" && (
-            <button
-                onClick={() => updateStatus(o.orderId, "Delivered")}
-                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
-            >
-                ✅ Deliver
-            </button>
-        )}
+                                                {o.status === "Out for Delivery" && (
+                                                    <button
+                                                        onClick={() => updateStatus(o.orderId, "Delivered")}
+                                                        className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded"
+                                                    >
+                                                        ✅ Deliver
+                                                    </button>
+                                                )}
 
-{o.status === "Delivered" && o.paymentStatus !== "Paid" && (
-    <button
-        onClick={() => markPayment(o.orderId)}
-        className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded"
-    >
-        💳 Payment Received
-    </button>
-)}
+                                                {o.status === "Delivered" && o.paymentStatus !== "Paid" && (
+                                                    <button
+                                                        onClick={() => markPayment(o.orderId)}
+                                                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1 rounded"
+                                                    >
+                                                        💳 Payment Received
+                                                    </button>
+                                                )}
 
-{o.status === "Delivered" && o.paymentStatus === "Paid" && (
-    <span className="text-green-600 font-bold">
-        ✔ Completed
-    </span>
-)}
-    </div>
-</td>
-<td>
-    {o.paymentStatus === "Paid" ? (
-        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
-            ✅ Paid
-        </span>
-    ) : (
-        <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
-            Pending
-        </span>
-    )}
-</td>
+                                                {o.status === "Delivered" && o.paymentStatus === "Paid" && (
+                                                    <span className="text-green-600 font-bold">
+                                                        ✔ Completed
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            {o.paymentStatus === "Paid" ? (
+                                                <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                                    ✅ Paid
+                                                </span>
+                                            ) : (
+                                                <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full text-xs font-semibold">
+                                                    Pending
+                                                </span>
+                                            )}
+                                        </td>
                                         <td className="p-3">
                                             {new Date(o.orderDate).toLocaleString()}
                                         </td>

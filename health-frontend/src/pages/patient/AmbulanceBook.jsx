@@ -244,8 +244,8 @@ export default function Ambulance() {
                                                         disabled={amb.isAvailable === false}
                                                         onClick={() => goToBooking(amb)}
                                                         className={`shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-full text-[14px] font-semibold transition ${amb.isAvailable === false
-                                                                ? "bg-[#EFEAE0] text-[#A8A192] cursor-not-allowed"
-                                                                : "bg-[#16332B] text-white hover:bg-[#0F231D]"
+                                                            ? "bg-[#EFEAE0] text-[#A8A192] cursor-not-allowed"
+                                                            : "bg-[#16332B] text-white hover:bg-[#0F231D]"
                                                             }`}
                                                     >
                                                         {amb.isAvailable === false ? (

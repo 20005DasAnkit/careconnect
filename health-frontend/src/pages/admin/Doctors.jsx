@@ -98,37 +98,37 @@ export default function Doctors() {
           {showForm && (
             <div className="bg-white p-4 mb-6 shadow rounded">
 
-              <input name="fullName" 
-                onChange={handleChange} 
-                placeholder="Full Name" 
-                className="input w-full mb-2" 
+              <input name="fullName"
+                onChange={handleChange}
+                placeholder="Full Name"
+                className="input w-full mb-2"
               />
 
-              <input name="email" 
-                onChange={handleChange} 
-                placeholder="Email" 
-                className="input w-full mb-2" 
+              <input name="email"
+                onChange={handleChange}
+                placeholder="Email"
+                className="input w-full mb-2"
               />
 
-              <input name="password" 
-                type="password" 
-                onChange={handleChange} 
-                placeholder="Password" 
-                className="input w-full mb-2" 
+              <input name="password"
+                type="password"
+                onChange={handleChange}
+                placeholder="Password"
+                className="input w-full mb-2"
               />
 
-              <input name="specialization" 
-                onChange={handleChange} 
-                placeholder="Specialization" 
-                className="input w-full mb-2" 
+              <input name="specialization"
+                onChange={handleChange}
+                placeholder="Specialization"
+                className="input w-full mb-2"
               />
 
-              <input name="hospitalName" 
-                onChange={handleChange} 
-                placeholder="Hospital Name" 
-                className="input w-full mb-2" 
+              <input name="hospitalName"
+                onChange={handleChange}
+                placeholder="Hospital Name"
+                className="input w-full mb-2"
               />
-              
+
               <input
                 type="number"
                 name="fee"

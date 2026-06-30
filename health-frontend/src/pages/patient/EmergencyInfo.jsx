@@ -167,9 +167,8 @@ export default function EmergencyInfo() {
               <a
                 key={label}
                 href={`tel:${number}`}
-                className={`group py-9 px-2 lg:px-6 flex flex-col gap-3 hover:bg-white transition-colors ${
-                  i !== 0 ? "border-l border-[#E4DFD3]" : ""
-                }`}
+                className={`group py-9 px-2 lg:px-6 flex flex-col gap-3 hover:bg-white transition-colors ${i !== 0 ? "border-l border-[#E4DFD3]" : ""
+                  }`}
               >
                 <Icon size={20} style={{ color: tone }} strokeWidth={1.75} />
                 <div>
@@ -216,11 +215,10 @@ export default function EmergencyInfo() {
                 <button
                   key={s.name}
                   onClick={() => setActiveSymptom(i)}
-                  className={`px-5 py-2.5 rounded-full text-[14px] font-medium transition-all ${
-                    activeSymptom === i
-                      ? "bg-[#16332B] text-[#FAF8F3]"
-                      : "bg-white border border-[#E4DFD3] text-[#16332B]/70 hover:border-[#16332B]/30"
-                  }`}
+                  className={`px-5 py-2.5 rounded-full text-[14px] font-medium transition-all ${activeSymptom === i
+                    ? "bg-[#16332B] text-[#FAF8F3]"
+                    : "bg-white border border-[#E4DFD3] text-[#16332B]/70 hover:border-[#16332B]/30"
+                    }`}
                 >
                   {s.name}
                 </button>

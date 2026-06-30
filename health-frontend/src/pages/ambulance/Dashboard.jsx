@@ -20,31 +20,31 @@ API.interceptors.request.use(cfg => {
 
 /* ─── Tokens ──────────────────────────────────── */
 const T = {
-  cream:      "#F5F0E8",
-  creamDark:  "#EDE7D9",
-  green:      "#2D5016",
+  cream: "#F5F0E8",
+  creamDark: "#EDE7D9",
+  green: "#2D5016",
   greenLight: "#EBF2E3",
-  terra:      "#C4622D",
+  terra: "#C4622D",
   terraLight: "#FAF0EA",
-  ink:        "#1A1A1A",
-  muted:      "#6B7280",
-  border:     "#E2DACE",
-  white:      "#FFFFFF",
-  amber:      "#D97706",
+  ink: "#1A1A1A",
+  muted: "#6B7280",
+  border: "#E2DACE",
+  white: "#FFFFFF",
+  amber: "#D97706",
   amberLight: "#FEF3C7",
-  red:        "#DC2626",
-  redLight:   "#FEE2E2",
-  blue:       "#1D4ED8",
-  blueLight:  "#DBEAFE",
+  red: "#DC2626",
+  redLight: "#FEE2E2",
+  blue: "#1D4ED8",
+  blueLight: "#DBEAFE",
 };
 
 const STATUS_CFG = {
-  Pending:   { bg: T.amberLight, text: T.amber,  border: "#FDE68A", label: "Pending"   },
-  Accepted:  { bg: T.greenLight, text: T.green,  border: "#BBD9A0", label: "Accepted"  },
-  OnTheWay:  { bg: T.blueLight,  text: T.blue,   border: "#BFDBFE", label: "On The Way"},
-  Completed: { bg: T.greenLight, text: T.green,  border: "#BBD9A0", label: "Completed" },
-  Rejected:  { bg: T.redLight,   text: T.red,    border: "#FECACA", label: "Rejected"  },
-  Cancelled: { bg: T.redLight,   text: T.red,    border: "#FECACA", label: "Cancelled" },
+  Pending: { bg: T.amberLight, text: T.amber, border: "#FDE68A", label: "Pending" },
+  Accepted: { bg: T.greenLight, text: T.green, border: "#BBD9A0", label: "Accepted" },
+  OnTheWay: { bg: T.blueLight, text: T.blue, border: "#BFDBFE", label: "On The Way" },
+  Completed: { bg: T.greenLight, text: T.green, border: "#BBD9A0", label: "Completed" },
+  Rejected: { bg: T.redLight, text: T.red, border: "#FECACA", label: "Rejected" },
+  Cancelled: { bg: T.redLight, text: T.red, border: "#FECACA", label: "Cancelled" },
 };
 
 /* ─── Helpers ─────────────────────────────────── */
@@ -211,9 +211,9 @@ function ActionBtn({ label, bg, fg, icon, onClick }) {
 export default function AmbulanceDashboard() {
   const navigate = useNavigate();
   const [requests, setRequests] = useState([]);
-  const [loading, setLoading]   = useState(true);
-  const [drawer, setDrawer]     = useState(false);
-  const [driver, setDriver]     = useState({ name: "Driver", vehicleType: "Basic", isAvailable: true });
+  const [loading, setLoading] = useState(true);
+  const [drawer, setDrawer] = useState(false);
+  const [driver, setDriver] = useState({ name: "Driver", vehicleType: "Basic", isAvailable: true });
 
   const load = async () => {
     try {
@@ -240,11 +240,11 @@ export default function AmbulanceDashboard() {
   };
 
   /* derived stats */
-  const active    = requests.filter(r => r.status === "Pending" || r.status === "Accepted" || r.status === "OnTheWay");
+  const active = requests.filter(r => r.status === "Pending" || r.status === "Accepted" || r.status === "OnTheWay");
   const completed = requests.filter(r => r.status === "Completed").length;
   const cancelled = requests.filter(r => r.status === "Cancelled" || r.status === "Rejected").length;
-  const earnings  = requests.filter(r => r.status === "Completed").reduce((s, r) => s + Number(r.fare || 0), 0);
-  const recent    = [...requests].sort((a, b) => new Date(b.requestTime) - new Date(a.requestTime)).slice(0, 5);
+  const earnings = requests.filter(r => r.status === "Completed").reduce((s, r) => s + Number(r.fare || 0), 0);
+  const recent = [...requests].sort((a, b) => new Date(b.requestTime) - new Date(a.requestTime)).slice(0, 5);
 
   if (loading) return (
     <div style={{ minHeight: "100vh", background: T.cream, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -295,9 +295,9 @@ export default function AmbulanceDashboard() {
       </div>
 
       <nav style={{ flex: 1, padding: "16px 12px", display: "flex", flexDirection: "column", gap: 4 }}>
-        <NavLink active icon={<LayoutDashboard size={17} />} label="Dashboard"  path="/ambulance/dashboard"  navigate={navigate} />
-        <NavLink        icon={<ClipboardList size={17} />}  label="All Rides"   path="/ambulance/requests"   navigate={navigate} />
-        <NavLink        icon={<UserCircle2 size={17} />}    label="Profile"     path="/ambulance/profile"    navigate={navigate} />
+        <NavLink active icon={<LayoutDashboard size={17} />} label="Dashboard" path="/ambulance/dashboard" navigate={navigate} />
+        <NavLink icon={<ClipboardList size={17} />} label="All Rides" path="/ambulance/requests" navigate={navigate} />
+        <NavLink icon={<UserCircle2 size={17} />} label="Profile" path="/ambulance/profile" navigate={navigate} />
       </nav>
 
       <div style={{ padding: 16, borderTop: "1px solid rgba(255,255,255,.08)" }}>
@@ -356,10 +356,10 @@ export default function AmbulanceDashboard() {
 
           {/* Stats */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 18, marginBottom: 28 }}>
-            <StatCard title="Active Rides"  value={active.length}  accent={T.terra} icon={<Ambulance size={22} />} growth={active.length > 0 ? null : undefined} sub="" />
-            <StatCard title="Completed"     value={completed}      accent={T.green} icon={<CheckCircle2 size={22} />} growth={8} />
-            <StatCard title="Cancelled"     value={cancelled}      accent={T.red}   icon={<XCircle size={22} />}     growth={-3} />
-            <StatCard title="Earnings"      value={`₹${earnings}`} accent="#7C3AED" icon={<IndianRupee size={22} />} growth={15} />
+            <StatCard title="Active Rides" value={active.length} accent={T.terra} icon={<Ambulance size={22} />} growth={active.length > 0 ? null : undefined} sub="" />
+            <StatCard title="Completed" value={completed} accent={T.green} icon={<CheckCircle2 size={22} />} growth={8} />
+            <StatCard title="Cancelled" value={cancelled} accent={T.red} icon={<XCircle size={22} />} growth={-3} />
+            <StatCard title="Earnings" value={`₹${earnings}`} accent="#7C3AED" icon={<IndianRupee size={22} />} growth={15} />
           </div>
 
           {/* Active rides section */}

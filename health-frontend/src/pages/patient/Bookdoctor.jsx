@@ -377,11 +377,11 @@ export default function BookAppointment() {
                                     Payment Method: {paymentMethod}
                                 </p>
 
-<p className="text-[#8B8478] text-sm">
-    {paymentMethod === "Online"
-        ? `Advance Paid: ₹${appointmentResult?.advancePaid}`
-        : "Advance Paid: ₹0"}
-</p>
+                                <p className="text-[#8B8478] text-sm">
+                                    {paymentMethod === "Online"
+                                        ? `Advance Paid: ₹${appointmentResult?.advancePaid}`
+                                        : "Advance Paid: ₹0"}
+                                </p>
 
                                 <button
                                     onClick={() => navigate("/patient/appointments")}

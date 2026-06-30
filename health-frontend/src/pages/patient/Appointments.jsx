@@ -292,16 +292,23 @@ export default function Appointments() {
 
                     {/* ── Editorial header ── */}
                     <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 16, marginBottom: 32 }}>
-                        <div>
-                            <p style={{ fontSize: 12, fontWeight: 700, letterSpacing: 2, color: T.green, textTransform: "uppercase", margin: "0 0 10px" }}>
-                                My Appointments
-                            </p>
-                            <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 40, lineHeight: 1.1, margin: 0, color: T.ink }}>
+                        <h1
+                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                            className="leading-[1.05] tracking-tight"
+                        >
+                            <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)", color: T.green }}>
                                 Every visit,
-                                <br />
-                                <span style={{ fontStyle: "italic", fontWeight: 600, color: T.terra }}>organized in one place.</span>
-                            </h1>
-                        </div>
+                            </span>
+                            <br />
+                            <span
+                                className="italic text-[#B5562C]"
+                                style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}
+                            >
+                                organized in one place.
+                            </span>
+                        </h1>
+
+
                         <a href="/patient/doctors" style={{
                             display: "flex", alignItems: "center", gap: 8, padding: "13px 22px",
                             borderRadius: 99, background: T.ink, color: T.white,
@@ -442,4 +449,6 @@ function PaginationBtn({ onClick, disabled, icon }) {
             {icon}
         </button>
     );
+
+
 }

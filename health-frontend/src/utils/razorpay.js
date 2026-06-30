@@ -19,7 +19,12 @@ function loadRazorpayScript() {
   });
 }
 
-export async function payHalfAdvance({ amount, description, onSuccess, onFailure }) {
+export async function payHalfAdvance({
+  amount,
+  description,
+  onSuccess,
+  onFailure,
+}) {
   await loadRazorpayScript();
 
   const { data: order } = await api.post("/payment/create-order", {

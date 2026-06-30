@@ -19,7 +19,7 @@ export default function AdminLayout({ children }) {
                 <p><Link to="/admin/products" style={{ color: "#fff" }}>Products</Link></p>
                 <p><Link to="/admin/appointments" style={{ color: "#fff" }}>Appointments</Link></p>
                 <p><Link to="/admin/ambulances" style={{ color: "#fff" }}>Ambulances</Link></p>
-                
+
             </aside>
 
             <main style={{ flex: 1, padding: "20px" }}>
