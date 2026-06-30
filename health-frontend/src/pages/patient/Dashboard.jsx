@@ -99,10 +99,6 @@ export default function Dashboard() {
                     </nav>
                     <div className="hidden lg:flex items-center gap-5">
 
-                        <button className="text-xl">
-                            ⌕
-                        </button>
-
                         <button
                             onClick={() => navigate("/patient/profile")}
                             className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
