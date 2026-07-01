@@ -41,14 +41,26 @@ public class PatientController : ControllerBase
         return Ok(doctors);
     }
 
+    // Replace these two methods in your existing PatientController.cs
+
     [HttpGet("doctor/{doctorId}/slots")]
     public IActionResult GetDoctorSlots(int doctorId)
     {
         var slots = _context.DoctorAvailabilities
             .Where(x =>
                 x.DoctorId == doctorId &&
-                !x.IsBooked)
+                !x.IsBooked)   // IsBooked now means "fully booked" — excludes only full slots
             .OrderBy(x => x.AvailableFrom)
+            .Select(x => new
+            {
+                x.Id,
+                x.AvailableFrom,
+                x.AvailableTo,
+                x.Place,
+                x.MaxPatients,
+                x.BookedCount,
+                SeatsLeft = x.MaxPatients - x.BookedCount
+            })
             .ToList();
 
         return Ok(slots);
@@ -66,8 +78,8 @@ public class PatientController : ControllerBase
         if (slot == null)
             return NotFound("Slot not found");
 
-        if (slot.IsBooked)
-            return BadRequest("Slot already booked");
+        if (slot.IsBooked || slot.BookedCount >= slot.MaxPatients)
+            return BadRequest("This slot is already fully booked.");
 
         var doctor = _context.Doctors
             .FirstOrDefault(x => x.Id == slot.DoctorId);
@@ -98,7 +110,10 @@ public class PatientController : ControllerBase
             }
         }
 
-        slot.IsBooked = true;
+        // Increment booked count instead of a hard single-use lock
+        slot.BookedCount += 1;
+        if (slot.BookedCount >= slot.MaxPatients)
+            slot.IsBooked = true;   // now genuinely full — hidden from new bookings
 
         var appointment = new Appointment
         {
@@ -130,6 +145,7 @@ public class PatientController : ControllerBase
             AdvancePaid = appointment.AdvanceAmount,
             WalletUsed = walletUsed,
             WalletBalance = user?.RefundBalance ?? 0,
+            SeatsLeft = slot.MaxPatients - slot.BookedCount,
             Message = "Appointment booked successfully."
         });
     }
@@ -429,6 +445,8 @@ public class PatientController : ControllerBase
         _ => 25m // NonAC default
     };
 
+    // Replace CancelAppointment in your existing PatientController.cs
+
     [HttpPut("appointment/cancel/{id}")]
     public IActionResult CancelAppointment(int id)
     {
@@ -452,20 +470,19 @@ public class PatientController : ControllerBase
         decimal refund = 0;
 
         var hoursLeft = (slot.AvailableFrom - DateTime.UtcNow).TotalHours;
-        Console.WriteLine($"Hours Left: {hoursLeft}");
-        Console.WriteLine($"Advance: {appointment.AdvanceAmount}");
-        Console.WriteLine($"Current Wallet: {user.RefundBalance}");
 
         if (hoursLeft >= 1)
         {
             refund = Math.Round(appointment.AdvanceAmount * 0.5m, 2);
             user.RefundBalance += refund;
-            Console.WriteLine($"Refund Added: {refund}");
-            Console.WriteLine($"New Wallet: {user.RefundBalance}");
         }
 
         appointment.Status = "CancelledByUser";
-        slot.IsBooked = false;
+
+        // Free up exactly one seat, not the whole slot
+        if (slot.BookedCount > 0)
+            slot.BookedCount -= 1;
+        slot.IsBooked = slot.BookedCount >= slot.MaxPatients;
 
         _context.SaveChanges();
 
@@ -473,7 +490,8 @@ public class PatientController : ControllerBase
         {
             Message = "Appointment Cancelled",
             Refund = refund,
-            Wallet = user.RefundBalance
+            Wallet = user.RefundBalance,
+            SeatsLeft = slot.MaxPatients - slot.BookedCount
         });
     }
 

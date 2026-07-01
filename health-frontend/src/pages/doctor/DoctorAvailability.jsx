@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../services/api";
 import {
     CalendarDays, CheckCircle2, Clock3, Edit2, Trash2,
-    Plus, X, LayoutGrid,
+    Plus, X, LayoutGrid, Users,
 } from "lucide-react";
 
 /* ─── Design tokens ───────────────────────────────── */
@@ -38,15 +38,18 @@ function StatCard({ label, value, accent, icon }) {
     );
 }
 
-function SlotBadge({ booked }) {
+// Full = no seats left at all. Partially booked slots still count as "Available".
+function SlotBadge({ seatsLeft, maxPatients }) {
+    const full = seatsLeft <= 0;
     return (
         <span style={{
             padding: "4px 12px", borderRadius: 99, fontSize: 12, fontWeight: 700,
-            background: booked ? "#FEE2E2" : T.greenLight,
-            color: booked ? "#991B1B" : T.green,
-            border: `1px solid ${booked ? "#FECACA" : "#BBD9A0"}`,
+            background: full ? "#FEE2E2" : T.greenLight,
+            color: full ? "#991B1B" : T.green,
+            border: `1px solid ${full ? "#FECACA" : "#BBD9A0"}`,
+            whiteSpace: "nowrap",
         }}>
-            {booked ? "Booked" : "Available"}
+            {full ? "Fully Booked" : `${seatsLeft}/${maxPatients} seats left`}
         </span>
     );
 }
@@ -78,6 +81,36 @@ function DTInput({ label, value, onChange }) {
     );
 }
 
+function MaxPatientsInput({ value, onChange, locked }) {
+    return (
+        <div style={{ marginBottom: 16 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 6 }}>
+                <Users size={14} /> Max Patients for this slot
+            </label>
+            <input
+                type="number"
+                min={1}
+                value={value}
+                disabled={locked}
+                onChange={onChange}
+                placeholder="e.g. 20"
+                style={{
+                    width: "100%", padding: "11px 14px", borderRadius: 10,
+                    border: `1px solid ${T.border}`, fontSize: 13, outline: "none",
+                    background: locked ? T.creamDark : T.cream, color: T.ink,
+                }}
+            />
+            <p style={{ fontSize: 11, color: T.muted, margin: "6px 0 0" }}>
+                {locked
+                    ? "Can't change this once patients have booked."
+                    : "How many patients you're willing to see in this time window."}
+            </p>
+        </div>
+    );
+}
+
+const EMPTY_NEW_SLOT = { availableFrom: "", availableTo: "", place: "", maxPatients: 20 };
+
 /* ─── Main ────────────────────────────────────────── */
 export default function DoctorAvailability() {
     const [slots, setSlots] = useState([]);
@@ -85,8 +118,8 @@ export default function DoctorAvailability() {
     const [search, setSearch] = useState("");
     const [showAdd, setShowAdd] = useState(false);
     const [editing, setEditing] = useState(null);
-    const [newSlot, setNewSlot] = useState({ availableFrom: "", availableTo: "" });
-    const [editData, setEditData] = useState({ id: 0, availableFrom: "", availableTo: "" });
+    const [newSlot, setNewSlot] = useState(EMPTY_NEW_SLOT);
+    const [editData, setEditData] = useState({ id: 0, availableFrom: "", availableTo: "", place: "", maxPatients: 20 });
 
     const load = async () => {
         try {
@@ -101,14 +134,24 @@ export default function DoctorAvailability() {
     };
 
     useEffect(() => { load(); }, []);
+
     const addSlot = async () => {
         if (!newSlot.availableFrom || !newSlot.availableTo) {
             alert("Please select both From and To.");
             return;
         }
+        if (!newSlot.maxPatients || newSlot.maxPatients < 1) {
+            alert("Max patients must be at least 1.");
+            return;
+        }
         try {
-            await api.post("/Doctor/availability", newSlot);
-            setNewSlot({ availableFrom: "", availableTo: "" });
+            await api.post("/Doctor/availability", {
+                availableFrom: newSlot.availableFrom,
+                availableTo: newSlot.availableTo,
+                place: newSlot.place,
+                maxPatients: Number(newSlot.maxPatients),
+            });
+            setNewSlot(EMPTY_NEW_SLOT);
             setShowAdd(false);
             load();
         } catch {
@@ -118,11 +161,17 @@ export default function DoctorAvailability() {
 
     const saveEdit = async () => {
         try {
-            await api.put("/Doctor/availability", editData);
+            await api.put("/Doctor/availability", {
+                id: editData.id,
+                availableFrom: editData.availableFrom,
+                availableTo: editData.availableTo,
+                place: editData.place,
+                maxPatients: Number(editData.maxPatients),
+            });
             setEditing(null);
             load();
-        } catch {
-            alert("Update failed.");
+        } catch (err) {
+            alert(err?.response?.data || "Update failed.");
         }
     };
 
@@ -137,8 +186,10 @@ export default function DoctorAvailability() {
     };
 
     const totalSlots = slots.length;
-    const availSlots = slots.filter(s => !s.isBooked).length;
-    const bookedSlots = slots.filter(s => s.isBooked).length;
+    const totalSeats = slots.reduce((s, x) => s + (x.maxPatients || 0), 0);
+    const seatsLeftTotal = slots.reduce((s, x) => s + ((x.maxPatients || 0) - (x.bookedCount || 0)), 0);
+    const fullSlots = slots.filter(s => (s.maxPatients - s.bookedCount) <= 0).length;
+
     const filtered = slots.filter(s => {
         if (!search) return true;
         return s.availableFrom.substring(0, 10).includes(search);
@@ -170,7 +221,7 @@ export default function DoctorAvailability() {
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 14 }}>
                 <div>
                     <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 28, margin: 0, color: T.ink }}>My Availability</h1>
-                    <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>Manage your consultation time slots</p>
+                    <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>Manage your consultation time slots and seat capacity</p>
                 </div>
                 <button onClick={() => setShowAdd(true)} style={{
                     display: "flex", alignItems: "center", gap: 8, background: T.terra, color: T.white,
@@ -186,8 +237,9 @@ export default function DoctorAvailability() {
             {/* Stats */}
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
                 <StatCard label="Total Slots" value={totalSlots} accent={T.green} icon={<LayoutGrid size={22} />} />
-                <StatCard label="Available Slots" value={availSlots} accent={T.green} icon={<CheckCircle2 size={22} />} />
-                <StatCard label="Booked Slots" value={bookedSlots} accent="#DC2626" icon={<CalendarDays size={22} />} />
+                <StatCard label="Total Seats" value={totalSeats} accent={T.green} icon={<Users size={22} />} />
+                <StatCard label="Seats Left" value={seatsLeftTotal} accent={T.terra} icon={<CheckCircle2 size={22} />} />
+                <StatCard label="Fully Booked Slots" value={fullSlots} accent="#DC2626" icon={<CalendarDays size={22} />} />
             </div>
 
             {/* Table */}
@@ -206,7 +258,7 @@ export default function DoctorAvailability() {
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                         <thead>
                             <tr style={{ background: T.cream }}>
-                                {["#", "Available From", "Available To", "Place", "Duration", "Status"].map(h => (
+                                {["#", "Available From", "Available To", "Place", "Duration", "Seats", "Actions"].map(h => (
                                     <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>{h}</th>
                                 ))}
                             </tr>
@@ -214,7 +266,7 @@ export default function DoctorAvailability() {
                         <tbody>
                             {filtered.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
+                                    <td colSpan={7} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
                                         <CalendarDays size={44} style={{ opacity: .3, display: "block", margin: "0 auto 12px" }} />
                                         No slots found. Add your first availability slot.
                                     </td>
@@ -224,6 +276,9 @@ export default function DoctorAvailability() {
                                 const to = new Date(slot.availableTo);
                                 const mins = Math.round((to - from) / 60000);
                                 const dur = mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60 > 0 ? mins % 60 + "m" : ""}`.trim() : `${mins}m`;
+                                const seatsLeft = slot.seatsLeft ?? (slot.maxPatients - slot.bookedCount);
+                                const hasBookings = (slot.bookedCount || 0) > 0;
+
                                 return (
                                     <tr key={slot.id} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
                                         onMouseEnter={e => e.currentTarget.style.background = T.cream}
@@ -237,19 +292,29 @@ export default function DoctorAvailability() {
                                             <div style={{ fontWeight: 600 }}>{to.toLocaleDateString()}</div>
                                             <div style={{ fontSize: 12, color: T.muted, marginTop: 2 }}>{to.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</div>
                                         </td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{slot.place || "—"}</td>
                                         <td style={{ padding: "15px 20px" }}>
                                             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                                 <Clock3 size={13} color={T.muted} />
                                                 <span style={{ fontSize: 13, color: T.ink, fontWeight: 600 }}>{dur}</span>
                                             </div>
                                         </td>
-                                        <td style={{ padding: "15px 20px" }}><SlotBadge booked={slot.isBooked} /></td>
                                         <td style={{ padding: "15px 20px" }}>
-                                            {!slot.isBooked ? (
+                                            <SlotBadge seatsLeft={seatsLeft} maxPatients={slot.maxPatients} />
+                                            <div style={{ fontSize: 11, color: T.muted, marginTop: 4 }}>{slot.bookedCount} booked</div>
+                                        </td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            {!hasBookings ? (
                                                 <div style={{ display: "flex", gap: 8 }}>
                                                     <button onClick={() => {
                                                         setEditing(slot.id);
-                                                        setEditData({ id: slot.id, availableFrom: slot.availableFrom.slice(0, 16), availableTo: slot.availableTo.slice(0, 16) });
+                                                        setEditData({
+                                                            id: slot.id,
+                                                            availableFrom: slot.availableFrom.slice(0, 16),
+                                                            availableTo: slot.availableTo.slice(0, 16),
+                                                            place: slot.place || "",
+                                                            maxPatients: slot.maxPatients,
+                                                        });
                                                     }} style={{ width: 34, height: 34, borderRadius: 8, border: "none", cursor: "pointer", background: T.greenLight, color: T.green, display: "flex", alignItems: "center", justifyContent: "center", transition: "opacity .15s" }}
                                                         onMouseEnter={e => e.currentTarget.style.opacity = ".75"}
                                                         onMouseLeave={e => e.currentTarget.style.opacity = "1"}>
@@ -262,7 +327,7 @@ export default function DoctorAvailability() {
                                                     </button>
                                                 </div>
                                             ) : (
-                                                <span style={{ fontSize: 12, color: T.muted, fontWeight: 600 }}>Locked</span>
+                                                <span style={{ fontSize: 12, color: T.muted, fontWeight: 600 }}>Locked — has bookings</span>
                                             )}
                                         </td>
                                     </tr>
@@ -284,24 +349,20 @@ export default function DoctorAvailability() {
                 <Modal title="Add New Time Slot" onClose={() => setShowAdd(false)}>
                     <DTInput label="Available From" value={newSlot.availableFrom} onChange={e => setNewSlot({ ...newSlot, availableFrom: e.target.value })} />
                     <DTInput label="Available To" value={newSlot.availableTo} onChange={e => setNewSlot({ ...newSlot, availableTo: e.target.value })} />
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium">
-                            Place
-                        </label>
 
+                    <div style={{ marginBottom: 16 }}>
+                        <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 6 }}>Place</label>
                         <input
                             type="text"
                             placeholder="Enter hospital / clinic / chamber"
-                            value={newSlot.Place}
-                            onChange={(e) =>
-                                setNewSlot({
-                                    ...newSlot,
-                                    Place: e.target.value,
-                                })
-                            }
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={newSlot.place}
+                            onChange={(e) => setNewSlot({ ...newSlot, place: e.target.value })}
+                            style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: `1px solid ${T.border}`, fontSize: 13, outline: "none", background: T.cream, color: T.ink }}
                         />
                     </div>
+
+                    <MaxPatientsInput value={newSlot.maxPatients} onChange={e => setNewSlot({ ...newSlot, maxPatients: e.target.value })} />
+
                     <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                         <button onClick={() => setShowAdd(false)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: T.cream, color: T.ink, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
                         <button onClick={addSlot} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: "none", background: T.terra, color: T.white, fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Add Slot</button>
@@ -314,24 +375,20 @@ export default function DoctorAvailability() {
                 <Modal title="Edit Time Slot" onClose={() => setEditing(null)}>
                     <DTInput label="Available From" value={editData.availableFrom} onChange={e => setEditData({ ...editData, availableFrom: e.target.value })} />
                     <DTInput label="Available To" value={editData.availableTo} onChange={e => setEditData({ ...editData, availableTo: e.target.value })} />
-                    <div className="space-y-2">
-                        <label className="block text-sm font-medium">
-                            Place
-                        </label>
 
+                    <div style={{ marginBottom: 16 }}>
+                        <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 6 }}>Place</label>
                         <input
                             type="text"
                             placeholder="Enter hospital / clinic / chamber"
-                            value={newSlot.Place}
-                            onChange={(e) =>
-                                setNewSlot({
-                                    ...newSlot,
-                                    Place: e.target.value,
-                                })
-                            }
-                            className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            value={editData.place}
+                            onChange={(e) => setEditData({ ...editData, place: e.target.value })}
+                            style={{ width: "100%", padding: "11px 14px", borderRadius: 10, border: `1px solid ${T.border}`, fontSize: 13, outline: "none", background: T.cream, color: T.ink }}
                         />
                     </div>
+
+                    <MaxPatientsInput value={editData.maxPatients} onChange={e => setEditData({ ...editData, maxPatients: e.target.value })} />
+
                     <div style={{ display: "flex", gap: 10, marginTop: 8 }}>
                         <button onClick={() => setEditing(null)} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: `1px solid ${T.border}`, background: T.cream, color: T.ink, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>Cancel</button>
                         <button onClick={saveEdit} style={{ flex: 1, padding: "11px 0", borderRadius: 10, border: "none", background: T.green, color: T.white, fontWeight: 700, fontSize: 14, cursor: "pointer" }}>Save Changes</button>

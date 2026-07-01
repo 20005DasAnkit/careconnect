@@ -19,6 +19,8 @@ public class DoctorController : ControllerBase
         _context = context;
     }
 
+    // Replace these three methods in your existing DoctorController.cs
+
     [HttpPost("availability")]
     public IActionResult AddAvailability(CreateAvailabilityDto dto)
     {
@@ -31,12 +33,17 @@ public class DoctorController : ControllerBase
         if (doctor == null)
             return NotFound("Doctor not found");
 
+        var maxPatients = dto.MaxPatients < 1 ? 1 : dto.MaxPatients;
+
         var availability = new DoctorAvailability
         {
             DoctorId = doctor.Id,
             AvailableFrom = dto.AvailableFrom,
             AvailableTo = dto.AvailableTo,
-            Place = dto.Place
+            Place = dto.Place,
+            MaxPatients = maxPatients,
+            BookedCount = 0,
+            IsBooked = false
         };
 
         _context.DoctorAvailabilities.Add(availability);
@@ -66,11 +73,48 @@ public class DoctorController : ControllerBase
                 x.AvailableFrom,
                 x.AvailableTo,
                 x.Place,
-                x.IsBooked
+                x.IsBooked,
+                x.MaxPatients,
+                x.BookedCount,
+                SeatsLeft = x.MaxPatients - x.BookedCount
             })
             .ToList();
 
         return Ok(data);
+    }
+
+    [HttpPut("availability")]
+    public IActionResult UpdateAvailability(UpdateAvailabilityDto dto)
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var doctor = _context.Doctors
+            .FirstOrDefault(x => x.UserId == userId);
+
+        if (doctor == null)
+            return NotFound("Doctor not found");
+
+        var availability = _context.DoctorAvailabilities
+            .FirstOrDefault(x => x.Id == dto.Id &&
+                                 x.DoctorId == doctor.Id);
+
+        if (availability == null)
+            return NotFound("Availability not found");
+
+        if (availability.BookedCount > 0)
+            return BadRequest("Cannot edit a slot that already has bookings.");
+
+        var maxPatients = dto.MaxPatients < 1 ? 1 : dto.MaxPatients;
+
+        availability.AvailableFrom = dto.AvailableFrom;
+        availability.AvailableTo = dto.AvailableTo;
+        availability.Place = dto.Place;
+        availability.MaxPatients = maxPatients;
+
+        _context.SaveChanges();
+
+        return Ok("Availability updated successfully");
     }
 
     [HttpGet("appointments")]
@@ -183,37 +227,6 @@ select new
                 x.Status == "CancelledByAdmin" ||
                 x.Status == "CancelledByUser")
         });
-    }
-
-    [HttpPut("availability")]
-    public IActionResult UpdateAvailability(UpdateAvailabilityDto dto)
-    {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-        var doctor = _context.Doctors
-            .FirstOrDefault(x => x.UserId == userId);
-
-        if (doctor == null)
-            return NotFound("Doctor not found");
-
-        var availability = _context.DoctorAvailabilities
-            .FirstOrDefault(x => x.Id == dto.Id &&
-                                 x.DoctorId == doctor.Id);
-
-        if (availability == null)
-            return NotFound("Availability not found");
-
-        if (availability.IsBooked)
-            return BadRequest("Booked slot cannot be edited.");
-
-        availability.AvailableFrom = dto.AvailableFrom;
-        availability.AvailableTo = dto.AvailableTo;
-        availability.Place = dto.Place;
-
-        _context.SaveChanges();
-
-        return Ok("Availability updated successfully");
     }
 
     [HttpDelete("availability/{id}")]

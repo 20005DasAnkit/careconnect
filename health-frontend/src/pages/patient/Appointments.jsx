@@ -4,7 +4,7 @@ import { Toaster, toast } from "react-hot-toast";
 import {
     Calendar, Clock, Search, RefreshCw, ChevronLeft, ChevronRight,
     CheckCircle2, XCircle, AlertCircle, IndianRupee,
-    Stethoscope, Building2, MapPin, Hash, Plus, Download,
+    Stethoscope, Building2, MapPin, Hash, Plus, Download, Receipt,
 } from "lucide-react";
 
 /* ─── Tokens ──────────────────────────────────── */
@@ -33,6 +33,8 @@ const PAYMENT_CFG = {
     Paid: { bg: T.greenLight, text: T.green },
     Pending: { bg: "#FEF3C7", text: "#D97706" },
     Failed: { bg: "#FEE2E2", text: "#DC2626" },
+    Cash: { bg: T.creamDark, text: T.ink },
+    Wallet: { bg: T.greenLight, text: T.green },
 };
 
 const TABS = ["All", "Confirmed", "Pending", "Completed", "Cancelled"];
@@ -71,7 +73,7 @@ function CancelModal({ open, loading, onClose, onConfirm }) {
                 </div>
                 <h2 style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 22, color: T.ink, margin: "0 0 10px" }}>Cancel Appointment?</h2>
                 <p style={{ fontSize: 14, color: T.muted, lineHeight: 1.6, margin: "0 0 28px" }}>
-                    This action cannot be undone. Your advance payment refund depends on the cancellation policy.
+                    This action cannot be undone. If cancelled at least 1 hour before your visit, 50% of the advance is credited to your CareConnect wallet as a refund balance for your next booking.
                 </p>
                 <div style={{ display: "flex", gap: 12 }}>
                     <button onClick={onClose} style={{ flex: 1, height: 46, borderRadius: 12, border: `1.5px solid ${T.border}`, background: T.cream, color: T.ink, fontWeight: 600, fontSize: 14, cursor: "pointer" }}>
@@ -86,19 +88,50 @@ function CancelModal({ open, loading, onClose, onConfirm }) {
     );
 }
 
+/* ─── Small pill action button used in the row ─── */
+function PillBtn({ icon, label, loadingLabel, loading, onClick, bg, fg }) {
+    return (
+        <button
+            onClick={onClick}
+            disabled={loading}
+            style={{
+                display: "flex", alignItems: "center", gap: 6,
+                padding: "8px 14px", border: "none", borderRadius: 10,
+                background: bg, color: fg, fontWeight: 700, fontSize: 12,
+                cursor: loading ? "not-allowed" : "pointer",
+                opacity: loading ? 0.7 : 1, whiteSpace: "nowrap",
+            }}
+        >
+            {loading ? (
+                <>
+                    <RefreshCw size={13} style={{ animation: "spin 1s linear infinite" }} />
+                    {loadingLabel}
+                </>
+            ) : (
+                <>
+                    {icon}
+                    {label}
+                </>
+            )}
+        </button>
+    );
+}
+
 /* ─── Appointment Row ─────────────────────────── */
-function AppointmentRow({ appt, onCancel, onDownload, downloadingId, last }) {
+function AppointmentRow({ appt, onCancel, onDownloadRx, onDownloadBill, downloadingRxId, downloadingBillId, last }) {
     const status = STATUS_CFG[appt.status] || STATUS_CFG.Pending;
     const payment = PAYMENT_CFG[appt.paymentStatus] || PAYMENT_CFG.Pending;
     const initial = (appt.doctorName || "D")[0].toUpperCase();
-    const isDownloading = downloadingId === appt.id;
+    const isRxDownloading = downloadingRxId === appt.id;
+    const isBillDownloading = downloadingBillId === appt.id;
+    const canBill = appt.status === "Confirmed" || appt.status === "Completed";
 
     return (
         <div
             style={{
                 display: "grid",
                 gridTemplateColumns:
-"minmax(180px,2fr) minmax(110px,1fr) minmax(90px,1fr) minmax(90px,1fr) minmax(80px,1fr) minmax(110px,1fr) minmax(170px,1fr)",
+                    "2.6fr 1.2fr 1.2fr 1fr 1fr 1.2fr 1.6fr",
                 alignItems: "center",
                 gap: 16,
                 padding: "18px 24px",
@@ -168,55 +201,46 @@ function AppointmentRow({ appt, onCancel, onDownload, downloadingId, last }) {
             </span>
 
             {/* Actions */}
-{/* Prescription */}
-<div style={{ justifySelf: "center" }}>
-    {appt.status === "Completed" ? (
-        <button
-            onClick={() => onDownload(appt.id)}
-            disabled={isDownloading}
-            style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 6,
-                padding: "8px 14px",
-                border: "none",
-                borderRadius: 10,
-                background: T.greenLight,
-                color: T.green,
-                fontWeight: 700,
-                fontSize: 12,
-                cursor: isDownloading ? "not-allowed" : "pointer",
-                opacity: isDownloading ? 0.7 : 1,
-            }}
-        >
-            {isDownloading ? (
-                <>
-                    <RefreshCw
-                        size={14}
-                        style={{ animation: "spin 1s linear infinite" }}
+            <div style={{ display: "flex", flexDirection: "column", gap: 6, justifySelf: "end" }}>
+                {appt.status === "Confirmed" && (
+                    <button onClick={() => onCancel(appt.id)} title="Cancel appointment" style={{
+                        width: 30, height: 30, borderRadius: 8, border: "none", background: "#FEE2E2", color: "#DC2626",
+                        display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", alignSelf: "flex-end",
+                    }}>
+                        <XCircle size={14} />
+                    </button>
+                )}
+
+                {canBill && (
+                    <PillBtn
+                        icon={<Receipt size={13} />}
+                        label="Download Bill"
+                        loadingLabel="Downloading…"
+                        loading={isBillDownloading}
+                        onClick={() => onDownloadBill(appt.id)}
+                        bg={T.terraLight}
+                        fg={T.terra}
                     />
-                    Downloading...
-                </>
-            ) : (
-                <>
-                    <Download size={14} />
-                    Download Prescription
-                </>
-            )}
-        </button>
-    ) : (
-        <span style={{ color: T.muted, fontSize: 12 }}>—</span>
-    )}
-</div>
+                )}
+
+                {appt.status === "Completed" && (
+                    <PillBtn
+                        icon={<Download size={13} />}
+                        label="Prescription"
+                        loadingLabel="Downloading…"
+                        loading={isRxDownloading}
+                        onClick={() => onDownloadRx(appt.id)}
+                        bg={T.greenLight}
+                        fg={T.green}
+                    />
+                )}
+
+                {!canBill && appt.status !== "Confirmed" && (
+                    <span style={{ color: T.muted, fontSize: 12, alignSelf: "flex-end" }}>—</span>
+                )}
+            </div>
         </div>
     );
-}
-
-function iconBtnStyle(bg, fg) {
-    return {
-        width: 34, height: 34, borderRadius: 10, border: "none", background: bg, color: fg,
-        display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-    };
 }
 
 /* ─── Stat Column ─────────────────────────────── */
@@ -243,7 +267,8 @@ export default function Appointments() {
     const [page, setPage] = useState(1);
     const [cancelId, setCancelId] = useState(null);
     const [cancelLoading, setCancelLoading] = useState(false);
-    const [downloadingId, setDownloadingId] = useState(null);
+    const [downloadingRxId, setDownloadingRxId] = useState(null);
+    const [downloadingBillId, setDownloadingBillId] = useState(null);
 
     async function load() {
         try {
@@ -264,8 +289,9 @@ export default function Appointments() {
     async function cancelAppointment() {
         try {
             setCancelLoading(true);
-            await api.put(`/patient/appointment/cancel/${cancelId}`);
-            toast.success("Appointment cancelled.");
+            const res = await api.put(`/patient/appointment/cancel/${cancelId}`);
+            const refund = res?.data?.refund ?? res?.data?.Refund ?? 0;
+            toast.success(refund > 0 ? `Appointment cancelled. ₹${refund} credited to your wallet.` : "Appointment cancelled.");
             setAppointments(p => p.map(a => a.id === cancelId ? { ...a, status: "CancelledByUser" } : a));
             setCancelId(null);
         } catch {
@@ -275,29 +301,49 @@ export default function Appointments() {
         }
     }
 
-    async function downloadPrescription(appointmentId) {
+    async function downloadPdf(url, filename, setLoadingId, id, notReadyMsg) {
         try {
-            setDownloadingId(appointmentId);
-            const res = await api.get(`/patient/prescriptions/${appointmentId}/pdf`, {
-                responseType: "blob",
-            });
-            const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+            setLoadingId(id);
+            const res = await api.get(url, { responseType: "blob" });
+            const blobUrl = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
             const link = document.createElement("a");
-            link.href = url;
-            link.setAttribute("download", `CareConnect_Prescription_${appointmentId}.pdf`);
+            link.href = blobUrl;
+            link.setAttribute("download", filename);
             document.body.appendChild(link);
             link.click();
             link.remove();
-            window.URL.revokeObjectURL(url);
+            window.URL.revokeObjectURL(blobUrl);
         } catch (err) {
             if (err?.response?.status === 404) {
-                toast.error("Prescription not available yet.");
+                toast.error(notReadyMsg || "Not available yet.");
+            } else if (err?.response?.status === 400) {
+                toast.error(err?.response?.data?.message || "Not available yet.");
             } else {
-                toast.error("Failed to download prescription.");
+                toast.error("Failed to download.");
             }
         } finally {
-            setDownloadingId(null);
+            setLoadingId(null);
         }
+    }
+
+    function downloadPrescription(appointmentId) {
+        downloadPdf(
+            `/patient/prescriptions/${appointmentId}/pdf`,
+            `CareConnect_Prescription_${appointmentId}.pdf`,
+            setDownloadingRxId,
+            appointmentId,
+            "Prescription not available yet."
+        );
+    }
+
+    function downloadBill(appointmentId) {
+        downloadPdf(
+            `/patient/appointments/${appointmentId}/bill/pdf`,
+            `CareConnect_Bill_${appointmentId}.pdf`,
+            setDownloadingBillId,
+            appointmentId,
+            "Bill not available yet."
+        );
     }
 
     const filtered = useMemo(() => {
@@ -435,10 +481,10 @@ export default function Appointments() {
                                 <div style={{
                                     display: "grid",
                                     gridTemplateColumns:
-"minmax(180px,2fr) minmax(110px,1fr) minmax(90px,1fr) minmax(90px,1fr) minmax(80px,1fr) minmax(110px,1fr) minmax(170px,1fr)",
+                                        "2.6fr 1.2fr 1.2fr 1fr 1fr 1.2fr 1.6fr",
                                     gap: 16, padding: "14px 24px", borderBottom: `1px solid ${T.border}`,
                                 }}>
-                                    {["Doctor", "Date", "Time", "Payment", "Advance", "Status", "Prescription"].map((h, i) => (
+                                    {["Doctor", "Date", "Time", "Payment", "Advance", "Status", "Actions"].map((h, i) => (
                                         <span key={i} style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .5 }}>
                                             {h}
                                         </span>
@@ -453,8 +499,10 @@ export default function Appointments() {
                                     key={a.id}
                                     appt={a}
                                     onCancel={setCancelId}
-                                    onDownload={downloadPrescription}
-                                    downloadingId={downloadingId}
+                                    onDownloadRx={downloadPrescription}
+                                    onDownloadBill={downloadBill}
+                                    downloadingRxId={downloadingRxId}
+                                    downloadingBillId={downloadingBillId}
                                     last={i === current.length - 1}
                                 />
                             ))}

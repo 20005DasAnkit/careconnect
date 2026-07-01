@@ -40,6 +40,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<PrescriptionPdfService>();
+builder.Services.AddScoped<BillingPdfService>();
 
 // CORS (IMPORTANT)
 builder.Services.AddCors(options =>
