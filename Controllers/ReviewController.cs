@@ -12,7 +12,6 @@ namespace HEALTHCARE.Controllers;
 public class ReviewController : ControllerBase
 {
     private readonly AppDbContext _context;
-
     public ReviewController(AppDbContext context)
     {
         _context = context;

@@ -25,23 +25,21 @@ public class PatientController : ControllerBase
     {
         var doctors = _context.Doctors
             .Include(x => x.User)
-.Select(d => new
-{
-    d.Id,
-    Name = d.User.FullName,
-    d.User.Email,
-    d.Specialization,
-    d.HospitalName,
-    d.Fee,
-    d.About,
-    ImageUrl = d.ImageUrl
-})
+            .Select(d => new
+            {
+                d.Id,
+                Name = d.User.FullName,
+                d.User.Email,
+                d.Specialization,
+                d.HospitalName,
+                d.Fee,
+                d.About,
+                ImageUrl = d.ImageUrl
+            })
             .ToList();
 
         return Ok(doctors);
     }
-
-    // Replace these two methods in your existing PatientController.cs
 
     [HttpGet("doctor/{doctorId}/slots")]
     public IActionResult GetDoctorSlots(int doctorId)
@@ -291,21 +289,52 @@ public class PatientController : ControllerBase
         return Ok(orders);
     }
 
-    [HttpGet("ambulances")]
-    public IActionResult GetAmbulances()
-    {
-        return Ok(
-           _context.Ambulances
-    .Select(x => new
-    {
-        x.Id,
-        x.DriverName,
-        x.VehicleNumber,
-        x.Type,
-        x.IsAvailable
-    })
-    .ToList());
-    }
+[HttpGet("ambulances")]
+public IActionResult GetAmbulances()
+{
+    var userId = int.Parse(
+        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+    var ambulances =
+        (from a in _context.Ambulances
+
+         let activeRequest = _context.AmbulanceRequests
+             .Where(r =>
+                 r.AmbulanceId == a.Id &&
+                 r.Status != "Completed" &&
+                 r.Status != "Rejected" &&
+                 r.Status != "Cancelled")
+             .OrderByDescending(r => r.RequestTime)
+             .FirstOrDefault()
+
+         select new
+         {
+             a.Id,
+             a.DriverName,
+             a.VehicleNumber,
+             a.Type,
+
+             IsAvailable = a.IsAvailable,
+
+             MyRide =
+                 activeRequest != null &&
+                 activeRequest.UserId == userId,
+
+             RequestId =
+                 activeRequest != null &&
+                 activeRequest.UserId == userId
+                     ? activeRequest.Id
+                     : (int?)null,
+
+             RideStatus =
+                 activeRequest != null &&
+                 activeRequest.UserId == userId
+                     ? activeRequest.Status
+                     : null
+         }).ToList();
+
+    return Ok(ambulances);
+}
     private static readonly Dictionary<string, string[]> CityKeywords = new()
     {
         ["Kolkata"] = new[] { "kolkata", "calcutta", "park street", "ballygunge", "alipore" },
@@ -649,4 +678,35 @@ public class PatientController : ControllerBase
             avatarUrl = user.AvatarUrl
         });
     }
+
+    [HttpGet("ride/{id}")]
+public IActionResult GetRide(int id)
+{
+    var userId = int.Parse(
+        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+    var ride =
+        (from r in _context.AmbulanceRequests
+         join a in _context.Ambulances
+            on r.AmbulanceId equals a.Id
+         where r.Id == id &&
+               r.UserId == userId
+         select new
+         {
+             r.Id,
+             r.Status,
+             r.Fare,
+             r.DistanceKm,
+             r.PickupLocation,
+             r.DestinationLocation,
+             DriverName = a.DriverName,
+             DriverPhone = a.DriverPhone,
+             VehicleNumber = a.VehicleNumber
+         }).FirstOrDefault();
+
+    if (ride == null)
+        return NotFound();
+
+    return Ok(ride);
+}
 }

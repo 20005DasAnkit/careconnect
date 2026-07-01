@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
+import MapPicker from "../../components/MapPicker";
 import {
     FiMapPin,
     FiNavigation,
@@ -13,25 +14,6 @@ import {
 import { toast, Toaster } from "react-hot-toast";
 
 const STEPS = ["Pickup", "Destination", "Vehicle", "Confirm"];
-
-// Known destinations with fixed coordinates — avoids needing a paid maps/geocoding API.
-const DESTINATIONS = [
-    {
-        key: "lakeview",
-        label: "Lakeview Hospital (main)",
-        address: "Lakeview Hospital, Main Campus",
-        lat: 22.5726,
-        lng: 88.3639,
-    },
-    {
-        key: "lakeview_annex",
-        label: "Lakeview Hospital (annex / emergency wing)",
-        address: "Lakeview Hospital, Emergency Annex",
-        lat: 22.5751,
-        lng: 88.3667,
-    },
-    { key: "other", label: "Other location", address: "", lat: null, lng: null },
-];
 
 const VEHICLE_TYPES = [
     {
@@ -108,12 +90,12 @@ export default function AmbulanceRequest() {
     const [pickup, setPickup] = useState(null); // { lat, lng }
     const [pickupLabel, setPickupLabel] = useState("");
 
-    const [destinationKey, setDestinationKey] = useState("lakeview");
-    const [customDestination, setCustomDestination] = useState({
-        address: "",
-        lat: "",
-        lng: "",
-    });
+
+    const [destination, setDestination] = useState(null);
+    const [destinationAddress, setDestinationAddress] = useState("");
+    const [search, setSearch] = useState("");
+    const [searchResults, setSearchResults] = useState([]);
+    const [searching, setSearching] = useState(false);
 
     const [vehicleType, setVehicleType] = useState(null);
     const [submitting, setSubmitting] = useState(false);
@@ -124,17 +106,6 @@ export default function AmbulanceRequest() {
     const [rideStatus, setRideStatus] = useState("Pending"); // Pending | Accepted | Rejected | Cancelled
     const [rideInfo, setRideInfo] = useState(null);
     const pollRef = useRef(null);
-
-    const destination = useMemo(() => {
-        if (destinationKey === "other") {
-            return {
-                address: customDestination.address,
-                lat: parseFloat(customDestination.lat),
-                lng: parseFloat(customDestination.lng),
-            };
-        }
-        return DESTINATIONS.find((d) => d.key === destinationKey);
-    }, [destinationKey, customDestination]);
 
     const distanceKm = useMemo(() => {
         if (!pickup || !destination?.lat || !destination?.lng) return null;
@@ -176,6 +147,34 @@ export default function AmbulanceRequest() {
         detectPickup();
     }, []);
 
+    async function searchLocation(value) {
+
+    if (value.length < 3) {
+        setSearchResults([]);
+        return;
+    }
+
+    try {
+
+        setSearching(true);
+
+        const res = await api.get(
+            `/maps/search?q=${encodeURIComponent(value)}`
+        );
+
+        setSearchResults(res.data);
+
+    } catch (err) {
+
+        console.error(err);
+
+    } finally {
+
+        setSearching(false);
+
+    }
+}
+
     // Poll ride status once we're on step 4 ("waiting for driver" / done)
     useEffect(() => {
         if (step !== 4 || !result?.requestId) return;
@@ -201,14 +200,18 @@ export default function AmbulanceRequest() {
         return () => clearInterval(pollRef.current);
     }, [step, result]);
 
-    function canContinueDestination() {
-        if (destinationKey !== "other") return true;
-        return (
-            customDestination.address.trim() &&
-            !Number.isNaN(parseFloat(customDestination.lat)) &&
-            !Number.isNaN(parseFloat(customDestination.lng))
-        );
+    useEffect(() => {
+    if (search.length < 3) {
+        setSearchResults([]);
+        return;
     }
+
+    const timer = setTimeout(() => {
+        searchLocation(search);
+    }, 600);
+
+    return () => clearTimeout(timer);
+}, [search]);
 
     async function submitRequest() {
         if (!ambulanceId) {
@@ -221,7 +224,7 @@ export default function AmbulanceRequest() {
             const res = await api.post("/patient/ambulance-request", {
                 ambulanceId: parseInt(ambulanceId, 10),
                 pickupLocation: pickupLabel,
-                destinationLocation: destination.address,
+                destinationLocation: destinationAddress,
                 pickupLat: pickup.lat,
                 pickupLng: pickup.lng,
                 destinationLat: destination.lat,
@@ -316,71 +319,98 @@ export default function AmbulanceRequest() {
 
                         {/* Step 1: Destination */}
                         {step === 1 && (
-                            <div>
-                                <div className="space-y-2.5">
-                                    {DESTINATIONS.map((d) => (
-                                        <button
-                                            key={d.key}
-                                            onClick={() => setDestinationKey(d.key)}
-                                            className={`w-full text-left rounded-xl border p-4 transition ${destinationKey === d.key
-                                                ? "border-[#16332B] bg-[#F8F6F0]"
-                                                : "border-[#E7E2D6] hover:border-[#16332B]/30"
-                                                }`}
-                                        >
-                                            <p className="text-sm font-medium text-[#16332B]">{d.label}</p>
-                                            {d.address && (
-                                                <p className="text-xs text-[#8B8478] mt-1">{d.address}</p>
-                                            )}
-                                        </button>
-                                    ))}
+                            <div className="space-y-5">
+
+                                <MapPicker
+                                    currentLocation={pickup}
+                                    destination={destination}
+                                    setDestination={setDestination}
+                                />
+
+                                <div>
+                                    <label className="block text-sm font-medium text-[#16332B] mb-2">
+                                        Destination Address
+                                    </label>
+
+                                    <input
+                                        type="text"
+                                        value={search}
+                                        onChange={(e) => setSearch(e.target.value)}
+                                        placeholder="Search Hospital or Address"
+                                        className="w-full h-12 px-4 rounded-xl border border-[#E7E2D6] focus:outline-none focus:ring-2 focus:ring-[#16332B]/20"
+                                    />
+                                    {searching && (
+
+                                        <p className="text-sm mt-2 text-gray-500">
+                                            Searching...
+                                        </p>
+
+                                    )}
+
+                                    {searchResults.length > 0 && (
+
+                                        <div className="border rounded-xl mt-2 max-h-60 overflow-y-auto">
+
+                                            {searchResults.map((item, index) => (
+
+                                                <button
+                                                    key={index}
+                                                    className="w-full text-left p-3 hover:bg-gray-100 border-b"
+                                                    onClick={() => {
+
+                                                        setDestination({
+                                                            lat: parseFloat(item.lat),
+                                                            lng: parseFloat(item.lon)
+                                                        });
+
+                                                        setDestinationAddress(item.display_name);
+
+                                                        setSearch(item.display_name);
+
+                                                        setSearchResults([]);
+
+                                                    }}
+                                                >
+
+                                                    {item.display_name}
+
+                                                </button>
+
+                                            ))}
+
+                                        </div>
+
+                                    )}
                                 </div>
 
-                                {destinationKey === "other" && (
-                                    <div className="mt-4 space-y-3">
-                                        <input
-                                            value={customDestination.address}
-                                            onChange={(e) =>
-                                                setCustomDestination((p) => ({ ...p, address: e.target.value }))
-                                            }
-                                            placeholder="Destination address"
-                                            className="w-full h-11 px-4 rounded-xl border border-[#E7E2D6] focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 focus:border-[#16332B] text-sm"
-                                        />
-                                        <div className="grid grid-cols-2 gap-3">
-                                            <input
-                                                value={customDestination.lat}
-                                                onChange={(e) =>
-                                                    setCustomDestination((p) => ({ ...p, lat: e.target.value }))
-                                                }
-                                                placeholder="Latitude"
-                                                inputMode="decimal"
-                                                className="h-11 px-4 rounded-xl border border-[#E7E2D6] focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 focus:border-[#16332B] text-sm"
-                                            />
-                                            <input
-                                                value={customDestination.lng}
-                                                onChange={(e) =>
-                                                    setCustomDestination((p) => ({ ...p, lng: e.target.value }))
-                                                }
-                                                placeholder="Longitude"
-                                                inputMode="decimal"
-                                                className="h-11 px-4 rounded-xl border border-[#E7E2D6] focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 focus:border-[#16332B] text-sm"
-                                            />
-                                        </div>
-                                        <p className="text-xs text-[#A8A192]">
-                                            Tip: open Google Maps, long-press the destination, and copy the coordinates shown.
+                                {destination && (
+                                    <div className="bg-[#F8F6F0] rounded-xl border border-[#E7E2D6] p-4">
+
+                                        <p className="font-medium text-[#16332B]">
+                                            Selected Location
                                         </p>
+
+                                        <p className="text-sm text-[#777] mt-2">
+                                            Latitude : {destination.lat.toFixed(6)}
+                                        </p>
+
+                                        <p className="text-sm text-[#777]">
+                                            Longitude : {destination.lng.toFixed(6)}
+                                        </p>
+
                                     </div>
                                 )}
 
                                 <button
                                     onClick={() => setStep(2)}
-                                    disabled={!canContinueDestination()}
-                                    className="w-full mt-6 bg-[#16332B] hover:bg-[#0F241D] disabled:opacity-40 text-white py-3 rounded-xl font-medium transition"
+                                    disabled={!destination}
+                                    className="w-full mt-4 bg-[#16332B] hover:bg-[#0F241D] disabled:opacity-40 text-white py-3 rounded-xl font-medium transition"
                                 >
                                     Continue
                                 </button>
+
                             </div>
                         )}
-
                         {/* Step 2: Vehicle type */}
                         {step === 2 && (
                             <div>
@@ -433,7 +463,7 @@ export default function AmbulanceRequest() {
                                     <div className="flex justify-between text-sm">
                                         <span className="text-[#8B8478]">Destination</span>
                                         <span className="font-medium text-[#16332B] text-right">
-                                            {destination?.address}
+                                            {destinationAddress}
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">

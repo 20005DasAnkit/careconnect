@@ -351,6 +351,7 @@ public class AdminController : ControllerBase
     {
         return Ok(_context.Products.ToList());
     }
+    
     [HttpGet("ambulances")]
     public IActionResult GetAmbulances()
     {

@@ -34,7 +34,6 @@ namespace HEALTHCARE.Models
 
         [MaxLength(1000)]
         public string? AdviceOnFollowUp { get; set; }
-
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

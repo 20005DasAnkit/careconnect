@@ -95,36 +95,36 @@ export default function DoctorProfile() {
 
     const f = k => e => setForm(p => ({ ...p, [k]: e.target.value }));
     const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+        const file = e.target.files[0];
+        if (!file) return;
 
-    const formData = new FormData();
-    formData.append("image", file);
+        const formData = new FormData();
+        formData.append("image", file);
 
-    try {
-        setUploading(true);
+        try {
+            setUploading(true);
 
-        const res = await api.post(
-            "/Doctor/upload-image",
-            formData,
-            {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                },
-            }
-        );
+            const res = await api.post(
+                "/Doctor/upload-image",
+                formData,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                }
+            );
 
-        setDoctor(prev => ({
-            ...prev,
-            imageUrl: res.data.imageUrl,
-        }));
+            setDoctor(prev => ({
+                ...prev,
+                imageUrl: res.data.imageUrl,
+            }));
 
-    } catch {
-        alert("Image upload failed");
-    } finally {
-        setUploading(false);
-    }
-};
+        } catch {
+            alert("Image upload failed");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     if (!doctor) return (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "60vh", background: T.cream }}>
@@ -159,86 +159,86 @@ export default function DoctorProfile() {
                     <div style={{ height: 100, background: `linear-gradient(135deg, ${T.green}, #4A8022)` }} />
 
                     <div style={{ padding: "0 24px 28px", marginTop: -50 }}>
-<div
-    style={{
-        width: 110,
-        height: 110,
-        borderRadius: "50%",
-        border: `4px solid ${T.white}`,
-        overflow: "hidden",
-        position: "relative",
-        background: T.creamDark,
-        boxShadow: "0 4px 14px rgba(0,0,0,.12)",
-    }}
->
-    {doctor.imageUrl ? (
-        <img
-            src={`http://localhost:5008${doctor.imageUrl}`}
-            alt="Doctor"
-            style={{
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-            }}
-        />
-    ) : (
-        <div
-            style={{
-                width: "100%",
-                height: "100%",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-            }}
-        >
-            <UserCircle2 size={70} color={T.muted} />
-        </div>
-    )}
+                        <div
+                            style={{
+                                width: 110,
+                                height: 110,
+                                borderRadius: "50%",
+                                border: `4px solid ${T.white}`,
+                                overflow: "hidden",
+                                position: "relative",
+                                background: T.creamDark,
+                                boxShadow: "0 4px 14px rgba(0,0,0,.12)",
+                            }}
+                        >
+                            {doctor.imageUrl ? (
+                                <img
+                                    src={`http://localhost:5008${doctor.imageUrl}`}
+                                    alt="Doctor"
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        objectFit: "cover",
+                                    }}
+                                />
+                            ) : (
+                                <div
+                                    style={{
+                                        width: "100%",
+                                        height: "100%",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <UserCircle2 size={70} color={T.muted} />
+                                </div>
+                            )}
 
-    <label
-        style={{
-            position: "absolute",
-            bottom: 5,
-            right: 5,
-            width: 34,
-            height: 34,
-            borderRadius: "50%",
-            background: T.green,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            border: "2px solid white",
-        }}
-    >
-        <Camera size={16} color="white" />
+                            <label
+                                style={{
+                                    position: "absolute",
+                                    bottom: 5,
+                                    right: 5,
+                                    width: 34,
+                                    height: 34,
+                                    borderRadius: "50%",
+                                    background: T.green,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    cursor: "pointer",
+                                    border: "2px solid white",
+                                }}
+                            >
+                                <Camera size={16} color="white" />
 
-        <input
-            hidden
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-        />
-    </label>
+                                <input
+                                    hidden
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                />
+                            </label>
 
-    {uploading && (
-        <div
-            style={{
-                position: "absolute",
-                inset: 0,
-                background: "rgba(0,0,0,.45)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontSize: 12,
-                fontWeight: 600,
-            }}
-        >
-            Uploading...
-        </div>
-    )}
-</div>
+                            {uploading && (
+                                <div
+                                    style={{
+                                        position: "absolute",
+                                        inset: 0,
+                                        background: "rgba(0,0,0,.45)",
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        color: "white",
+                                        fontSize: 12,
+                                        fontWeight: 600,
+                                    }}
+                                >
+                                    Uploading...
+                                </div>
+                            )}
+                        </div>
 
                         <h2 style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 22, margin: "14px 0 4px", color: T.ink }}>
                             {doctor.name || doctor.name}

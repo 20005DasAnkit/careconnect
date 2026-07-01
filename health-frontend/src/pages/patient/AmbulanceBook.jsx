@@ -219,43 +219,71 @@ export default function Ambulance() {
                                                         )}
                                                     </div>
 
+
                                                     <div className="flex-1 min-w-0">
                                                         <p className="font-semibold text-[#16332B] text-[15px] truncate">
                                                             {amb.driverName || "Driver"}
                                                         </p>
+
                                                         <p className="text-[13px] text-[#16332B]/50 mt-1">
                                                             {amb.vehicleNumber}
                                                         </p>
+
                                                         <div className="flex items-center gap-1.5 mt-2">
                                                             <span
-                                                                className={`w-1.5 h-1.5 rounded-full ${amb.isAvailable === false ? "bg-[#A8A192]" : "bg-[#3E7C59]"
+                                                                className={`w-1.5 h-1.5 rounded-full ${amb.myRide
+                                                                        ? "bg-green-600"
+                                                                        : amb.isAvailable
+                                                                            ? "bg-[#3E7C59]"
+                                                                            : "bg-[#A8A192]"
                                                                     }`}
                                                             />
+
                                                             <span
-                                                                className={`text-[12px] font-medium ${amb.isAvailable === false ? "text-[#16332B]/40" : "text-[#3E7C59]"
+                                                                className={`text-[12px] font-medium ${amb.myRide
+                                                                        ? "text-green-600"
+                                                                        : amb.isAvailable
+                                                                            ? "text-[#3E7C59]"
+                                                                            : "text-[#16332B]/40"
                                                                     }`}
                                                             >
-                                                                {amb.isAvailable === false ? "Currently dispatched" : "Available now"}
+                                                                {amb.myRide
+                                                                    ? "Driver is on the way"
+                                                                    : amb.isAvailable
+                                                                        ? "Available now"
+                                                                        : "Currently dispatched"}
                                                             </span>
                                                         </div>
                                                     </div>
 
-                                                    <button
-                                                        disabled={amb.isAvailable === false}
-                                                        onClick={() => goToBooking(amb)}
-                                                        className={`shrink-0 flex items-center gap-1.5 px-5 py-2.5 rounded-full text-[14px] font-semibold transition ${amb.isAvailable === false
-                                                            ? "bg-[#EFEAE0] text-[#A8A192] cursor-not-allowed"
-                                                            : "bg-[#16332B] text-white hover:bg-[#0F231D]"
-                                                            }`}
-                                                    >
-                                                        {amb.isAvailable === false ? (
-                                                            "Unavailable"
-                                                        ) : (
-                                                            <>
-                                                                Book <ArrowRight size={14} />
-                                                            </>
-                                                        )}
-                                                    </button>
+                                                    {/* Button */}
+
+                                                    {amb.myRide ? (
+                                                        <button
+                                                            onClick={() =>
+                                                                navigate(`/patient/ride/${amb.requestId}`)
+                                                            }
+                                                            className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#16332B] text-white hover:bg-[#0F231D] transition"
+                                                        >
+                                                            On The Way
+                                                            <ArrowRight size={14} />
+                                                        </button>
+                                                    ) : amb.isAvailable ? (
+                                                        <button
+                                                            onClick={() => goToBooking(amb)}
+                                                            className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#16332B] text-white hover:bg-[#0F231D] transition"
+                                                        >
+                                                            Book
+                                                            <ArrowRight size={14} />
+                                                        </button>
+                                                    ) : (
+                                                        <button
+                                                            disabled
+                                                            className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#EFEAE0] text-[#A8A192] cursor-not-allowed"
+                                                        >
+                                                            Unavailable
+                                                        </button>
+                                                    )}
                                                 </div>
                                             ))}
                                         </div>

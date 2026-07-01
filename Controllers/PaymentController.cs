@@ -13,13 +13,11 @@ namespace HEALTHCARE.Controllers;
 public class PaymentController : ControllerBase
 {
     private readonly IConfiguration _config;
-
     public PaymentController(IConfiguration config)
     {
         _config = config;
     }
 
-    // POST api/payment/create-order
     [HttpPost("create-order")]
     public IActionResult CreateOrder([FromBody] CreateRazorpayOrderDto dto)
     {
@@ -47,7 +45,6 @@ public class PaymentController : ControllerBase
         });
     }
 
-    // POST api/payment/verify
     [HttpPost("verify")]
     public IActionResult VerifyPayment([FromBody] VerifyRazorpayPaymentDto dto)
     {
@@ -61,7 +58,6 @@ public class PaymentController : ControllerBase
 
         return Ok(new { verified = true });
     }
-
     private static string ComputeHmacSha256(string data, string secret)
     {
         using var hmac = new HMACSHA256(Encoding.UTF8.GetBytes(secret));

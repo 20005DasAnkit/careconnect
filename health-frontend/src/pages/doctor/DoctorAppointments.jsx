@@ -191,7 +191,7 @@ export default function DoctorAppointments() {
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                         <thead>
                             <tr style={{ background: T.cream }}>
-                                {["#", "Patient", "Email","Appointment", "Status", "Actions"].map(h => (
+                                {["#", "Patient", "Email", "Appointment", "Status", "Actions"].map(h => (
                                     <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>{h}</th>
                                 ))}
                             </tr>
@@ -223,15 +223,15 @@ export default function DoctorAppointments() {
                                             <span style={{ fontSize: 13, color: T.muted }}>{item.patientEmail}</span>
                                         </div>
                                     </td>
-<td style={{ padding: "15px 20px" }}>
-    <div style={{ fontWeight: 600 }}>
-        {item.appointmentDate}
-    </div>
+                                    <td style={{ padding: "15px 20px" }}>
+                                        <div style={{ fontWeight: 600 }}>
+                                            {item.appointmentDate}
+                                        </div>
 
-    <div style={{ fontSize: 12, color: T.muted }}>
-        {item.appointmentTime}
-    </div>
-</td>
+                                        <div style={{ fontSize: 12, color: T.muted }}>
+                                            {item.appointmentTime}
+                                        </div>
+                                    </td>
                                     <td style={{ padding: "15px 20px" }}><Badge status={item.status} /></td>
                                     <td style={{ padding: "15px 20px" }}>
                                         {item.status === "Pending" ? (
@@ -240,13 +240,13 @@ export default function DoctorAppointments() {
                                                 <ActionBtn label="Reject" bg="#FEE2E2" fg="#DC2626" onClick={() => updateStatus(item.id, "CancelledByAdmin")} />
                                             </div>
                                         ) : item.status === "Completed" ? (
-    <ActionBtn
-        label={item.hasPrescription ? "Edit Prescription" : "Add Prescription"}
-        bg={item.hasPrescription ? "#DBEAFE" : T.greenLight}
-        fg={item.hasPrescription ? "#1E40AF" : T.green}
-        onClick={() => setRxAppointment(item)}
-    />
-) : (
+                                            <ActionBtn
+                                                label={item.hasPrescription ? "Edit Prescription" : "Add Prescription"}
+                                                bg={item.hasPrescription ? "#DBEAFE" : T.greenLight}
+                                                fg={item.hasPrescription ? "#1E40AF" : T.green}
+                                                onClick={() => setRxAppointment(item)}
+                                            />
+                                        ) : (
                                             <ActionBtn label={item.status === "Confirmed" ? "Confirmed" : "—"} disabled bg={T.creamDark} fg={T.muted} />
                                         )}
                                     </td>

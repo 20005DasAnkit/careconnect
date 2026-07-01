@@ -239,8 +239,8 @@ export default function BookAppointment() {
                                                     {seatsLeft != null && (
                                                         <span
                                                             className={`inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full ${low
-                                                                    ? "bg-[#FBEAE0] text-[#C9683F]"
-                                                                    : "bg-[#EEF5F2] text-[#2F6B47]"
+                                                                ? "bg-[#FBEAE0] text-[#C9683F]"
+                                                                : "bg-[#EEF5F2] text-[#2F6B47]"
                                                                 }`}
                                                         >
                                                             {seatsLeft} seat{seatsLeft === 1 ? "" : "s"} left

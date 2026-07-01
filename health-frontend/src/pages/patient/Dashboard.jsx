@@ -405,15 +405,15 @@ export default function Dashboard() {
                                 key={doctor.id}
                                 className="bg-white rounded-2xl border border-[#E4DFD3] overflow-hidden hover:shadow-md transition"
                             >
-<img
-    src={
-        doctor.imageUrl
-            ? `http://localhost:5008${doctor.imageUrl}`
-            : getStockImage(doctor.id)
-    }
-    className="w-full h-56 object-cover"
-    alt={displayDoctorName(doctor.name)}
-/>
+                                <img
+                                    src={
+                                        doctor.imageUrl
+                                            ? `http://localhost:5008${doctor.imageUrl}`
+                                            : getStockImage(doctor.id)
+                                    }
+                                    className="w-full h-56 object-cover"
+                                    alt={displayDoctorName(doctor.name)}
+                                />
 
                                 <div className="p-6 font-[system-ui,sans-serif]">
                                     <h3 className="text-lg font-semibold font-[Georgia,serif]">
