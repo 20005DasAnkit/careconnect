@@ -4,7 +4,7 @@ import { Toaster, toast } from "react-hot-toast";
 import {
     Calendar, Clock, Search, RefreshCw, ChevronLeft, ChevronRight,
     CheckCircle2, XCircle, AlertCircle, IndianRupee,
-    Stethoscope, Building2, MapPin, Hash, Plus,
+    Stethoscope, Building2, MapPin, Hash, Plus, Download,
 } from "lucide-react";
 
 /* ─── Tokens ──────────────────────────────────── */
@@ -87,16 +87,18 @@ function CancelModal({ open, loading, onClose, onConfirm }) {
 }
 
 /* ─── Appointment Row ─────────────────────────── */
-function AppointmentRow({ appt, onCancel, last }) {
+function AppointmentRow({ appt, onCancel, onDownload, downloadingId, last }) {
     const status = STATUS_CFG[appt.status] || STATUS_CFG.Pending;
     const payment = PAYMENT_CFG[appt.paymentStatus] || PAYMENT_CFG.Pending;
     const initial = (appt.doctorName || "D")[0].toUpperCase();
+    const isDownloading = downloadingId === appt.id;
 
     return (
         <div
             style={{
                 display: "grid",
-                gridTemplateColumns: "minmax(180px,2fr) minmax(110px,1fr) minmax(90px,1fr) minmax(90px,1fr) minmax(80px,1fr) minmax(110px,1fr) auto",
+                gridTemplateColumns:
+"minmax(180px,2fr) minmax(110px,1fr) minmax(90px,1fr) minmax(90px,1fr) minmax(80px,1fr) minmax(110px,1fr) minmax(170px,1fr)",
                 alignItems: "center",
                 gap: 16,
                 padding: "18px 24px",
@@ -166,21 +168,46 @@ function AppointmentRow({ appt, onCancel, last }) {
             </span>
 
             {/* Actions */}
-            <div style={{ display: "flex", gap: 8, justifySelf: "end" }}>
-                {appt.status === "Confirmed" && (
-                    <button onClick={() => onCancel(appt.id)} title="Cancel appointment" style={iconBtnStyle("#FEE2E2", "#DC2626")}>
-                        <XCircle size={15} />
-                    </button>
-                )}
-                {appt.status === "Completed" && (
-                    <button title="Book again" style={iconBtnStyle(T.greenLight, T.green)}>
-                        <RefreshCw size={15} />
-                    </button>
-                )}
-                <button title="View details" style={iconBtnStyle(T.cream, T.ink)}>
-                    <Search size={15} />
-                </button>
-            </div>
+{/* Prescription */}
+<div style={{ justifySelf: "center" }}>
+    {appt.status === "Completed" ? (
+        <button
+            onClick={() => onDownload(appt.id)}
+            disabled={isDownloading}
+            style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "8px 14px",
+                border: "none",
+                borderRadius: 10,
+                background: T.greenLight,
+                color: T.green,
+                fontWeight: 700,
+                fontSize: 12,
+                cursor: isDownloading ? "not-allowed" : "pointer",
+                opacity: isDownloading ? 0.7 : 1,
+            }}
+        >
+            {isDownloading ? (
+                <>
+                    <RefreshCw
+                        size={14}
+                        style={{ animation: "spin 1s linear infinite" }}
+                    />
+                    Downloading...
+                </>
+            ) : (
+                <>
+                    <Download size={14} />
+                    Download Prescription
+                </>
+            )}
+        </button>
+    ) : (
+        <span style={{ color: T.muted, fontSize: 12 }}>—</span>
+    )}
+</div>
         </div>
     );
 }
@@ -216,6 +243,7 @@ export default function Appointments() {
     const [page, setPage] = useState(1);
     const [cancelId, setCancelId] = useState(null);
     const [cancelLoading, setCancelLoading] = useState(false);
+    const [downloadingId, setDownloadingId] = useState(null);
 
     async function load() {
         try {
@@ -244,6 +272,31 @@ export default function Appointments() {
             toast.error("Unable to cancel.");
         } finally {
             setCancelLoading(false);
+        }
+    }
+
+    async function downloadPrescription(appointmentId) {
+        try {
+            setDownloadingId(appointmentId);
+            const res = await api.get(`/patient/prescriptions/${appointmentId}/pdf`, {
+                responseType: "blob",
+            });
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+            const link = document.createElement("a");
+            link.href = url;
+            link.setAttribute("download", `CareConnect_Prescription_${appointmentId}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            if (err?.response?.status === 404) {
+                toast.error("Prescription not available yet.");
+            } else {
+                toast.error("Failed to download prescription.");
+            }
+        } finally {
+            setDownloadingId(null);
         }
     }
 
@@ -281,6 +334,7 @@ export default function Appointments() {
           @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,600&family=Inter:wght@400;500;600;700&display=swap');
           *{box-sizing:border-box;}
           @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+          @keyframes spin{to{transform:rotate(360deg)}}
           ::-webkit-scrollbar{width:5px;height:5px;}
           ::-webkit-scrollbar-thumb{background:${T.border};border-radius:99px;}
           .appt-tab{position:relative; background:none; border:none; padding:10px 4px; font-size:14px; font-weight:600; cursor:pointer; color:${T.muted};}
@@ -380,10 +434,11 @@ export default function Appointments() {
                             {!loading && current.length > 0 && (
                                 <div style={{
                                     display: "grid",
-                                    gridTemplateColumns: "minmax(180px,2fr) minmax(110px,1fr) minmax(90px,1fr) minmax(90px,1fr) minmax(80px,1fr) minmax(110px,1fr) auto",
+                                    gridTemplateColumns:
+"minmax(180px,2fr) minmax(110px,1fr) minmax(90px,1fr) minmax(90px,1fr) minmax(80px,1fr) minmax(110px,1fr) minmax(170px,1fr)",
                                     gap: 16, padding: "14px 24px", borderBottom: `1px solid ${T.border}`,
                                 }}>
-                                    {["Doctor", "Date", "Time", "Payment", "Advance", "Status", ""].map((h, i) => (
+                                    {["Doctor", "Date", "Time", "Payment", "Advance", "Status", "Prescription"].map((h, i) => (
                                         <span key={i} style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .5 }}>
                                             {h}
                                         </span>
@@ -394,7 +449,14 @@ export default function Appointments() {
                             {loading && [...Array(5)].map((_, i) => <SkeletonRow key={i} />)}
 
                             {!loading && current.map((a, i) => (
-                                <AppointmentRow key={a.id} appt={a} onCancel={setCancelId} last={i === current.length - 1} />
+                                <AppointmentRow
+                                    key={a.id}
+                                    appt={a}
+                                    onCancel={setCancelId}
+                                    onDownload={downloadPrescription}
+                                    downloadingId={downloadingId}
+                                    last={i === current.length - 1}
+                                />
                             ))}
 
                             {!loading && current.length === 0 && (
@@ -449,6 +511,4 @@ function PaginationBtn({ onClick, disabled, icon }) {
             {icon}
         </button>
     );
-
-
 }

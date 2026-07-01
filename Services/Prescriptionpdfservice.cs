@@ -34,7 +34,7 @@ namespace HEALTHCARE.Services
                             row.RelativeItem().Column(c =>
                             {
                                 c.Item().Text("CareConnect").FontSize(24).Bold().FontColor(Colors.White);
-                                c.Item().PaddingTop(2).Text("Lakeview Hospital Network")
+                                c.Item().PaddingTop(2).Text("Care You Can Trust, Anytime")
                                     .FontSize(9).FontColor(Colors.White).FontColor("#D7E4C9");
                             });
 
@@ -53,8 +53,7 @@ namespace HEALTHCARE.Services
                             {
                                 row.RelativeItem().Column(c =>
                                 {
-                                    c.Item().Text("PHYSICIAN").FontSize(8).FontColor(MutedText).LetterSpacing(0.1f);
-                                    c.Item().PaddingTop(2).Text($"Dr. {rx.DoctorName}").FontSize(12).Bold();
+                                    c.Item().PaddingTop(2).Text($"{rx.DoctorName}").FontSize(12).Bold();
                                     c.Item().Text(rx.DoctorSpecialization).FontSize(9).FontColor(MutedText);
                                     c.Item().Text(rx.HospitalName).FontSize(9).FontColor(MutedText);
                                 });
@@ -147,7 +146,7 @@ namespace HEALTHCARE.Services
                                 row.ConstantItem(180).Column(c =>
                                 {
                                     c.Item().PaddingBottom(4).LineHorizontal(1).LineColor(Ink);
-                                    c.Item().AlignCenter().Text($"Dr. {rx.DoctorName}").FontSize(9).Bold();
+                                    c.Item().AlignCenter().Text($"{rx.DoctorName}").FontSize(9).Bold();
                                     c.Item().AlignCenter().Text("Signature").FontSize(8).FontColor(MutedText);
                                 });
                             });

@@ -86,24 +86,31 @@ public class DoctorController : ControllerBase
             return NotFound();
         var count = _context.Appointments.Count(a => a.DoctorId == doctor.Id);
 
-        var appointments = (
-            from a in _context.Appointments
-            join u in _context.Users
-                on a.PatientId equals u.Id
-            where a.DoctorId == doctor.Id
-            orderby a.BookedAt descending
-            select new
-            {
-                a.Id,
-                PatientName = u.FullName,
-                PatientEmail = u.Email,
-                Status = a.Status,
-                Date = a.DoctorAvailability.AvailableFrom.Date,
-                Time = a.DoctorAvailability.AvailableFrom.ToString("hh:mm tt"),
-                Place = a.DoctorAvailability.Place,
-                BookedAt = a.BookedAt
-            }
-        ).ToList();
+       var appointments = (
+    from a in _context.Appointments
+    join u in _context.Users on a.PatientId equals u.Id
+    join d in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals d.Id
+select new
+{
+    a.Id,
+    PatientName = u.FullName,
+    PatientEmail = u.Email,
+    Status = a.Status,
+
+    AppointmentDate = a.DoctorAvailability.AvailableFrom.ToString("dd MMM yyyy"),
+    AppointmentTime = a.DoctorAvailability.AvailableFrom.ToString("hh:mm tt"),
+
+    Place = a.DoctorAvailability.Place,
+    BookedAt = a.BookedAt,
+
+    HasPrescription = _context.Prescriptions.Any(p => p.AppointmentId == a.Id)
+}
+)
+.Where(x => x.Status != null)
+.Where(x => _context.Appointments
+    .Any(a => a.Id == x.Id && a.DoctorId == doctor.Id))
+.OrderByDescending(x => x.BookedAt)
+.ToList();
 
         return Ok(appointments);
     }

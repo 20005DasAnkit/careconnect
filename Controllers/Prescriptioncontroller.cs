@@ -6,6 +6,7 @@ using HEALTHCARE.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace HEALTHCARE.Controllers
 {
@@ -23,71 +24,99 @@ namespace HEALTHCARE.Controllers
             _pdfService = pdfService;
         }
 
-        private int CurrentUserId() =>
-            int.Parse(User.FindFirst("id")?.Value ?? User.FindFirst("sub")?.Value ?? "0");
+        private int CurrentUserId()
+{
+    return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+}
 
         // Appointment.DoctorId points at Doctor.Id, not AppUser.Id — resolve via UserId.
-        private async Task<int?> CurrentDoctorId()
-        {
-            var userId = CurrentUserId();
-            var doctor = await _db.Doctors.FirstOrDefaultAsync(d => d.UserId == userId);
-            return doctor?.Id;
-        }
+private async Task<int?> CurrentDoctorId()
+{
+    var userId = CurrentUserId();
+
+    var doctor = await _db.Doctors
+        .FirstOrDefaultAsync(d => d.UserId == userId);
+
+    return doctor?.Id;
+}
 
         // ───────────────────────── DOCTOR: create or update ─────────────────────────
-        [HttpPost("doctor/prescriptions")]
-        [Authorize(Roles = "Doctor")]
-        public async Task<IActionResult> CreateOrUpdate([FromBody] CreatePrescriptionDto dto)
+        
+       [HttpPost("doctor/prescriptions")]
+[Authorize(Roles = "Doctor")]
+public async Task<IActionResult> CreateOrUpdate([FromBody] CreatePrescriptionDto dto)
+{
+    var appointment = await _db.Appointments
+        .FirstOrDefaultAsync(a => a.Id == dto.AppointmentId);
+
+    if (appointment == null)
+        return NotFound(new { message = "Appointment not found." });
+
+    var doctorId = await CurrentDoctorId();
+
+    if (doctorId == null)
+        return BadRequest(new { message = "Doctor not found." });
+
+    if (appointment.DoctorId != doctorId)
+        return Forbid();
+
+    if (appointment.Status != "Completed")
+        return BadRequest(new
         {
-            var appointment = await _db.Appointments
-                .FirstOrDefaultAsync(a => a.Id == dto.AppointmentId);
+            message = "Prescriptions can only be added for completed appointments."
+        });
 
-            if (appointment == null)
-                return NotFound(new { message = "Appointment not found." });
+    if (string.IsNullOrWhiteSpace(dto.Diagnosis))
+        return BadRequest(new { message = "Diagnosis is required." });
 
-            var doctorId = await CurrentDoctorId();
-            if (doctorId == null || appointment.DoctorId != doctorId)
-                return Forbid();
+    if (dto.Medicines == null || dto.Medicines.Count == 0)
+        return BadRequest(new { message = "Add at least one medicine." });
 
-            if (appointment.Status != "Completed")
-                return BadRequest(new { message = "Prescriptions can only be added for completed appointments." });
+    var medicinesJson = JsonSerializer.Serialize(dto.Medicines);
 
-            if (string.IsNullOrWhiteSpace(dto.Diagnosis))
-                return BadRequest(new { message = "Diagnosis is required." });
+    var existing = await _db.Prescriptions
+        .FirstOrDefaultAsync(p => p.AppointmentId == dto.AppointmentId);
 
-            if (dto.Medicines == null || dto.Medicines.Count == 0)
-                return BadRequest(new { message = "Add at least one medicine." });
+    if (existing != null)
+    {
+        existing.Diagnosis = dto.Diagnosis;
+        existing.MedicinesJson = medicinesJson;
+        existing.Notes = dto.Notes;
+        existing.AdviceOnFollowUp = dto.AdviceOnFollowUp;
+        existing.UpdatedAt = DateTime.UtcNow;
+    }
+    else
+    {
+        _db.Prescriptions.Add(new Prescription
+        {
+            AppointmentId = dto.AppointmentId,
+            DoctorId = doctorId.Value,
+            PatientId = appointment.PatientId,
+            Diagnosis = dto.Diagnosis,
+            MedicinesJson = medicinesJson,
+            Notes = dto.Notes,
+            AdviceOnFollowUp = dto.AdviceOnFollowUp
+        });
+    }
 
-            var medicinesJson = JsonSerializer.Serialize(dto.Medicines);
+    try
+    {
+        await _db.SaveChangesAsync();
 
-            var existing = await _db.Prescriptions
-                .FirstOrDefaultAsync(p => p.AppointmentId == dto.AppointmentId);
-
-            if (existing != null)
-            {
-                existing.Diagnosis = dto.Diagnosis;
-                existing.MedicinesJson = medicinesJson;
-                existing.Notes = dto.Notes;
-                existing.AdviceOnFollowUp = dto.AdviceOnFollowUp;
-                existing.UpdatedAt = DateTime.UtcNow;
-            }
-            else
-            {
-                _db.Prescriptions.Add(new Prescription
-                {
-                    AppointmentId = dto.AppointmentId,
-                    DoctorId = doctorId.Value,
-                    PatientId = appointment.PatientId,
-                    Diagnosis = dto.Diagnosis,
-                    MedicinesJson = medicinesJson,
-                    Notes = dto.Notes,
-                    AdviceOnFollowUp = dto.AdviceOnFollowUp,
-                });
-            }
-
-            await _db.SaveChangesAsync();
-            return Ok(new { message = "Prescription saved successfully." });
-        }
+        return Ok(new
+        {
+            message = "Prescription saved successfully."
+        });
+    }
+    catch (Exception ex)
+    {
+        return BadRequest(new
+        {
+            error = ex.Message,
+            inner = ex.InnerException?.Message
+        });
+    }
+}
 
         // ───────────────────────── SHARED: fetch details as JSON ─────────────────────────
         [HttpGet("prescriptions/appointment/{appointmentId}")]

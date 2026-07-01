@@ -4,6 +4,7 @@ import {
     CheckCircle2, XCircle, ClipboardList, Calendar,
     UserCircle2, Mail, Search, Filter,
 } from "lucide-react";
+import PrescriptionModal from "./PrescriptionModal";
 
 /* ─── Design tokens ───────────────────────────────── */
 const T = {
@@ -77,6 +78,7 @@ export default function DoctorAppointments() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [filterStatus, setFilterStatus] = useState("All");
+    const [rxAppointment, setRxAppointment] = useState(null);
 
     const load = async () => {
         try {
@@ -103,7 +105,7 @@ export default function DoctorAppointments() {
     const total = appointments.length;
     const confirmed = appointments.filter(x => x.status === "Confirmed").length;
     const pending = appointments.filter(x => x.status === "Pending").length;
-    const cancelled = appointments.filter(x => ["Cancelled", "CancelledByUser", "CancelledByAdmin"].includes(x.status)).length;
+    const cancelled = appointments.filter(x => ["Cancelled", "CancelledByUser", "CancelledByAdmin"].includes(x.status));
 
     const filtered = appointments.filter(a => {
         const matchSearch = !search ||
@@ -151,7 +153,7 @@ export default function DoctorAppointments() {
                 <StatCard label="Total Bookings" value={total} accent={T.green} icon={<ClipboardList size={22} />} />
                 <StatCard label="Confirmed" value={confirmed} accent={T.green} icon={<CheckCircle2 size={22} />} />
                 <StatCard label="Pending" value={pending} accent="#D97706" icon={<Calendar size={22} />} />
-                <StatCard label="Cancelled" value={cancelled} accent="#DC2626" icon={<XCircle size={22} />} />
+                <StatCard label="Cancelled" value={cancelled.length} accent="#DC2626" icon={<XCircle size={22} />} />
             </div>
 
             {/* Table card */}
@@ -189,7 +191,7 @@ export default function DoctorAppointments() {
                     <table style={{ width: "100%", borderCollapse: "collapse" }}>
                         <thead>
                             <tr style={{ background: T.cream }}>
-                                {["#", "Patient", "Email", "Booked At", "Status", "Actions"].map(h => (
+                                {["#", "Patient", "Email","Appointment", "Status", "Actions"].map(h => (
                                     <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>{h}</th>
                                 ))}
                             </tr>
@@ -221,9 +223,15 @@ export default function DoctorAppointments() {
                                             <span style={{ fontSize: 13, color: T.muted }}>{item.patientEmail}</span>
                                         </div>
                                     </td>
-                                    <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, whiteSpace: "nowrap" }}>
-                                        {new Date(item.bookedAt).toLocaleString()}
-                                    </td>
+<td style={{ padding: "15px 20px" }}>
+    <div style={{ fontWeight: 600 }}>
+        {item.appointmentDate}
+    </div>
+
+    <div style={{ fontSize: 12, color: T.muted }}>
+        {item.appointmentTime}
+    </div>
+</td>
                                     <td style={{ padding: "15px 20px" }}><Badge status={item.status} /></td>
                                     <td style={{ padding: "15px 20px" }}>
                                         {item.status === "Pending" ? (
@@ -231,7 +239,14 @@ export default function DoctorAppointments() {
                                                 <ActionBtn label="Accept" bg={T.greenLight} fg={T.green} onClick={() => updateStatus(item.id, "Confirmed")} />
                                                 <ActionBtn label="Reject" bg="#FEE2E2" fg="#DC2626" onClick={() => updateStatus(item.id, "CancelledByAdmin")} />
                                             </div>
-                                        ) : (
+                                        ) : item.status === "Completed" ? (
+    <ActionBtn
+        label={item.hasPrescription ? "Edit Prescription" : "Add Prescription"}
+        bg={item.hasPrescription ? "#DBEAFE" : T.greenLight}
+        fg={item.hasPrescription ? "#1E40AF" : T.green}
+        onClick={() => setRxAppointment(item)}
+    />
+) : (
                                             <ActionBtn label={item.status === "Confirmed" ? "Confirmed" : "—"} disabled bg={T.creamDark} fg={T.muted} />
                                         )}
                                     </td>
@@ -246,6 +261,12 @@ export default function DoctorAppointments() {
                     <span style={{ fontSize: 12, color: T.muted }}>Showing <b style={{ color: T.ink }}>{filtered.length}</b> of <b style={{ color: T.ink }}>{total}</b> appointments</span>
                 </div>
             </div>
+
+            <PrescriptionModal
+                appointment={rxAppointment}
+                onClose={() => setRxAppointment(null)}
+                onSaved={load}
+            />
         </div>
     );
 }

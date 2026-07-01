@@ -45,10 +45,17 @@ const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
 function validate(form) {
     const errors = {};
-    if (!form.fullName.trim()) errors.fullName = "Full name is required";
-    if (form.phone && !PHONE_RE.test(form.phone.trim())) errors.phone = "Enter a valid phone number";
-    if (form.pinCode && !PIN_RE.test(form.pinCode.trim())) errors.pinCode = "PIN code must be 6 digits";
-    if (form.dob && new Date(form.dob) > new Date()) errors.dob = "Date of birth can't be in the future";
+    if (!form.fullName.trim())
+        errors.fullName = "Full name is required";
+
+    if (form.phone && !PHONE_RE.test(form.phone.trim()))
+        errors.phone = "Enter a valid phone number";
+
+    if (form.pinCode && !PIN_RE.test(form.pinCode.trim()))
+        errors.pinCode = "PIN code must be 6 digits";
+
+    if (form.dob && new Date(form.dob) > new Date())
+        errors.dob = "Date of birth can't be in the future";
     return errors;
 }
 
@@ -221,15 +228,37 @@ export default function Profile() {
 
     if (status === "error") {
         return (
-            <div className="min-h-screen flex items-center justify-center px-5" style={{ backgroundColor: T.cream, fontFamily: INTER }}>
-                <div className="max-w-sm w-full rounded-[28px] p-8 text-center shadow-xl" style={{ backgroundColor: T.white, border: `1px solid ${T.border}` }}>
-                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: T.redLight }}>
-                        <AlertCircle className="w-6 h-6" style={{ color: T.red }} />
+            <div className="min-h-screen flex items-center justify-center px-5"
+                style=
+                {{
+                    backgroundColor: T.cream,
+                    fontFamily: INTER
+                }}>
+
+                <div className="max-w-sm w-full rounded-[28px] p-8 text-center shadow-xl"
+                    style=
+                    {{
+                        backgroundColor: T.white,
+                        border: `1px solid ${T.border}`
+                    }}>
+
+                    <div className="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4"
+                        style=
+                        {{ backgroundColor: T.redLight }}>
+                        <AlertCircle className="w-6 h-6"
+                            style={{ color: T.red }} />
                     </div>
-                    <h2 className="text-base font-semibold mb-1.5" style={{ color: T.ink, fontFamily: FRAUNCES }}>
+
+                    <h2 className="text-base font-semibold mb-1.5"
+                        style={{ color: T.ink, fontFamily: FRAUNCES }}>
                         Couldn't load your profile
                     </h2>
-                    <p className="text-sm mb-5" style={{ color: T.ink, opacity: 0.6 }}>{loadError}</p>
+
+                    <p className="text-sm mb-5"
+                        style={{ color: T.ink, opacity: 0.6 }}>
+                        {loadError}
+                    </p>
+
                     <button
                         onClick={loadProfile}
                         className="inline-flex items-center gap-2 text-sm font-medium px-5 py-2.5 rounded-xl text-white transition-transform active:scale-[0.97]"
@@ -248,14 +277,17 @@ export default function Profile() {
             ? `http://localhost:5008${form.avatarUrl}`
             : "";
     return (
-        <div className="min-h-screen pb-28 md:pb-10" style={{ backgroundColor: T.cream, fontFamily: INTER }}>
+        <div className="min-h-screen pb-28 md:pb-10"
+            style={{ backgroundColor: T.cream, fontFamily: INTER }}>
             <Toaster position="top-right" />
 
             {/* ── Header band ── */}
             <div className="px-4 sm:px-8 pt-10 pb-6 max-w-5xl mx-auto">
-                <p className="text-xs font-semibold tracking-[0.18em] uppercase mb-2" style={{ color: T.terra }}>
+                <p className="text-xs font-semibold tracking-[0.18em] uppercase mb-2"
+                    style={{ color: T.terra }}>
                     Account
                 </p>
+
                 <div className="flex flex-wrap items-end justify-between gap-3">
                     <h1
                         style={{
@@ -270,23 +302,34 @@ export default function Profile() {
                     {isDirty && (
                         <span
                             className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
-                            style={{ backgroundColor: "#FDF2E9", color: T.terra, border: `1px solid ${T.terra}33` }}
+                            style={{
+                                backgroundColor: "#FDF2E9",
+                                color: T.terra,
+                                border: `1px solid ${T.terra}33`
+                            }}
                         >
-                            <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: T.terra }} />
+                            <span className="w-1.5 h-1.5 rounded-full"
+                                style={{ backgroundColor: T.terra }} />
                             Unsaved changes
                         </span>
                     )}
                 </div>
+
                 <p className="mt-1 text-sm" style={{ color: T.ink, opacity: 0.55 }}>
                     Manage the details tied to your account and bookings.
                 </p>
             </div>
 
             <div className="max-w-5xl mx-auto px-4 sm:px-8">
-                <div className="rounded-[32px] shadow-sm overflow-hidden" style={{ backgroundColor: T.white, border: `1px solid ${T.border}` }}>
+                <div className="rounded-[32px] shadow-sm overflow-hidden"
+                    style={{
+                        backgroundColor: T.white,
+                        border: `1px solid ${T.border}`
+                    }}>
 
                     {/* Identity strip */}
-                    <div className="flex items-center gap-6 p-6 sm:p-8" style={{ borderBottom: `1px solid ${T.border}` }}>
+                    <div className="flex items-center gap-6 p-6 sm:p-8"
+                        style={{ borderBottom: `1px solid ${T.border}` }}>
                         <div className="relative shrink-0">
                             {displayAvatar ? (
                                 <img
@@ -298,9 +341,15 @@ export default function Profile() {
                             ) : (
                                 <div
                                     className="w-24 h-24 sm:w-28 sm:h-28 rounded-full flex items-center justify-center"
-                                    style={{ backgroundColor: T.greenLight, border: `3px solid ${T.creamDark}` }}
+                                    style={{
+                                        backgroundColor: T.greenLight,
+                                        border: `3px solid ${T.creamDark}`
+                                    }}
                                 >
-                                    <span style={{ fontFamily: FRAUNCES, fontSize: "1.75rem", color: T.green }}>
+                                    <span style={{
+                                        fontFamily: FRAUNCES,
+                                        fontSize: "1.75rem", color: T.green
+                                    }}>
                                         {initials(form.fullName)}
                                     </span>
                                 </div>
@@ -333,34 +382,63 @@ export default function Profile() {
                         </div>
 
                         <div className="min-w-0">
-                            <h2 className="text-xl sm:text-2xl font-semibold truncate" style={{ fontFamily: FRAUNCES, color: T.ink }}>
+                            <h2 className="text-xl sm:text-2xl font-semibold truncate"
+                                style={{
+                                    fontFamily: FRAUNCES,
+                                    color: T.ink
+                                }}>
                                 {form.fullName || "Patient"}
                             </h2>
-                            <p className="text-sm truncate" style={{ color: T.ink, opacity: 0.55 }}>{form.email}</p>
+
+                            <p className="text-sm truncate"
+                                style={{
+                                    color: T.ink,
+                                    opacity: 0.55
+                                }}>
+                                {form.email}
+                            </p>
                         </div>
                     </div>
 
                     {/* Refund balance — hairline stat strip */}
-                    <div className="p-6 sm:p-8" style={{ borderBottom: `1px solid ${T.border}` }}>
+                    <div className="p-6 sm:p-8"
+                        style={{ borderBottom: `1px solid ${T.border}` }}>
+
                         <div
                             className="rounded-2xl px-6 py-5 flex flex-wrap items-center justify-between gap-4"
                             style={{ backgroundColor: T.greenLight }}
                         >
                             <div>
-                                <p className="text-xs font-semibold tracking-[0.14em] uppercase" style={{ color: T.green, opacity: 0.75 }}>
+                                <p className="text-xs font-semibold tracking-[0.14em] uppercase"
+                                    style={{
+                                        color: T.green,
+                                        opacity: 0.75
+                                    }}>
                                     Refund Balance
                                 </p>
-                                <p className="mt-1 text-sm" style={{ color: T.ink, opacity: 0.6 }}>
+
+                                <p className="mt-1 text-sm"
+                                    style={{
+                                        color: T.ink,
+                                        opacity: 0.6
+                                    }}>
                                     Applied automatically at your next appointment.
                                 </p>
+
                             </div>
+
                             <div className="text-right">
                                 {refundLoading ? (
-                                    <Loader2 className="w-6 h-6 animate-spin ml-auto" style={{ color: T.green }} />
+                                    <Loader2 className="w-6 h-6 animate-spin ml-auto"
+                                        style={{ color: T.green }} />
                                 ) : (
                                     <h3
                                         className="flex items-center gap-0.5"
-                                        style={{ fontFamily: FRAUNCES, fontSize: "clamp(1.75rem, 3vw, 2.25rem)", color: T.green }}
+                                        style={{
+                                            fontFamily: FRAUNCES,
+                                            fontSize: "clamp(1.75rem, 3vw, 2.25rem)",
+                                            color: T.green
+                                        }}
                                     >
                                         <IndianRupee className="w-6 h-6" strokeWidth={2.25} />
                                         {refundBalance}
@@ -372,24 +450,66 @@ export default function Profile() {
 
                     {/* Form */}
                     <div className="p-6 sm:p-8">
-                        <p className="text-xs font-semibold tracking-[0.14em] uppercase mb-5" style={{ color: T.ink, opacity: 0.45 }}>
+                        <p className="text-xs font-semibold tracking-[0.14em] uppercase mb-5"
+                            style={{
+                                color: T.ink,
+                                opacity: 0.45
+                            }}>
                             Personal Details
                         </p>
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <FormField label="Full Name" name="fullName" value={form.fullName} onChange={handleChange} error={errors.fullName} required />
-                            <FormField label="Email" name="email" value={form.email} disabled hint="Email can't be changed here — it's your login ID." />
-                            <FormField label="Phone" name="phone" value={form.phone} onChange={handleChange} error={errors.phone} placeholder="e.g. +91 98765 43210" />
 
-                            <FormField as="select" label="Gender" name="gender" value={form.gender} onChange={handleChange}>
+                        <div className="grid md:grid-cols-2 gap-5">
+                            <FormField label="Full Name"
+                                name="fullName"
+                                value={form.fullName}
+                                onChange={handleChange}
+                                error={errors.fullName}
+                                required
+                            />
+
+                            <FormField label="Email"
+                                name="email"
+                                value={form.email}
+                                disabled hint="Email can't be changed here — it's your login ID."
+                            />
+
+                            <FormField label="Phone"
+                                name="phone"
+                                value={form.phone}
+                                onChange={handleChange}
+                                error={errors.phone}
+                                placeholder="e.g. +91 98765 43210"
+                            />
+
+                            <FormField as="select"
+                                label="Gender"
+                                name="gender"
+                                value={form.gender}
+                                onChange={handleChange}
+                            >
+
                                 <option value="">Select gender</option>
                                 <option>Male</option>
                                 <option>Female</option>
                                 <option>Other</option>
                             </FormField>
 
-                            <FormField type="date" label="Date of Birth" name="dob" value={form.dob} onChange={handleChange} error={errors.dob} max={new Date().toISOString().split("T")[0]} />
+                            <FormField type="date"
+                                label="Date of Birth"
+                                name="dob"
+                                value={form.dob}
+                                onChange={handleChange}
+                                error={errors.dob}
+                                max={new Date().toISOString().split("T")[0]}
+                            />
 
-                            <FormField as="select" label="Blood Group" name="bloodGroup" value={form.bloodGroup} onChange={handleChange}>
+                            <FormField as="select"
+                                label="Blood Group"
+                                name="bloodGroup"
+                                value={form.bloodGroup}
+                                onChange={handleChange}
+                            >
+
                                 <option value="">Select</option>
                                 {BLOOD_GROUPS.map((bg) => (
                                     <option key={bg}>{bg}</option>
@@ -397,7 +517,6 @@ export default function Profile() {
                             </FormField>
 
                             <FormField as="textarea" rows={3} label="Address" name="address" value={form.address} onChange={handleChange} className="md:col-span-2" />
-
                             <FormField label="City" name="city" value={form.city} onChange={handleChange} />
                             <FormField label="State" name="state" value={form.state} onChange={handleChange} />
                             <FormField label="Country" name="country" value={form.country} onChange={handleChange} />
@@ -412,7 +531,11 @@ export default function Profile() {
                                 onClick={discardChanges}
                                 disabled={saving}
                                 className="px-7 py-3.5 rounded-2xl font-semibold transition-all disabled:opacity-60"
-                                style={{ backgroundColor: T.cream, color: T.ink, border: `1.5px solid ${T.border}` }}
+                                style={{
+                                    backgroundColor: T.cream,
+                                    color: T.ink,
+                                    border: `1.5px solid ${T.border}`
+                                }}
                             >
                                 Discard
                             </button>
@@ -426,16 +549,25 @@ export default function Profile() {
             {isDirty && (
                 <div
                     className="md:hidden fixed bottom-0 left-0 right-0 flex gap-3 p-4 z-20"
-                    style={{ backgroundColor: T.white, borderTop: `1px solid ${T.border}`, boxShadow: "0 -8px 24px rgba(22,51,43,0.08)" }}
+                    style={{
+                        backgroundColor: T.white,
+                        borderTop: `1px solid ${T.border}`,
+                        boxShadow: "0 -8px 24px rgba(22,51,43,0.08)"
+                    }}
                 >
                     <button
                         onClick={discardChanges}
                         disabled={saving}
                         className="flex-1 py-3.5 rounded-2xl font-semibold disabled:opacity-60"
-                        style={{ backgroundColor: T.cream, color: T.ink, border: `1.5px solid ${T.border}` }}
+                        style={{
+                            backgroundColor: T.cream,
+                            color: T.ink,
+                            border: `1.5px solid ${T.border}`
+                        }}
                     >
                         Discard
                     </button>
+
                     <div className="flex-[1.4]">
                         <SaveButton saving={saving} isDirty={isDirty} onClick={saveProfile} full />
                     </div>
@@ -481,11 +613,29 @@ function FormField({
             </label>
 
             {as === "select" ? (
-                <select id={name} name={name} value={value ?? ""} onChange={onChange} disabled={disabled} className={`${base} h-12`} style={style}>
+                <select
+                    id={name}
+                    name={name}
+                    value={value ?? ""}
+                    onChange={onChange}
+                    disabled={disabled}
+                    className={`${base} h-12`}
+                    style={style}>
                     {children}
                 </select>
+
             ) : as === "textarea" ? (
-                <textarea id={name} name={name} rows={rows} value={value ?? ""} onChange={onChange} disabled={disabled} className={`${base} p-4`} style={style} />
+                <textarea
+                    id={name}
+                    name={name}
+                    rows={rows}
+                    value={value ?? ""}
+                    onChange={onChange}
+                    disabled={disabled}
+                    className={`${base} p-4`}
+                    style={style}
+                />
+
             ) : (
                 <input
                     id={name}
@@ -512,15 +662,37 @@ function FormField({
 function ProfileSkeleton() {
     const pulse = { backgroundColor: "#EDE7D9" };
     return (
-        <div className="min-h-screen py-10 px-4" style={{ backgroundColor: T.cream }}>
-            <div className="max-w-5xl mx-auto rounded-[32px] p-8" style={{ backgroundColor: T.white, border: `1px solid ${T.border}` }}>
-                <div className="h-9 w-52 rounded-xl animate-pulse mb-3" style={pulse} />
-                <div className="h-4 w-72 rounded animate-pulse mb-8" style={pulse} />
+        <div className="min-h-screen py-10 px-4"
+            style={{ backgroundColor: T.cream }}
+        >
+
+            <div className="max-w-5xl mx-auto rounded-[32px] p-8"
+                style={{
+                    backgroundColor: T.white,
+                    border: `1px solid ${T.border}`
+                }}>
+
+                <div className="h-9 w-52 rounded-xl animate-pulse mb-3"
+                    style={pulse}
+                />
+
+                <div className="h-4 w-72 rounded animate-pulse mb-8"
+                    style={pulse}
+                />
+
                 <div className="flex items-center gap-6 mb-8">
-                    <div className="w-28 h-28 rounded-full animate-pulse" style={pulse} />
+                    <div className="w-28 h-28 rounded-full animate-pulse"
+                        style={pulse}
+                    />
+
                     <div>
-                        <div className="h-6 w-40 rounded animate-pulse mb-2" style={pulse} />
-                        <div className="h-4 w-52 rounded animate-pulse" style={pulse} />
+                        <div className="h-6 w-40 rounded animate-pulse mb-2"
+                            style={pulse}
+                        />
+
+                        <div className="h-4 w-52 rounded animate-pulse"
+                            style={pulse}
+                        />
                     </div>
                 </div>
                 <div className="h-24 rounded-2xl animate-pulse mb-8" style={pulse} />
