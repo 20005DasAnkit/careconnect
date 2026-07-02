@@ -2,50 +2,148 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import Sidebar from "../../components/Sidebar";
 import Navbar from "../../components/Navbar";
+import {
+  Users,
+  Stethoscope,
+  Building2,
+  Package,
+  Ambulance,
+  CalendarDays,
+  ShoppingBag,
+  Clock3,
+  Truck,
+} from "lucide-react";
+
+const T = {
+  cream: "#F5F0E8",
+  green: "#2D5016",
+  greenLight: "#EBF2E3",
+  terra: "#C4622D",
+  terraLight: "#FAF0EA",
+  ink: "#1A1A1A",
+  muted: "#6B7280",
+  border: "#E2DACE",
+  white: "#FFFFFF",
+};
+
+const STATS = [
+  { key: "totalPatients", label: "Patients", icon: Users, accent: T.green },
+  { key: "totalDoctors", label: "Doctors", icon: Stethoscope, accent: T.green },
+  { key: "totalHospitals", label: "Hospitals", icon: Building2, accent: T.green },
+  { key: "totalProducts", label: "Products", icon: Package, accent: T.terra },
+  { key: "totalAmbulances", label: "Ambulances", icon: Ambulance, accent: T.terra },
+  { key: "totalAppointments", label: "Appointments", icon: CalendarDays, accent: T.green },
+  { key: "totalOrders", label: "Orders", icon: ShoppingBag, accent: T.terra },
+  { key: "pendingAppointments", label: "Pending Appointments", icon: Clock3, accent: "#DC2626" },
+  { key: "pendingAmbulanceRequests", label: "Pending Ambulance", icon: Truck, accent: "#DC2626" },
+];
+
+function StatCard({ label, value, accent, icon: Icon }) {
+  return (
+    <div
+      style={{
+        background: T.white,
+        borderRadius: 20,
+        padding: "22px 24px",
+        border: `1px solid ${T.border}`,
+        boxShadow: "0 2px 8px rgba(0,0,0,.04)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <div>
+        <p style={{ fontSize: 13, color: T.muted, margin: 0 }}>{label}</p>
+        <h2 style={{ fontFamily: "'Fraunces', serif", fontWeight: 800, fontSize: 36, margin: "8px 0 0", color: T.ink }}>
+          {value}
+        </h2>
+      </div>
+      <div
+        style={{
+          width: 52,
+          height: 52,
+          borderRadius: 14,
+          background: accent + "1F",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={22} color={accent} />
+      </div>
+    </div>
+  );
+}
 
 export default function Dashboard() {
   const [data, setData] = useState({});
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/admin/dashboard").then(res => setData(res.data));
+    api
+      .get("/admin/dashboard")
+      .then((res) => setData(res.data))
+      .catch((err) => console.error(err))
+      .finally(() => setLoading(false));
   }, []);
 
-  const Card = ({ title, value, color }) => (
-    <div className={`p-5 rounded-xl shadow text-white ${color}`}>
-      <h3 className="text-lg">{title}</h3>
-      <p className="text-2xl font-bold">{value}</p>
-    </div>
-  );
-
   return (
-    <div className="flex">
-      <Sidebar />
+    <div style={{ fontFamily: "'Inter', sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;800&family=Inter:wght@400;500;600;700&display=swap');
+        *{box-sizing:border-box;}
+      `}</style>
 
-      <div className="ml-64 w-full bg-gray-100 min-h-screen">
+      <Sidebar />
+      <div style={{ marginLeft: 264, background: T.cream, minHeight: "100vh" }}>
         <Navbar />
 
-        <div className="p-6 grid grid-cols-4 gap-4">
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-
-            <Card title="Patients" value={data.totalPatients || 0} color="bg-blue-500" />
-
-            <Card title="Doctors" value={data.totalDoctors || 0} color="bg-green-500" />
-
-            <Card title="Hospitals" value={data.totalHospitals || 0} color="bg-cyan-600" />
-
-            <Card title="Products" value={data.totalProducts || 0} color="bg-purple-500" />
-
-            <Card title="Ambulances" value={data.totalAmbulances || 0} color="bg-red-500" />
-
-            <Card title="Appointments" value={data.totalAppointments || 0} color="bg-yellow-500" />
-
-            <Card title="Orders" value={data.totalOrders || 0} color="bg-indigo-500" />
-
-            <Card title="Pending Appointments" value={data.pendingAppointments || 0} color="bg-orange-500" />
-
-            <Card title="Pending Ambulance" value={data.pendingAmbulanceRequests || 0} color="bg-pink-500" />
-
+        <div style={{ padding: "32px 28px" }}>
+          <div style={{ marginBottom: 24 }}>
+            <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.14em", textTransform: "uppercase", color: T.terra, margin: "0 0 6px" }}>
+              Overview
+            </p>
+            <h1 style={{ fontFamily: "'Fraunces', serif", fontWeight: 700, fontSize: 30, color: T.ink, margin: 0 }}>Dashboard</h1>
+            <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>
+              A quick snapshot of everything happening across CareConnect.
+            </p>
           </div>
+
+          {loading ? (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 18,
+              }}
+            >
+              {[...Array(9)].map((_, i) => (
+                <div
+                  key={i}
+                  style={{
+                    height: 96,
+                    borderRadius: 20,
+                    background: "#EDE7D9",
+                    animation: "cc-pulse 1.4s ease-in-out infinite",
+                  }}
+                />
+              ))}
+              <style>{`@keyframes cc-pulse{0%,100%{opacity:1}50%{opacity:.55}}`}</style>
+            </div>
+          ) : (
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 18,
+              }}
+            >
+              {STATS.map((s) => (
+                <StatCard key={s.key} label={s.label} value={data[s.key] || 0} accent={s.accent} icon={s.icon} />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

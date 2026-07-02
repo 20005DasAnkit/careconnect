@@ -11,4 +11,6 @@ public class CreateDoctorSlotRequestDto
     public DateTime RequestedTo { get; set; }
 
     public int MaxPatients { get; set; }
+
+    public string? Reason { get; set; }
 }

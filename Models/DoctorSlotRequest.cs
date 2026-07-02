@@ -1,5 +1,4 @@
 namespace HEALTHCARE.Models;
-
 public class DoctorSlotRequest
 {
     public int Id { get; set; }
@@ -19,12 +18,17 @@ public class DoctorSlotRequest
 
     public int MaxPatients { get; set; }
 
+    public string? Reason { get; set; }
+
     public string Status { get; set; } = "Pending";
-    // Pending
-    // Approved
-    // Rejected
 
     public string? AdminRemark { get; set; }
 
+    public bool AvailabilityCreated { get; set; } = false;
+
     public DateTime RequestedAt { get; set; } = DateTime.Now;
+
+    public DateTime? ReviewedAt { get; set; }
+
+    public int? ReviewedBy { get; set; }
 }
