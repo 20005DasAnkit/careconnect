@@ -35,23 +35,27 @@ export default function Dashboard() {
     const [menuOpen, setMenuOpen] = useState(false);
 
     const navigate = useNavigate();
+    const token = localStorage.getItem("token");
 
     const userName = localStorage.getItem("name") || "My Account";
 
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [token]);
 
     const loadData = async () => {
         try {
             const docRes = await api.get("/patient/doctors");
-            const appRes = await api.get("/patient/appointments");
-            const orderRes = await api.get("/patient/orders");
-
             setDoctors(docRes.data || []);
-            setAppointments(appRes.data || []);
-            setOrders(orderRes.data || []);
+
+            if (token) {
+                const appRes = await api.get("/patient/appointments");
+                const orderRes = await api.get("/patient/orders");
+
+                setAppointments(appRes.data || []);
+                setOrders(orderRes.data || []);
+            }
         } catch (err) {
             console.log(err);
         }
@@ -86,38 +90,57 @@ export default function Dashboard() {
 
                     <nav className="hidden lg:flex items-center gap-9 font-[system-ui,sans-serif] text-[15px] text-[#16332B]/80">
                         <a href="/patient/products" className="hover:text-[#16332B] transition">Medicines</a>
-                        <a href="/patient/appointments" className="flex items-center gap-1 hover:text-[#16332B] transition"> Appoinments <span className="text-xs"></span></a>
+                        <a
+                            href={token ? "/patient/appointments" : "/login"}
+                            className="hover:text-[#16332B] transition"
+                        >
+                            Appointments
+                        </a>
                         <a href="/patient/EmergencyInfo" className="hover:text-[#16332B] transition">Emergency Info</a>
                         <a href="/patient/Locations" className="hover:text-[#16332B] transition">Locations</a>
-                        <a href="/patient/orders" className="flex items-center gap-1 hover:text-[#16332B] transition">
-                            Orders <span className="text-xs"></span>
+                        <a
+                            href={token ? "/patient/orders" : "/login"}
+                            className="hover:text-[#16332B] transition"
+                        >
+                            Orders
                         </a>
-
                         <a href="/patient/AboutUs" className="flex items-center gap-1 hover:text-[#16332B] transition">
                             AboutUs <span className="text-xs">▾</span>
                         </a>
                     </nav>
-                    <div className="hidden lg:flex items-center gap-5">
+                    <div className="hidden lg:flex items-center gap-4">
 
-                        <button
-                            onClick={() => navigate("/patient/profile")}
-                            className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
-                        >
-                            <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
-                                <User size={18} />
-                            </div>
+                        {token ? (
+                            <button
+                                onClick={() => navigate("/patient/profile")}
+                                className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
+                            >
+                                <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
+                                    <User size={18} />
+                                </div>
 
-                            <div className="text-left">
-                                <p className="text-sm font-semibold">
-                                    {userName}
-                                </p>
+                                <div className="text-left">
+                                    <p className="text-sm font-semibold">{userName}</p>
+                                    <p className="text-xs text-gray-500">My Profile</p>
+                                </div>
+                            </button>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => navigate("/login")}
+                                    className="text-[#16332B] font-medium hover:underline"
+                                >
+                                    Sign In
+                                </button>
 
-                                <p className="text-xs text-gray-500">
-                                    My Profile
-                                </p>
-                            </div>
-
-                        </button>
+                                <button
+                                    onClick={() => navigate("/register")}
+                                    className="bg-[#16332B] text-white px-5 py-2 rounded-full hover:bg-[#0F231D]"
+                                >
+                                    Sign Up
+                                </button>
+                            </>
+                        )}
 
                     </div>
 
@@ -167,25 +190,40 @@ export default function Dashboard() {
                     </p>
 
                     <div className="flex flex-wrap items-center gap-6 mt-9 font-[system-ui,sans-serif]">
-                        <a
-                            href="/patient/doctors"
-                            className="bg-[#16332B] text-white px-7 py-4 rounded-full font-medium hover:bg-[#0F231D] transition"
+                        <button
+                            onClick={() =>
+                                token
+                                    ? navigate("/patient/doctors")
+                                    : navigate("/login")
+                            }
+                            className="bg-[#16332B] text-white px-7 py-4 rounded-full"
                         >
                             Book Appointment
-                        </a>
-                        <a
-                            href="/patient/products"
+                        </button>
+                        <button
+                            onClick={() =>
+                                token
+                                    ? navigate("/patient/products")
+                                    : navigate("/login")
+                            }
                             className="border border-[#16332B] px-7 py-4 rounded-full font-medium hover:bg-[#16332B] hover:text-white transition"
                         >
                             Buy Medicines
-                        </a>
+                        </button>
 
                     </div>
 
                     <p className="mt-5 text-sm font-[system-ui,sans-serif] text-[#16332B]/60">
-                        <a href="/patient/ambulance" className="underline hover:text-[#16332B]">
+                        <button
+                            onClick={() =>
+                                token
+                                    ? navigate("/patient/ambulance")
+                                    : navigate("/login")
+                            }
+                            className="underline hover:text-[#16332B]"
+                        >
                             Need urgent help? Book an ambulance →
-                        </a>
+                        </button>
                     </p>
                 </div>
 
@@ -429,12 +467,19 @@ export default function Dashboard() {
                                         <span className="ml-2 text-[#16332B]/50">(4.9)</span>
                                     </div>
 
-                                    <Link
-                                        to={`/patient/bookdoctor?doctorId=${doctor.id}`}
-                                        className="block mt-5 bg-[#16332B] text-white text-center py-3 rounded-full font-medium hover:bg-[#0F231D] transition"
+                                    <button
+                                        onClick={() => {
+                                            if (!token) {
+                                                navigate("/login");
+                                                return;
+                                            }
+
+                                            navigate(`/patient/bookdoctor?doctorId=${doctor.id}`);
+                                        }}
+                                        className="block w-full mt-5 bg-[#16332B] text-white text-center py-3 rounded-full font-medium hover:bg-[#0F231D] transition"
                                     >
                                         Book Appointment
-                                    </Link>
+                                    </button>
                                 </div>
                             </div>
                         ))}
@@ -443,50 +488,52 @@ export default function Dashboard() {
             </section>
 
             {/* UPCOMING APPOINTMENT */}
-            <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
-                <div className="bg-white rounded-2xl border border-[#E4DFD3] p-8 lg:p-10">
+            {token && (
+                <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
+                    <div className="bg-white rounded-2xl border border-[#E4DFD3] p-8 lg:p-10">
 
-                    <div className="flex justify-between items-center mb-7">
-                        <h2 className="text-2xl font-medium">Upcoming appointment</h2>
-                        <a
-                            href="/patient/appointments"
-                            className="text-[#16332B] font-medium font-[system-ui,sans-serif] hover:underline"
-                        >
-                            View all
-                        </a>
+                        <div className="flex justify-between items-center mb-7">
+                            <h2 className="text-2xl font-medium">Upcoming appointment</h2>
+                            <a
+                                href="/patient/appointments"
+                                className="text-[#16332B] font-medium font-[system-ui,sans-serif] hover:underline"
+                            >
+                                View all
+                            </a>
+                        </div>
+
+                        {appointments.length === 0 ? (
+                            <div className="text-center py-12 font-[system-ui,sans-serif]">
+                                <h3 className="text-lg font-medium">No upcoming appointment</h3>
+                                <p className="text-[#16332B]/60 mt-2">
+                                    Book your first consultation today.
+                                </p>
+                            </div>
+                        ) : (
+                            <div className="grid md:grid-cols-2 gap-6 font-[system-ui,sans-serif]">
+                                {appointments.slice(0, 2).map((a) => (
+                                    <div
+                                        key={a.id}
+                                        className="border border-[#E4DFD3] rounded-2xl p-6 hover:border-[#16332B]/40 transition"
+                                    >
+                                        <h3 className="text-lg font-semibold font-[Georgia,serif]">
+                                            {displayDoctorName(a.doctorName) || a.doctorId}
+                                        </h3>
+
+                                        <p className="text-[#16332B]/60 mt-2 text-sm">
+                                            {new Date(a.bookedAt).toLocaleString()}
+                                        </p>
+
+                                        <span className="inline-block mt-4 bg-[#3E7C59]/10 text-[#3E7C59] px-4 py-1.5 rounded-full text-sm font-medium">
+                                            {a.status}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
-
-                    {appointments.length === 0 ? (
-                        <div className="text-center py-12 font-[system-ui,sans-serif]">
-                            <h3 className="text-lg font-medium">No upcoming appointment</h3>
-                            <p className="text-[#16332B]/60 mt-2">
-                                Book your first consultation today.
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="grid md:grid-cols-2 gap-6 font-[system-ui,sans-serif]">
-                            {appointments.slice(0, 2).map((a) => (
-                                <div
-                                    key={a.id}
-                                    className="border border-[#E4DFD3] rounded-2xl p-6 hover:border-[#16332B]/40 transition"
-                                >
-                                    <h3 className="text-lg font-semibold font-[Georgia,serif]">
-                                        {displayDoctorName(a.doctorName) || a.doctorId}
-                                    </h3>
-
-                                    <p className="text-[#16332B]/60 mt-2 text-sm">
-                                        {new Date(a.bookedAt).toLocaleString()}
-                                    </p>
-
-                                    <span className="inline-block mt-4 bg-[#3E7C59]/10 text-[#3E7C59] px-4 py-1.5 rounded-full text-sm font-medium">
-                                        {a.status}
-                                    </span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* HEALTH TIP */}
             <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
@@ -515,63 +562,70 @@ export default function Dashboard() {
                         </p>
                     </div>
 
-                    <a
-                        href="/patient/ambulance"
-                        className="bg-white text-[#991B1B] px-8 py-4 rounded-full font-medium hover:scale-[1.03] transition whitespace-nowrap font-[system-ui,sans-serif]"
+                    <button
+                        onClick={() =>
+                            token
+                                ? navigate("/patient/ambulance")
+                                : navigate("/login")
+                        }
+                        className="bg-white text-[#991B1B] px-8 py-4 rounded-full font-medium hover:scale-[1.03] transition"
                     >
                         Book Ambulance
-                    </a>
+                    </button>
                 </div>
             </section>
+
 
             {/* RECENT ORDERS */}
-            <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
-                <div className="flex justify-between items-end mb-8">
-                    <h2 className="text-4xl font-normal">Recent orders</h2>
-                    <a
-                        href="/patient/orders"
-                        className="text-[#16332B] font-medium font-[system-ui,sans-serif] hover:underline"
-                    >
-                        View all →
-                    </a>
-                </div>
+            {token && (
+                <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
+                    <div className="flex justify-between items-end mb-8">
+                        <h2 className="text-4xl font-normal">Recent orders</h2>
+                        <a
+                            href="/patient/orders"
+                            className="text-[#16332B] font-medium font-[system-ui,sans-serif] hover:underline"
+                        >
+                            View all →
+                        </a>
+                    </div>
 
-                <div className="bg-white rounded-2xl border border-[#E4DFD3] overflow-hidden font-[system-ui,sans-serif]">
-                    {orders.length === 0 ? (
-                        <div className="py-14 text-center text-[#16332B]/60">
-                            No medicine orders found.
-                        </div>
-                    ) : (
-                        <table className="w-full text-[15px]">
-                            <thead className="bg-[#FAF8F3]">
-                                <tr>
-                                    <th className="text-left p-5 font-medium">Medicine</th>
-                                    <th className="text-left p-5 font-medium">Date</th>
-                                    <th className="text-left p-5 font-medium">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {orders.slice(0, 5).map((order) => (
-                                    <tr
-                                        key={order.id}
-                                        className="border-t border-[#E4DFD3] hover:bg-[#FAF8F3]/60"
-                                    >
-                                        <td className="p-5">{order.productName}</td>
-                                        <td className="p-5">
-                                            {new Date(order.orderDate).toLocaleDateString("en-IN")}
-                                        </td>
-                                        <td className="p-5">
-                                            <span className="bg-[#3E7C59]/10 text-[#3E7C59] px-3 py-1 rounded-full">
-                                                {order.status}
-                                            </span>
-                                        </td>
+                    <div className="bg-white rounded-2xl border border-[#E4DFD3] overflow-hidden font-[system-ui,sans-serif]">
+                        {orders.length === 0 ? (
+                            <div className="py-14 text-center text-[#16332B]/60">
+                                No medicine orders found.
+                            </div>
+                        ) : (
+                            <table className="w-full text-[15px]">
+                                <thead className="bg-[#FAF8F3]">
+                                    <tr>
+                                        <th className="text-left p-5 font-medium">Medicine</th>
+                                        <th className="text-left p-5 font-medium">Date</th>
+                                        <th className="text-left p-5 font-medium">Status</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
-                </div>
-            </section>
+                                </thead>
+                                <tbody>
+                                    {orders.slice(0, 5).map((order) => (
+                                        <tr
+                                            key={order.id}
+                                            className="border-t border-[#E4DFD3] hover:bg-[#FAF8F3]/60"
+                                        >
+                                            <td className="p-5">{order.productName}</td>
+                                            <td className="p-5">
+                                                {new Date(order.orderDate).toLocaleDateString("en-IN")}
+                                            </td>
+                                            <td className="p-5">
+                                                <span className="bg-[#3E7C59]/10 text-[#3E7C59] px-3 py-1 rounded-full">
+                                                    {order.status}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
+                </section>
+            )}
 
             {/* TESTIMONIALS */}
             <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
@@ -695,7 +749,7 @@ export default function Dashboard() {
                 </div>
 
                 <div className="border-t border-white/10 py-6 text-center text-white/50 font-[system-ui,sans-serif] text-sm">
-                    © 2026 care. All Rights Reserved.
+                    © 2026 CareConnect. All Rights Reserved.
                 </div>
 
             </footer>

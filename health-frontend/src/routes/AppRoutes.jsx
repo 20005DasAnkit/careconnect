@@ -2,6 +2,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 
+//Protectedroute
+import ProtectedRoute from "../components/ProtectedRoute";
+
 // Admin
 import AdminDashboard from "../pages/admin/Dashboard";
 import Doctors from "../pages/admin/Doctors";
@@ -45,7 +48,8 @@ export default function AppRoutes() {
       <Routes>
 
         {/* AUTH */}
-        <Route path="/" element={<Login />} />
+        <Route path="/" element={<PatientDashboard />} />
+
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -66,20 +70,71 @@ export default function AppRoutes() {
         <Route path="/doctor/profile" element={<DoctorProfile />} />
 
         {/* PATIENT */}
-        <Route path="/patient" element={<PatientDashboard />} />
-        <Route path="/patient/Profile" element={<PatientPage />} />
-        <Route path="/patient/Locations" element={<LocationPage />} />
-        <Route path="/patient/bookdoctor" element={<DoctorBooking />} />
-        <Route path="/patient/products" element={<PatientProducts />} />
-        <Route path="/patient/ambulance" element={<AmbulanceBook />} />
-        <Route path="/patient/doctors" element={<PatientDoctors />} />
-        <Route path="/patient/orders" element={<PatientOrders />} />
-        <Route path="/patient/AboutUs" element={<AboutUS />} />
-        <Route path="/patient/EmergencyInfo" element={<EmergencyInfos />} />
-        <Route path="/patient/Place-order" element={<PlaceOrders />} />
-        <Route path="/patient/appointments" element={<PatientAppointments />} />
-        <Route path="/patient/ambulance/request" element={<AmbulanceRequest />} />
-        <Route path="/patient/ride/:id" element={<RideStatus />}/>
+        {/* PATIENT */}
+
+<Route path="/patient" element={<PatientDashboard />} />
+
+<Route
+  path="/patient/profile"
+  element={
+    <ProtectedRoute>
+      <PatientPage />
+    </ProtectedRoute>
+  }
+/>
+
+<Route path="/patient/Locations" element={<LocationPage />} />
+<Route path="/patient/bookdoctor" element={<DoctorBooking />} />
+<Route path="/patient/products" element={<PatientProducts />} />
+<Route path="/patient/ambulance" element={<AmbulanceBook />} />
+<Route path="/patient/doctors" element={<PatientDoctors />} />
+<Route path="/patient/AboutUs" element={<AboutUS />} />
+<Route path="/patient/EmergencyInfo" element={<EmergencyInfos />} />
+
+<Route
+  path="/patient/orders"
+  element={
+    <ProtectedRoute>
+      <PatientOrders />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/patient/Place-order"
+  element={
+    <ProtectedRoute>
+      <PlaceOrders />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/patient/appointments"
+  element={
+    <ProtectedRoute>
+      <PatientAppointments />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/patient/ambulance/request"
+  element={
+    <ProtectedRoute>
+      <AmbulanceRequest />
+    </ProtectedRoute>
+  }
+/>
+
+<Route
+  path="/patient/ride/:id"
+  element={
+    <ProtectedRoute>
+      <RideStatus />
+    </ProtectedRoute>
+  }
+/>
 
         {/* AMBULANCE DRIVER */}
         <Route path="/ambulance" element={<AmbulanceDashboard />} />

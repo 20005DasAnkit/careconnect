@@ -75,16 +75,25 @@ export default function Products() {
         return counts;
     }, [products]);
 
-    function goToOrder(product) {
-        const quantity = qty[product.id] || 1;
-        const params = new URLSearchParams({
-            productId: product.id,
-            quantity,
-            productName: product.name || "",
-            price: product.price,
-        });
-        navigate(`/patient/place-order?${params.toString()}`);
+function goToOrder(product) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        navigate("/login");
+        return;
     }
+
+    const quantity = qty[product.id] || 1;
+
+    const params = new URLSearchParams({
+        productId: product.id,
+        quantity,
+        productName: product.name || "",
+        price: product.price,
+    });
+
+    navigate(`/patient/place-order?${params.toString()}`);
+}
 
     return (
         <div

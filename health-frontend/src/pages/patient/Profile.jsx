@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
 import { Toaster, toast } from "react-hot-toast";
 import {
@@ -66,6 +67,7 @@ function initials(name) {
 }
 
 export default function Profile() {
+    const navigate = useNavigate();
     const [status, setStatus] = useState("loading"); // loading | ready | error
     const [loadError, setLoadError] = useState(null);
 
@@ -221,6 +223,18 @@ export default function Profile() {
         setErrors({});
         removeAvatarSelection();
     }
+    function handleLogout() {
+    localStorage.removeItem("token");
+    localStorage.removeItem("name");
+    localStorage.removeItem("email");
+    localStorage.removeItem("role");
+
+    toast.success("Logged out successfully.");
+
+    setTimeout(() => {
+        navigate("/");
+    }, 500);
+}
 
     /* ---------------------------- render states ---------------------------- */
 
@@ -288,32 +302,49 @@ export default function Profile() {
                     Account
                 </p>
 
-                <div className="flex flex-wrap items-end justify-between gap-3">
-                    <h1
-                        style={{
-                            fontFamily: FRAUNCES,
-                            fontSize: "clamp(2rem, 4vw, 2.75rem)",
-                            color: T.ink,
-                            lineHeight: 1.05,
-                        }}
-                    >
-                        My Profile
-                    </h1>
-                    {isDirty && (
-                        <span
-                            className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
-                            style={{
-                                backgroundColor: "#FDF2E9",
-                                color: T.terra,
-                                border: `1px solid ${T.terra}33`
-                            }}
-                        >
-                            <span className="w-1.5 h-1.5 rounded-full"
-                                style={{ backgroundColor: T.terra }} />
-                            Unsaved changes
-                        </span>
-                    )}
-                </div>
+<div className="flex flex-wrap items-end justify-between gap-3">
+    <div>
+        <h1
+            style={{
+                fontFamily: FRAUNCES,
+                fontSize: "clamp(2rem, 4vw, 2.75rem)",
+                color: T.ink,
+                lineHeight: 1.05,
+            }}
+        >
+            My Profile
+        </h1>
+    </div>
+
+    <div className="flex items-center gap-3">
+
+        {isDirty && (
+            <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full"
+                style={{
+                    backgroundColor: "#FDF2E9",
+                    color: T.terra,
+                    border: `1px solid ${T.terra}33`,
+                }}
+            >
+                <span
+                    className="w-1.5 h-1.5 rounded-full"
+                    style={{ backgroundColor: T.terra }}
+                />
+                Unsaved changes
+            </span>
+        )}
+
+        <button
+            onClick={handleLogout}
+            className="px-5 py-2.5 rounded-xl font-semibold text-white transition hover:opacity-90"
+            style={{ backgroundColor: "#B3441F" }}
+        >
+            Logout
+        </button>
+
+    </div>
+</div>
 
                 <p className="mt-1 text-sm" style={{ color: T.ink, opacity: 0.55 }}>
                     Manage the details tied to your account and bookings.

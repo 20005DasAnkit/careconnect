@@ -10,7 +10,6 @@ namespace HEALTHCARE.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize(Roles = "Patient")]
 public class PatientController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -64,6 +63,7 @@ public class PatientController : ControllerBase
         return Ok(slots);
     }
 
+    [Authorize(Roles = "Patient")]
     [HttpPost("book")]
     public IActionResult BookAppointment(BookAppointmentDto dto)
     {
@@ -148,6 +148,7 @@ public class PatientController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Patient")]
     [HttpGet("appointments")]
     public IActionResult MyAppointments()
     {
@@ -195,6 +196,8 @@ public class PatientController : ControllerBase
     {
         return Ok(_context.Products.ToList());
     }
+
+    [Authorize(Roles = "Patient")]
     [HttpPost("order")]
     public IActionResult PlaceOrder(PlaceOrderDto dto)
     {
@@ -258,6 +261,7 @@ public class PatientController : ControllerBase
         });
     }
 
+    [Authorize(Roles = "Patient")]
     [HttpGet("orders")]
     public IActionResult MyOrders()
     {
@@ -289,52 +293,53 @@ public class PatientController : ControllerBase
         return Ok(orders);
     }
 
-[HttpGet("ambulances")]
-public IActionResult GetAmbulances()
-{
-    var userId = int.Parse(
-        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    [Authorize(Roles = "Patient")]
+    [HttpGet("ambulances")]
+    public IActionResult GetAmbulances()
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-    var ambulances =
-        (from a in _context.Ambulances
+        var ambulances =
+            (from a in _context.Ambulances
 
-         let activeRequest = _context.AmbulanceRequests
-             .Where(r =>
-                 r.AmbulanceId == a.Id &&
-                 r.Status != "Completed" &&
-                 r.Status != "Rejected" &&
-                 r.Status != "Cancelled")
-             .OrderByDescending(r => r.RequestTime)
-             .FirstOrDefault()
+             let activeRequest = _context.AmbulanceRequests
+                 .Where(r =>
+                     r.AmbulanceId == a.Id &&
+                     r.Status != "Completed" &&
+                     r.Status != "Rejected" &&
+                     r.Status != "Cancelled")
+                 .OrderByDescending(r => r.RequestTime)
+                 .FirstOrDefault()
 
-         select new
-         {
-             a.Id,
-             a.DriverName,
-             a.VehicleNumber,
-             a.Type,
+             select new
+             {
+                 a.Id,
+                 a.DriverName,
+                 a.VehicleNumber,
+                 a.Type,
 
-             IsAvailable = a.IsAvailable,
+                 IsAvailable = a.IsAvailable,
 
-             MyRide =
-                 activeRequest != null &&
-                 activeRequest.UserId == userId,
+                 MyRide =
+                     activeRequest != null &&
+                     activeRequest.UserId == userId,
 
-             RequestId =
-                 activeRequest != null &&
-                 activeRequest.UserId == userId
-                     ? activeRequest.Id
-                     : (int?)null,
+                 RequestId =
+                     activeRequest != null &&
+                     activeRequest.UserId == userId
+                         ? activeRequest.Id
+                         : (int?)null,
 
-             RideStatus =
-                 activeRequest != null &&
-                 activeRequest.UserId == userId
-                     ? activeRequest.Status
-                     : null
-         }).ToList();
+                 RideStatus =
+                     activeRequest != null &&
+                     activeRequest.UserId == userId
+                         ? activeRequest.Status
+                         : null
+             }).ToList();
 
-    return Ok(ambulances);
-}
+        return Ok(ambulances);
+    }
     private static readonly Dictionary<string, string[]> CityKeywords = new()
     {
         ["Kolkata"] = new[] { "kolkata", "calcutta", "park street", "ballygunge", "alipore" },
@@ -402,6 +407,7 @@ public IActionResult GetAmbulances()
         return Ok(coverage);
     }
 
+    [Authorize(Roles = "Patient")]
     [HttpPost("ambulance-request")]
     public IActionResult RequestAmbulance(CreateAmbulanceRequestDto dto)
     {
@@ -476,6 +482,7 @@ public IActionResult GetAmbulances()
 
     // Replace CancelAppointment in your existing PatientController.cs
 
+    [Authorize(Roles = "Patient")]
     [HttpPut("appointment/cancel/{id}")]
     public IActionResult CancelAppointment(int id)
     {
@@ -553,6 +560,8 @@ public IActionResult GetAmbulances()
             VehicleNumber = ambulance != null ? ambulance.VehicleNumber : null
         });
     }
+
+    [Authorize(Roles = "Patient")]
     [HttpGet("refund-balance")]
     public IActionResult GetRefundBalance()
     {
@@ -566,6 +575,8 @@ public IActionResult GetAmbulances()
             RefundBalance = user?.RefundBalance ?? 0
         });
     }
+
+    [Authorize(Roles = "Patient")]
     [HttpGet("profile")]
     public IActionResult GetProfile()
     {
@@ -595,6 +606,7 @@ public IActionResult GetAmbulances()
         });
     }
 
+    [Authorize(Roles = "Patient")]
     [HttpPut("profile")]
     public IActionResult UpdateProfile(UpdateProfileDto dto)
     {
@@ -636,6 +648,8 @@ public IActionResult GetAmbulances()
             pinCode = user.PinCode
         });
     }
+
+    [Authorize(Roles = "Patient")]
     [HttpPost("avatar")]
     public async Task<IActionResult> UploadAvatar(IFormFile file)
     {
@@ -679,34 +693,35 @@ public IActionResult GetAmbulances()
         });
     }
 
+    [Authorize(Roles = "Patient")]
     [HttpGet("ride/{id}")]
-public IActionResult GetRide(int id)
-{
-    var userId = int.Parse(
-        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+    public IActionResult GetRide(int id)
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-    var ride =
-        (from r in _context.AmbulanceRequests
-         join a in _context.Ambulances
-            on r.AmbulanceId equals a.Id
-         where r.Id == id &&
-               r.UserId == userId
-         select new
-         {
-             r.Id,
-             r.Status,
-             r.Fare,
-             r.DistanceKm,
-             r.PickupLocation,
-             r.DestinationLocation,
-             DriverName = a.DriverName,
-             DriverPhone = a.DriverPhone,
-             VehicleNumber = a.VehicleNumber
-         }).FirstOrDefault();
+        var ride =
+            (from r in _context.AmbulanceRequests
+             join a in _context.Ambulances
+                on r.AmbulanceId equals a.Id
+             where r.Id == id &&
+                   r.UserId == userId
+             select new
+             {
+                 r.Id,
+                 r.Status,
+                 r.Fare,
+                 r.DistanceKm,
+                 r.PickupLocation,
+                 r.DestinationLocation,
+                 DriverName = a.DriverName,
+                 DriverPhone = a.DriverPhone,
+                 VehicleNumber = a.VehicleNumber
+             }).FirstOrDefault();
 
-    if (ride == null)
-        return NotFound();
+        if (ride == null)
+            return NotFound();
 
-    return Ok(ride);
-}
+        return Ok(ride);
+    }
 }

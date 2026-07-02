@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, Star, MapPin, Stethoscope, X, ChevronDown, ArrowRight } from "lucide-react";
 import api from "../../api/axios";
 
@@ -48,6 +48,7 @@ function CardSkeleton() {
 }
 
 export default function Doctors() {
+    const navigate = useNavigate();
     const [searchParams] = useSearchParams();
     const [doctors, setDoctors] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -299,9 +300,16 @@ export default function Doctors() {
                                             </p>
                                         </div>
                                         <button
-                                            onClick={() =>
-                                                (window.location.href = `/patient/bookdoctor?doctorId=${doc.id}`)
-                                            }
+                                            onClick={() => {
+                                                const token = localStorage.getItem("token");
+
+                                                if (!token) {
+                                                    navigate("/login");
+                                                    return;
+                                                }
+
+                                                navigate(`/patient/bookdoctor?doctorId=${doc.id}`);
+                                            }}
                                             className="flex items-center gap-1.5 bg-[#16332B] hover:bg-[#0F231D] active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-full transition-all"
                                         >
                                             Book <ArrowRight size={14} />

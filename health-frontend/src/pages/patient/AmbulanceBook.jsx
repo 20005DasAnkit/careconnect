@@ -62,13 +62,21 @@ export default function Ambulance() {
         }
     }
 
-    function goToBooking(amb) {
-        const params = new URLSearchParams({
-            ambulanceId: amb.id,
-            driverName: amb.driverName || "",
-        });
-        navigate(`/patient/ambulance/request?${params.toString()}`);
+function goToBooking(amb) {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        navigate("/login");
+        return;
     }
+
+    const params = new URLSearchParams({
+        ambulanceId: amb.id,
+        driverName: amb.driverName || "",
+    });
+
+    navigate(`/patient/ambulance/request?${params.toString()}`);
+}
 
     const filtered = ambulances.filter((a) => {
         if (!search) return true;
