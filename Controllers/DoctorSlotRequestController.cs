@@ -72,19 +72,19 @@ public class DoctorSlotRequestController : ControllerBase
         if (overlap)
             return BadRequest("Time slot overlaps another request.");
 
-var request = new DoctorSlotRequest
-{
-    DoctorId = doctor.Id,
-    HospitalId = dto.HospitalId,
-    HospitalSessionId = dto.HospitalSessionId,
-    RequestedFrom = dto.RequestedFrom,
-    RequestedTo = dto.RequestedTo,
-    MaxPatients = dto.MaxPatients,
-    Reason = dto.Reason,
-    Status = "Pending",
-    AvailabilityCreated = false,
-    RequestedAt = DateTime.Now
-};
+        var request = new DoctorSlotRequest
+        {
+            DoctorId = doctor.Id,
+            HospitalId = dto.HospitalId,
+            HospitalSessionId = dto.HospitalSessionId,
+            RequestedFrom = dto.RequestedFrom,
+            RequestedTo = dto.RequestedTo,
+            MaxPatients = dto.MaxPatients,
+            Reason = dto.Reason,
+            Status = "Pending",
+            AvailabilityCreated = false,
+            RequestedAt = DateTime.Now
+        };
 
         _context.DoctorSlotRequests.Add(request);
 
@@ -117,23 +117,23 @@ var request = new DoctorSlotRequest
             .Include(x => x.HospitalSession)
             .Where(x => x.DoctorId == doctor.Id)
             .OrderByDescending(x => x.RequestedAt)
-.Select(x => new
-{
-    x.Id,
-    Hospital = x.Hospital!.Name,
-    x.RequestedFrom,
-    x.RequestedTo,
-    x.MaxPatients,
-    x.Reason,
-    x.Status,
-    x.AdminRemark,
-    x.AvailabilityCreated,
-    x.RequestedAt
-})
-            .ToList();
+            .Select(x => new
+            {
+                x.Id,
+                Hospital = x.Hospital!.Name,
+                x.RequestedFrom,
+                x.RequestedTo,
+                x.MaxPatients,
+                x.Reason,
+                x.Status,
+                x.AdminRemark,
+                x.AvailabilityCreated,
+                x.RequestedAt
+            })
+                        .ToList();
 
-        return Ok(data);
-    }
+            return Ok(data);
+        }
 
     // ==========================
     // CANCEL REQUEST

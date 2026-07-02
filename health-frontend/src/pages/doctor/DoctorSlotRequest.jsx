@@ -22,13 +22,13 @@ export default function DoctorSlotRequest() {
     }, []);
 
     async function loadHospitals() {
-    try {
-        const res = await api.get("/doctor/hospitals");
-        setHospitals(res.data);
-    } catch (err) {
-        console.log(err);
+        try {
+            const res = await api.get("/doctor/hospitals");
+            setHospitals(res.data);
+        } catch (err) {
+            console.log(err);
+        }
     }
-}
 
     async function loadRequests() {
         try {
@@ -39,36 +39,26 @@ export default function DoctorSlotRequest() {
         }
     }
 
-async function loadSessions(hospitalId) {
-
-    try {
-
-        const res = await api.get(
-            `/doctor/hospital-sessions/${hospitalId}`
-        );
-
-        setSessions(res.data);
-
-    } catch (err) {
-
-        console.log(err);
-
+    async function loadSessions(hospitalId) {
+        try {
+            const res = await api.get(
+                `/doctor/hospital-sessions/${hospitalId}`
+            );
+            setSessions(res.data);
+        } catch (err) {
+            console.log(err);
+        }
     }
-}
 
     function handleChange(e) {
-
         const { name, value } = e.target;
-
         setForm(prev => ({
             ...prev,
             [name]: value
         }));
 
         if (name === "hospitalId") {
-
             loadSessions(value);
-
             setForm(prev => ({
                 ...prev,
                 hospitalId: value,
@@ -77,27 +67,22 @@ async function loadSessions(hospitalId) {
         }
     }
     async function submitRequest() {
-
         if (!form.hospitalId) {
             alert("Select Hospital");
             return;
         }
-
         if (!form.hospitalSessionId) {
             alert("Select Hospital Session");
             return;
         }
-
         if (!form.requestedFrom) {
             alert("Select Start Time");
             return;
         }
-
         if (!form.requestedTo) {
             alert("Select End Time");
             return;
         }
-
         try {
 
             const payload = {
@@ -109,9 +94,7 @@ async function loadSessions(hospitalId) {
                 reason: form.reason
             };
             await api.post("/doctor/request-slot", payload);
-
             alert("Slot request submitted successfully.");
-
             setForm({
                 hospitalId: "",
                 hospitalSessionId: "",
@@ -122,7 +105,6 @@ async function loadSessions(hospitalId) {
             });
 
             setSessions([]);
-
             loadRequests();
 
         } catch (err) {
@@ -136,9 +118,7 @@ async function loadSessions(hospitalId) {
     return (
 
         <div className="min-h-screen bg-gray-100 p-6">
-
             <div className="max-w-7xl mx-auto">
-
                 <div className="bg-white rounded-xl shadow p-6">
 
                     <h2 className="text-2xl font-bold mb-6">
@@ -162,7 +142,6 @@ async function loadSessions(hospitalId) {
                                 <option value="">
                                     Select Hospital
                                 </option>
-
                                 {hospitals.map(h => (
 
                                     <option
@@ -173,11 +152,8 @@ async function loadSessions(hospitalId) {
                                     </option>
 
                                 ))}
-
                             </select>
-
                         </div>
-
                         <div>
 
                             <label className="font-semibold">
@@ -190,11 +166,9 @@ async function loadSessions(hospitalId) {
                                 value={form.hospitalSessionId}
                                 onChange={handleChange}
                             >
-
                                 <option value="">
                                     Select Session
                                 </option>
-
                                 {sessions.map(s => (
 
                                     <option
@@ -205,16 +179,13 @@ async function loadSessions(hospitalId) {
                                     </option>
 
                                 ))}
-
                             </select>
-
                         </div>
                         <div>
 
                             <label className="font-semibold">
                                 From
                             </label>
-
                             <input
                                 type="datetime-local"
                                 name="requestedFrom"
@@ -222,15 +193,12 @@ async function loadSessions(hospitalId) {
                                 onChange={handleChange}
                                 className="w-full border rounded p-2 mt-2"
                             />
-
                         </div>
-
                         <div>
 
                             <label className="font-semibold">
                                 To
                             </label>
-
                             <input
                                 type="datetime-local"
                                 name="requestedTo"
@@ -238,15 +206,12 @@ async function loadSessions(hospitalId) {
                                 onChange={handleChange}
                                 className="w-full border rounded p-2 mt-2"
                             />
-
                         </div>
-
                         <div>
 
                             <label className="font-semibold">
                                 Maximum Patients
                             </label>
-
                             <input
                                 type="number"
                                 name="maxPatients"
@@ -254,7 +219,6 @@ async function loadSessions(hospitalId) {
                                 onChange={handleChange}
                                 className="w-full border rounded p-2 mt-2"
                             />
-
                         </div>
 
                         <div className="md:col-span-2">
@@ -262,7 +226,6 @@ async function loadSessions(hospitalId) {
                             <label className="font-semibold">
                                 Reason
                             </label>
-
                             <textarea
                                 name="reason"
                                 value={form.reason}
@@ -271,26 +234,21 @@ async function loadSessions(hospitalId) {
                                 placeholder="Example: Extra Evening OPD, Emergency Duty, Weekend Checkup"
                                 className="w-full border rounded p-3 mt-2"
                             />
-
                         </div>
 
                     </div>
-
                     <button
                         onClick={submitRequest}
                         className="mt-6 bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
                     >
                         Submit Request
                     </button>
-
                 </div>
 
                 {/* ===================== MY REQUESTS ===================== */}
 
                 <div className="bg-white rounded-xl shadow mt-8 overflow-hidden">
-
                     <div className="p-5 border-b">
-
                         <h2 className="text-xl font-bold">
                             My Slot Requests
                         </h2>
@@ -298,74 +256,49 @@ async function loadSessions(hospitalId) {
                     </div>
 
                     <table className="w-full">
-
                         <thead className="bg-gray-100">
-
                             <tr>
-
                                 <th className="p-3 text-left">Hospital</th>
-
                                 <th className="p-3 text-left">From</th>
-
                                 <th className="p-3 text-left">To</th>
-
                                 <th className="p-3 text-left">Patients</th>
-                                <th className="p-3 text-left">
-                                    Reason
-                                </th>
-
+                                <th className="p-3 text-left">Reason</th>
                                 <th className="p-3 text-left">Status</th>
-
                             </tr>
-
                         </thead>
-
                         <tbody>
 
                             {requests.length === 0 && (
-
                                 <tr>
-
                                     <td
                                         colSpan="5"
                                         className="text-center p-6 text-gray-500"
                                     >
                                         No Requests Found
                                     </td>
-
                                 </tr>
-
                             )}
-
                             {requests.map(r => (
-
                                 <tr
                                     key={r.id}
                                     className="border-t"
                                 >
-
                                     <td className="p-3">
                                         {r.hospital}
                                     </td>
-
                                     <td className="p-3">
                                         {new Date(r.requestedFrom).toLocaleString()}
                                     </td>
-
                                     <td className="p-3">
                                         {new Date(r.requestedTo).toLocaleString()}
                                     </td>
-
                                     <td className="p-3">
                                         {r.maxPatients}
                                     </td>
-
                                     <td className="p-3">
                                         {r.reason || "-"}
                                     </td>
-
                                     <td className="p-3">
-
                                         {r.status === "Pending" && (
                                             <span className="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full">
                                                 Pending
@@ -385,21 +318,15 @@ async function loadSessions(hospitalId) {
                                         )}
 
                                     </td>
-
                                 </tr>
 
                             ))}
 
                         </tbody>
-
                     </table>
 
-
                 </div>
-
             </div>
-
         </div>
-
     );
 }

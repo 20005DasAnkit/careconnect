@@ -58,15 +58,11 @@ export default function ProductOrders() {
                 <Navbar />
 
                 <div className="p-6">
-
                     <h2 className="text-3xl font-bold mb-6">
                         Product Orders
                     </h2>
-
                     <div className="bg-white rounded shadow overflow-x-auto">
-
                         <table className="w-full">
-
                             <thead className="bg-blue-700 text-white">
 
                                 <tr>
@@ -83,9 +79,7 @@ export default function ProductOrders() {
                             </thead>
 
                             <tbody>
-
                                 {orders.map(o => (
-
                                     <tr key={o.orderId} className="border-b">
 
                                         <td className="p-3">{o.customerName}</td>
@@ -138,7 +132,6 @@ export default function ProductOrders() {
                                                         ✅ Deliver
                                                     </button>
                                                 )}
-
                                                 {o.status === "Delivered" && o.paymentStatus !== "Paid" && (
                                                     <button
                                                         onClick={() => markPayment(o.orderId)}
@@ -147,7 +140,6 @@ export default function ProductOrders() {
                                                         💳 Payment Received
                                                     </button>
                                                 )}
-
                                                 {o.status === "Delivered" && o.paymentStatus === "Paid" && (
                                                     <span className="text-green-600 font-bold">
                                                         ✔ Completed
@@ -175,15 +167,10 @@ export default function ProductOrders() {
                                 ))}
 
                             </tbody>
-
                         </table>
-
                     </div>
-
                 </div>
-
             </div>
-
         </div>
     );
 }
