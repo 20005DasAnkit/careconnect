@@ -25,14 +25,27 @@ export default function Dashboard() {
         <Navbar />
 
         <div className="p-6 grid grid-cols-4 gap-4">
-          <Card title="Patients" value={data.totalPatients} color="bg-blue-500" />
-          <Card title="Doctors" value={data.totalDoctors} color="bg-green-500" />
-          <Card title="Products" value={data.totalProducts} color="bg-purple-500" />
-          <Card title="Ambulance" value={data.totalAmbulances} color="bg-red-500" />
-          <Card title="Appointments" value={data.totalAppointments} color="bg-yellow-500" />
-          <Card title="Orders" value={data.totalOrders} color="bg-indigo-500" />
-          <Card title="Pending Appointments" value={data.pendingAppointments} color="bg-orange-500" />
-          <Card title="Pending Requests" value={data.pendingAmbulanceRequests} color="bg-pink-500" />
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+
+            <Card title="Patients" value={data.totalPatients || 0} color="bg-blue-500" />
+
+            <Card title="Doctors" value={data.totalDoctors || 0} color="bg-green-500" />
+
+            <Card title="Hospitals" value={data.totalHospitals || 0} color="bg-cyan-600" />
+
+            <Card title="Products" value={data.totalProducts || 0} color="bg-purple-500" />
+
+            <Card title="Ambulances" value={data.totalAmbulances || 0} color="bg-red-500" />
+
+            <Card title="Appointments" value={data.totalAppointments || 0} color="bg-yellow-500" />
+
+            <Card title="Orders" value={data.totalOrders || 0} color="bg-indigo-500" />
+
+            <Card title="Pending Appointments" value={data.pendingAppointments || 0} color="bg-orange-500" />
+
+            <Card title="Pending Ambulance" value={data.pendingAmbulanceRequests || 0} color="bg-pink-500" />
+
+          </div>
         </div>
       </div>
     </div>

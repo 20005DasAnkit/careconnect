@@ -14,12 +14,16 @@ import AppointmentPage from "../pages/admin/Appointments";
 import AmbulancePage from "../pages/admin/Ambulances";
 import ProductOrders from "../pages/admin/ProductOrders";
 import AmbulanceBookings from "../pages/admin/AmbulanceBookings";
+import Hospitals from "../pages/admin/Hospitals";
+import HospitalSessions from "../pages/admin/HospitalSessions";
+import AdminSlotRequests from "../pages/admin/AdminSlotRequests";
 
 // Doctor
 import DoctorDashboard from "../pages/doctor/Dashboard";
 import DoctorAppointments from "../pages/doctor/DoctorAppointments";
 import DoctorAvailabilitys from "../pages/doctor/DoctorAvailability";
 import DoctorProfile from "../pages/doctor/DoctorProfile";
+import DoctorSlotRequest from "../pages/doctor/DoctorSlotRequest";
 
 // Patient
 import PatientDashboard from "../pages/patient/Dashboard";
@@ -62,12 +66,22 @@ export default function AppRoutes() {
         <Route path="/admin/ambulances" element={<AmbulancePage />} />
         <Route path="/admin/product-orders" element={<ProductOrders />} />
         <Route path="/admin/ambulance-bookings" element={<AmbulanceBookings />} />
+        <Route path="/admin/hospitals" element={<Hospitals />} />
+        <Route path="/admin/hospital-sessions" element={<HospitalSessions />} />
+        <Route path="/admin/slot-requests" element={<AdminSlotRequests />} />
+        
 
         {/* DOCTOR */}
         <Route path="/doctor/" element={<DoctorDashboard />} />
         <Route path="/doctor/appointments" element={<DoctorAppointments />} />
         <Route path="/doctor/availability" element={<DoctorAvailabilitys />} />
         <Route path="/doctor/profile" element={<DoctorProfile />} />
+        <Route
+    path="/doctor/request-slot"
+    element={<DoctorSlotRequest />}
+/>
+        
+
 
         {/* PATIENT */}
         {/* PATIENT */}

@@ -259,6 +259,7 @@ export default function DoctorDashboard() {
           <NavLink icon={<Calendar size={17} />} label="Appointments" path="/doctor/appointments" />
           <NavLink icon={<Clock3 size={17} />} label="Availability" path="/doctor/availability" />
           <NavLink icon={<UserCircle2 size={17} />} label="Profile" path="/doctor/profile" />
+          <NavLink icon={<Clock3 size={17} />} label="Request Slot" path="/doctor/request-slot" />
         </nav>
 
         <div style={{ padding: 16, borderTop: "1px solid rgba(255,255,255,.08)" }}>

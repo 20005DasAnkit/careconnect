@@ -75,32 +75,37 @@ export default function Products() {
         return counts;
     }, [products]);
 
-function goToOrder(product) {
-    const token = localStorage.getItem("token");
+    function goToOrder(product) {
+        const token = localStorage.getItem("token");
 
-    if (!token) {
-        navigate("/login");
-        return;
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        const quantity = qty[product.id] || 1;
+
+        const params = new URLSearchParams({
+            productId: product.id,
+            quantity,
+            productName: product.name || "",
+            price: product.price,
+        });
+
+        navigate(`/patient/place-order?${params.toString()}`);
     }
-
-    const quantity = qty[product.id] || 1;
-
-    const params = new URLSearchParams({
-        productId: product.id,
-        quantity,
-        productName: product.name || "",
-        price: product.price,
-    });
-
-    navigate(`/patient/place-order?${params.toString()}`);
-}
 
     return (
         <div
             className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-            <div className="max-w-[1200px] mx-auto px-6 lg:px-10 py-16">
+            <div
+                className="w-full mx-auto px-10 py-16"
+                style={{
+                    maxWidth: "1700px",
+                }}
+            >
 
                 {/* ───────────────────── HEADER ───────────────────── */}
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
@@ -125,7 +130,7 @@ function goToOrder(product) {
                         </h1>
                     </div>
 
-                    <div className="relative max-w-xs w-full">
+                    <div className="relative w-full max-w-md">
                         <Search
                             size={15}
                             className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35"
@@ -200,7 +205,7 @@ function goToOrder(product) {
 
                 {/* ───────────────────── PRODUCT GRID ───────────────────── */}
                 {!loading && filteredProducts.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                         {filteredProducts.map((p) => (
                             <div
                                 key={p.id}

@@ -149,31 +149,31 @@ export default function AmbulanceRequest() {
 
     async function searchLocation(value) {
 
-    if (value.length < 3) {
-        setSearchResults([]);
-        return;
+        if (value.length < 3) {
+            setSearchResults([]);
+            return;
+        }
+
+        try {
+
+            setSearching(true);
+
+            const res = await api.get(
+                `/maps/search?q=${encodeURIComponent(value)}`
+            );
+
+            setSearchResults(res.data);
+
+        } catch (err) {
+
+            console.error(err);
+
+        } finally {
+
+            setSearching(false);
+
+        }
     }
-
-    try {
-
-        setSearching(true);
-
-        const res = await api.get(
-            `/maps/search?q=${encodeURIComponent(value)}`
-        );
-
-        setSearchResults(res.data);
-
-    } catch (err) {
-
-        console.error(err);
-
-    } finally {
-
-        setSearching(false);
-
-    }
-}
 
     // Poll ride status once we're on step 4 ("waiting for driver" / done)
     useEffect(() => {
@@ -201,17 +201,17 @@ export default function AmbulanceRequest() {
     }, [step, result]);
 
     useEffect(() => {
-    if (search.length < 3) {
-        setSearchResults([]);
-        return;
-    }
+        if (search.length < 3) {
+            setSearchResults([]);
+            return;
+        }
 
-    const timer = setTimeout(() => {
-        searchLocation(search);
-    }, 600);
+        const timer = setTimeout(() => {
+            searchLocation(search);
+        }, 600);
 
-    return () => clearTimeout(timer);
-}, [search]);
+        return () => clearTimeout(timer);
+    }, [search]);
 
     async function submitRequest() {
         if (!ambulanceId) {
@@ -249,7 +249,13 @@ export default function AmbulanceRequest() {
             <Toaster position="top-right" />
 
             <div className="min-h-screen bg-[#F8F6F0]">
-                <div className="max-w-xl mx-auto px-4 py-10">
+                <div
+                    className="w-full mx-auto"
+                    style={{
+                        maxWidth: "1500px",
+                        padding: "48px 40px",
+                    }}
+                >
 
                     {step < 4 && (
                         <button
@@ -261,7 +267,15 @@ export default function AmbulanceRequest() {
                         </button>
                     )}
 
-                    <div className="bg-white rounded-2xl border border-[#E7E2D6] p-6 sm:p-8">
+                    <div
+                        className="bg-white shadow-lg"
+                        style={{
+                            borderRadius: "32px",
+                            border: "1px solid #E7E2D6",
+                            padding: "48px",
+                            minHeight: "82vh",
+                        }}
+                    >
 
                         {step < 4 && <StepHeader step={step} driverName={driverName} />}
 

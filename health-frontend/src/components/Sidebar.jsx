@@ -11,6 +11,8 @@ export default function Sidebar() {
         <Link to="/admin/products" className="hover:bg-blue-700 p-2 rounded">Products</Link>
         <Link to="/admin/appointments" className="hover:bg-blue-700 p-2 rounded">Appointments</Link>
         <Link to="/admin/ambulances" className="hover:bg-blue-700 p-2 rounded">Ambulance</Link>
+        <Link to="/admin/hospitals" className="hover:bg-blue-700 p-2 rounded">Hospitals</Link>
+        <Link to="/admin/hospital-sessions" className="hover:bg-blue-700 p-2 rounded">Hospital Sessions</Link>
         <Link
           to="/admin/product-orders"
           className="hover:bg-blue-700 p-2 rounded"
@@ -23,6 +25,10 @@ export default function Sidebar() {
           className="hover:bg-blue-700 p-2 rounded"
         >
           Ambulance Bookings
+        </Link>
+
+        <Link to="/admin/slot-requests">
+          Doctor Slot Requests
         </Link>
       </div>
     </div>

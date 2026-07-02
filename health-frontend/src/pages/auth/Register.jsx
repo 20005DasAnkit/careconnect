@@ -1,58 +1,75 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2, HeartPulse, CheckCircle2 } from "lucide-react";
+import { User, Mail, Phone, Lock, Eye, EyeOff, Loader2 } from "lucide-react";
 import { registerUser } from "../../services/authService";
 
-/* ─── Tokens ──────────────────────────────────── */
+/* ── CareConnect brand tokens (match landing page) ───────────── */
 const T = {
-    cream: "#F5F0E8",
-    creamDark: "#EDE7D9",
-    green: "#2D5016",
-    greenLight: "#EBF2E3",
-    terra: "#C4622D",
-    ink: "#1A1A1A",
-    muted: "#6B7280",
-    border: "#E2DACE",
+    cream: "#F5F1E8",
+    green: "#16332B",
+    greenSoft: "#1F4438",
+    terra: "#C1633B",
+    ink: "#1A1A17",
+    muted: "#6B685F",
+    border: "#E4DFD0",
     white: "#FFFFFF",
-    errorText: "#B91C1C",
-    errorBorder: "#FCA5A5",
-    errorBg: "#FEF2F2",
+    errorText: "#B0432B",
+    errorBg: "#FBEDE7",
+    errorBorder: "#EAC7B8",
 };
 
-/* ─── Input field ─────────────────────────────── */
-function Field({ label, error, icon, children }) {
-    return (
-        <div style={{ marginBottom: 16 }}>
-            <label style={{ display: "block", fontSize: 13, fontWeight: 600, color: T.ink, marginBottom: 6 }}>{label}</label>
-            <div style={{ position: "relative" }}>
-                {icon && (
-                    <span style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: T.muted, display: "flex", pointerEvents: "none" }}>
-                        {icon}
-                    </span>
-                )}
-                {children}
-            </div>
-            {error && <p style={{ fontSize: 12, color: T.errorText, marginTop: 4 }}>{error}</p>}
-        </div>
-    );
-}
-
-const baseInput = (hasIcon, hasErr) => ({
-    width: "100%", height: 48, borderRadius: 12,
-    border: `1.5px solid ${hasErr ? T.errorBorder : T.border}`,
-    paddingLeft: hasIcon ? 44 : 14, paddingRight: 14,
-    fontSize: 14, outline: "none", background: T.white,
-    color: T.ink, fontFamily: "Inter, sans-serif",
-    transition: "border-color .15s, box-shadow .15s",
-});
-
-/* ─── Left panel feature list ─────────────────── */
 const FEATURES = [
     "Book appointments with verified doctors",
     "Order medicine with doorstep delivery",
     "Request ambulance in emergencies",
     "Secure health records anytime",
 ];
+
+function Field({ label, error, icon: Icon, children }) {
+    return (
+        <label style={{ display: "block", marginBottom: 16 }}>
+            <span
+                style={{
+                    display: "block",
+                    fontSize: 12,
+                    letterSpacing: "0.06em",
+                    textTransform: "uppercase",
+                    color: T.muted,
+                    marginBottom: 7,
+                    fontWeight: 500,
+                }}
+            >
+                {label}
+            </span>
+            <div
+                className="cc-field"
+                style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    background: T.white,
+                    border: `1px solid ${error ? T.errorBorder : T.border}`,
+                    borderRadius: 10,
+                    padding: "12px 14px",
+                }}
+            >
+                <Icon size={17} color={T.muted} style={{ flexShrink: 0 }} />
+                {children}
+            </div>
+            {error && <p style={{ fontSize: 12, color: T.errorText, marginTop: 5 }}>{error}</p>}
+        </label>
+    );
+}
+
+const bareInput = {
+    border: "none",
+    outline: "none",
+    width: "100%",
+    fontSize: 15,
+    color: T.ink,
+    background: "transparent",
+    fontFamily: "'Inter', sans-serif",
+};
 
 export default function Register() {
     const navigate = useNavigate();
@@ -64,8 +81,13 @@ export default function Register() {
     const [loading, setLoading] = useState(false);
     const [apiError, setApiError] = useState("");
 
-    const set = k => e => { setForm(p => ({ ...p, [k]: e.target.value })); clearErr(k); };
-    function clearErr(k) { if (errors[k]) setErrors(p => ({ ...p, [k]: undefined })); }
+    const set = (k) => (e) => {
+        setForm((p) => ({ ...p, [k]: e.target.value }));
+        clearErr(k);
+    };
+    function clearErr(k) {
+        if (errors[k]) setErrors((p) => ({ ...p, [k]: undefined }));
+    }
 
     function validate() {
         const e = {};
@@ -81,7 +103,8 @@ export default function Register() {
         return e;
     }
 
-    async function handleSubmit() {
+    async function handleSubmit(e) {
+        e.preventDefault();
         setApiError("");
         const fe = validate();
         setErrors(fe);
@@ -89,168 +112,307 @@ export default function Register() {
 
         setLoading(true);
         try {
-            await registerUser({ fullName: form.name, email: form.email, password: form.password });
+            await registerUser({ fullName: form.name, email: form.email, phone: form.phone, password: form.password });
             navigate("/login");
         } catch (err) {
-            setApiError(err.response?.data?.message || err.response?.data || "Registration failed. Please try again.");
+            const msg =
+                err?.response?.data?.message ??
+                (typeof err?.response?.data === "string" ? err.response.data : null);
+            setApiError(msg || "Registration failed. Please try again.");
         } finally {
             setLoading(false);
         }
     }
 
     return (
-        <div style={{ minHeight: "100vh", display: "flex", fontFamily: "Inter, sans-serif" }}>
+        <div
+            style={{
+                minHeight: "100vh",
+                background: T.cream,
+                display: "flex",
+                alignItems: "stretch",
+                justifyContent: "center",
+                fontFamily: "'Inter', sans-serif",
+            }}
+        >
             <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,400&family=Inter:wght@400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Inter:wght@400;500;600&display=swap');
         *{box-sizing:border-box;}
         a{text-decoration:none;}
-        input:focus{border-color:${T.green}!important;box-shadow:0 0 0 3px ${T.greenLight}!important;}
-        @media(min-width:1024px){.reg-left{display:flex!important;}}
+        .cc-field{transition:border-color .15s ease, box-shadow .15s ease;}
+        .cc-field:focus-within{border-color:${T.green}!important;box-shadow:0 0 0 3px rgba(22,51,43,.08);}
+        .cc-btn{transition:transform .15s ease, opacity .15s ease;}
+        .cc-btn:hover{transform:translateY(-1px);}
+        .cc-btn:active{transform:translateY(0);}
+        .cc-link{color:${T.green};text-decoration:underline;text-underline-offset:3px;text-decoration-color:${T.border};}
+        .cc-link:hover{text-decoration-color:${T.green};}
+        input::placeholder{color:#B7B3A4;}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        @media(max-width:900px){.cc-branding{display:none!important;}}
       `}</style>
 
-            {/* ── Left ───────────────────────────────── */}
-            <div className="reg-left" style={{
-                width: "44%", display: "none", flexDirection: "column",
-                position: "relative", overflow: "hidden",
-                background: `linear-gradient(160deg, ${T.green} 0%, #3D6B1F 55%, #527A28 100%)`,
-                padding: "48px 52px",
-            }}>
-                {/* Blobs */}
-                <div style={{ position: "absolute", top: -60, right: -60, width: 260, height: 260, borderRadius: "50%", background: "rgba(255,255,255,.05)" }} />
-                <div style={{ position: "absolute", bottom: -40, left: -40, width: 220, height: 220, borderRadius: "50%", background: "rgba(196,98,45,.15)" }} />
-                <div style={{ position: "absolute", top: "50%", right: "10%", width: 140, height: 140, borderRadius: "50%", background: "rgba(255,255,255,.04)" }} />
-
-                {/* Logo */}
-                <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 10 }}>
-                    <div style={{ width: 40, height: 40, borderRadius: 10, background: T.terra, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                        <HeartPulse size={22} color={T.white} />
-                    </div>
-                    <span style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 20, color: T.white }}>CareConnect</span>
-                </div>
-
-                {/* Hero text */}
-                <div style={{ position: "relative", flex: 1, display: "flex", flexDirection: "column", justifyContent: "center" }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: 3, textTransform: "uppercase", color: "rgba(255,255,255,.55)", marginBottom: 18 }}>Join thousands of patients</p>
-                    <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 50, lineHeight: 1.1, color: T.white, margin: "0 0 24px" }}>
-                        Healthcare<br />
-                        <em style={{ fontStyle: "italic", fontWeight: 400 }}>made simple.</em>
-                    </h1>
-                    <p style={{ fontSize: 15, lineHeight: 1.8, color: "rgba(255,255,255,.7)", maxWidth: 320, marginBottom: 40 }}>
-                        Everything you need to manage your health in one secure platform.
-                    </p>
-
-                    {/* Feature list */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                        {FEATURES.map(f => (
-                            <div key={f} style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                                <div style={{ width: 24, height: 24, borderRadius: "50%", background: "rgba(255,255,255,.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                    <CheckCircle2 size={14} color={T.white} />
-                                </div>
-                                <span style={{ fontSize: 14, color: "rgba(255,255,255,.8)" }}>{f}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <p style={{ position: "relative", fontSize: 12, color: "rgba(255,255,255,.35)" }}>© 2025 CareConnect. All rights reserved.</p>
-            </div>
-
-            {/* ── Right ──────────────────────────────── */}
-            <div style={{ flex: 1, background: T.cream, display: "flex", alignItems: "center", justifyContent: "center", padding: "36px 24px", overflowY: "auto" }}>
-                <div style={{ width: "100%", maxWidth: 420 }}>
-
-                    {/* Mobile logo */}
-                    <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 32 }}>
-                        <div style={{ width: 36, height: 36, borderRadius: 9, background: T.terra, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <HeartPulse size={18} color={T.white} />
-                        </div>
-                        <span style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 18, color: T.ink }}>CareConnect</span>
-                    </div>
-
-                    <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 30, color: T.ink, margin: "0 0 4px" }}>Create account</h1>
-                    <p style={{ fontSize: 14, color: T.muted, margin: "0 0 28px" }}>Join CareConnect — it's free.</p>
-
-                    {/* API error */}
-                    {apiError && (
-                        <div style={{ background: T.errorBg, border: `1px solid ${T.errorBorder}`, color: T.errorText, borderRadius: 12, padding: "12px 14px", fontSize: 13, marginBottom: 22 }}>
-                            {apiError}
-                        </div>
-                    )}
-
-                    {/* Form */}
-                    <Field label="Full Name" error={errors.name} icon={<User size={16} />}>
-                        <input
-                            type="text" placeholder="John Doe"
-                            value={form.name} onChange={set("name")}
-                            style={baseInput(true, !!errors.name)}
-                        />
-                    </Field>
-
-                    <Field label="Email Address" error={errors.email} icon={<Mail size={16} />}>
-                        <input
-                            type="email" placeholder="you@example.com"
-                            value={form.email} onChange={set("email")}
-                            style={baseInput(true, !!errors.email)}
-                        />
-                    </Field>
-
-                    <Field label="Phone Number" error={errors.phone} icon={<Phone size={16} />}>
-                        <input
-                            type="tel" placeholder="10-digit mobile number"
-                            value={form.phone} onChange={set("phone")}
-                            style={baseInput(true, !!errors.phone)}
-                        />
-                    </Field>
-
-                    <Field label="Password" error={errors.password} icon={<Lock size={16} />}>
-                        <input
-                            type={showPwd ? "text" : "password"} placeholder="Min. 6 characters"
-                            value={form.password} onChange={set("password")}
-                            style={{ ...baseInput(true, !!errors.password), paddingRight: 44 }}
-                        />
-                        <button type="button" onClick={() => setShowPwd(p => !p)}
-                            style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: T.muted, display: "flex" }}>
-                            {showPwd ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                    </Field>
-
-                    <Field label="Confirm Password" error={errors.confirmPassword} icon={<Lock size={16} />}>
-                        <input
-                            type={showConf ? "text" : "password"} placeholder="Repeat your password"
-                            value={form.confirmPassword} onChange={set("confirmPassword")}
-                            style={{ ...baseInput(true, !!errors.confirmPassword), paddingRight: 44 }}
-                        />
-                        <button type="button" onClick={() => setShowConf(p => !p)}
-                            style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", color: T.muted, display: "flex" }}>
-                            {showConf ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                    </Field>
-
-                    <button
-                        onClick={handleSubmit}
-                        disabled={loading}
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: 1180,
+                    margin: "28px",
+                    display: "grid",
+                    gridTemplateColumns: "0.95fr 1.05fr",
+                    borderRadius: 22,
+                    overflow: "hidden",
+                    boxShadow: "0 30px 70px -25px rgba(22,51,43,.35)",
+                    background: T.white,
+                }}
+            >
+                {/* LEFT — brand / editorial panel, echoes the landing hero */}
+                <div
+                    className="cc-branding"
+                    style={{
+                        background: `linear-gradient(165deg, ${T.green} 0%, ${T.greenSoft} 100%)`,
+                        color: T.white,
+                        padding: "48px 44px",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        position: "relative",
+                        overflow: "hidden",
+                    }}
+                >
+                    <div
                         style={{
-                            width: "100%", height: 50, borderRadius: 12, border: "none",
-                            background: T.green, color: T.white, fontWeight: 700, fontSize: 15,
-                            cursor: loading ? "not-allowed" : "pointer", opacity: loading ? .7 : 1,
-                            display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                            marginTop: 8, transition: "background .15s",
+                            position: "absolute",
+                            inset: 0,
+                            backgroundImage:
+                                "url('https://images.unsplash.com/photo-1584982751601-97dcc096659c?q=80&w=1200&auto=format&fit=crop')",
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                            opacity: 0.16,
+                            mixBlendMode: "luminosity",
                         }}
-                        onMouseEnter={e => { if (!loading) e.currentTarget.style.background = "#3D6B1F"; }}
-                        onMouseLeave={e => e.currentTarget.style.background = T.green}
-                    >
-                        {loading && <Loader2 size={16} style={{ animation: "spin .8s linear infinite" }} />}
-                        {loading ? "Creating account…" : "Create Account"}
-                    </button>
+                    />
+                    <div style={{ position: "relative", zIndex: 1 }}>
+                        <Link to="/" style={{ display: "flex", alignItems: "center", gap: 9, color: T.white }}>
+                            <span style={{ fontSize: 20 }}>✦</span>
+                            <span style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, fontSize: 22 }}>
+                                CareConnect.
+                            </span>
+                        </Link>
 
-                    <p style={{ textAlign: "center", fontSize: 13, color: T.muted, marginTop: 24 }}>
-                        Already have an account?{" "}
-                        <Link to="/login" style={{ fontWeight: 700, color: T.terra }}>Sign In</Link>
-                    </p>
+                        <p
+                            style={{
+                                fontSize: 11,
+                                fontWeight: 600,
+                                letterSpacing: "0.18em",
+                                textTransform: "uppercase",
+                                color: "rgba(255,255,255,.55)",
+                                margin: "56px 0 16px",
+                            }}
+                        >
+                            Join thousands of patients
+                        </p>
+                        <h1
+                            style={{
+                                fontFamily: "'Fraunces', serif",
+                                fontWeight: 500,
+                                fontSize: 42,
+                                lineHeight: 1.12,
+                                margin: "0 0 18px",
+                                maxWidth: 380,
+                            }}
+                        >
+                            Care that actually has time for you.
+                        </h1>
+                        <p style={{ color: "rgba(255,255,255,.72)", fontSize: 15.5, lineHeight: 1.6, maxWidth: 340, marginBottom: 34 }}>
+                            Everything you need to manage your health, in one secure place.
+                        </p>
+
+                        <div style={{ display: "flex", flexDirection: "column", gap: 13 }}>
+                            {FEATURES.map((f) => (
+                                <div key={f} style={{ display: "flex", alignItems: "center", gap: 11 }}>
+                                    <div
+                                        style={{
+                                            width: 22,
+                                            height: 22,
+                                            borderRadius: "50%",
+                                            background: "rgba(255,255,255,.12)",
+                                            border: "1px solid rgba(255,255,255,.2)",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            flexShrink: 0,
+                                            fontSize: 12,
+                                            color: "#E8A583",
+                                        }}
+                                    >
+                                        ✓
+                                    </div>
+                                    <span style={{ fontSize: 14, color: "rgba(255,255,255,.82)" }}>{f}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div style={{ position: "relative", zIndex: 1, display: "flex", gap: 14 }}>
+                        <div
+                            style={{
+                                background: "rgba(255,255,255,.08)",
+                                border: "1px solid rgba(255,255,255,.16)",
+                                borderRadius: 14,
+                                padding: "16px 18px",
+                                flex: 1,
+                            }}
+                        >
+                            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 600 }}>250+</div>
+                            <div style={{ fontSize: 12.5, color: "rgba(255,255,255,.7)", marginTop: 2 }}>Specialist Doctors</div>
+                        </div>
+                        <div
+                            style={{
+                                background: "rgba(255,255,255,.08)",
+                                border: "1px solid rgba(255,255,255,.16)",
+                                borderRadius: 14,
+                                padding: "16px 18px",
+                                flex: 1,
+                            }}
+                        >
+                            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 600, color: "#E8A583" }}>
+                                24/7
+                            </div>
+                            <div style={{ fontSize: 12.5, color: "rgba(255,255,255,.7)", marginTop: 2 }}>Emergency Support</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* RIGHT — form */}
+                <div style={{ padding: "44px 52px", display: "flex", flexDirection: "column", justifyContent: "center", overflowY: "auto" }}>
+                    <div style={{ maxWidth: 400, width: "100%", margin: "0 auto" }}>
+                        <h2
+                            style={{
+                                fontFamily: "'Fraunces', serif",
+                                fontWeight: 500,
+                                fontSize: 30,
+                                color: T.ink,
+                                margin: "0 0 8px",
+                            }}
+                        >
+                            Create your account
+                        </h2>
+                        <p style={{ color: T.muted, fontSize: 14.5, margin: "0 0 26px" }}>
+                            Already have an account?{" "}
+                            <Link to="/login" className="cc-link">
+                                Sign in
+                            </Link>
+                        </p>
+
+                        {apiError && (
+                            <div
+                                style={{
+                                    background: T.errorBg,
+                                    border: `1px solid ${T.errorBorder}`,
+                                    color: T.errorText,
+                                    borderRadius: 10,
+                                    padding: "11px 14px",
+                                    fontSize: 13,
+                                    marginBottom: 20,
+                                }}
+                            >
+                                {apiError}
+                            </div>
+                        )}
+
+                        <form onSubmit={handleSubmit} noValidate>
+                            <Field label="Full Name" error={errors.name} icon={User}>
+                                <input type="text" placeholder="John Doe" value={form.name} onChange={set("name")} style={bareInput} />
+                            </Field>
+
+                            <Field label="Email Address" error={errors.email} icon={Mail}>
+                                <input
+                                    type="email"
+                                    placeholder="you@example.com"
+                                    value={form.email}
+                                    onChange={set("email")}
+                                    style={bareInput}
+                                />
+                            </Field>
+
+                            <Field label="Phone Number" error={errors.phone} icon={Phone}>
+                                <input
+                                    type="tel"
+                                    placeholder="10-digit mobile number"
+                                    value={form.phone}
+                                    onChange={set("phone")}
+                                    style={bareInput}
+                                />
+                            </Field>
+
+                            <Field label="Password" error={errors.password} icon={Lock}>
+                                <input
+                                    type={showPwd ? "text" : "password"}
+                                    placeholder="Min. 6 characters"
+                                    value={form.password}
+                                    onChange={set("password")}
+                                    style={bareInput}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPwd((s) => !s)}
+                                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}
+                                >
+                                    {showPwd ? <EyeOff size={16} color={T.muted} /> : <Eye size={16} color={T.muted} />}
+                                </button>
+                            </Field>
+
+                            <Field label="Confirm Password" error={errors.confirmPassword} icon={Lock}>
+                                <input
+                                    type={showConf ? "text" : "password"}
+                                    placeholder="Repeat your password"
+                                    value={form.confirmPassword}
+                                    onChange={set("confirmPassword")}
+                                    style={bareInput}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowConf((s) => !s)}
+                                    style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex" }}
+                                >
+                                    {showConf ? <EyeOff size={16} color={T.muted} /> : <Eye size={16} color={T.muted} />}
+                                </button>
+                            </Field>
+
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="cc-btn"
+                                style={{
+                                    width: "100%",
+                                    background: T.green,
+                                    color: T.white,
+                                    border: "none",
+                                    borderRadius: 999,
+                                    padding: "14px 0",
+                                    fontSize: 15,
+                                    fontWeight: 600,
+                                    cursor: loading ? "not-allowed" : "pointer",
+                                    opacity: loading ? 0.8 : 1,
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    gap: 8,
+                                    marginTop: 6,
+                                }}
+                            >
+                                {loading && <Loader2 size={16} style={{ animation: "spin .8s linear infinite" }} />}
+                                {loading ? "Creating account…" : "Create Account"}
+                            </button>
+                        </form>
+
+                        <p style={{ textAlign: "center", fontSize: 12.5, color: T.muted, marginTop: 20, lineHeight: 1.6 }}>
+                            By creating an account, you agree to CareConnect's{" "}
+                            <span className="cc-link">Terms of Service</span> and{" "}
+                            <span className="cc-link">Privacy Policy</span>.
+                        </p>
+                    </div>
                 </div>
             </div>
-
-            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
         </div>
     );
 }

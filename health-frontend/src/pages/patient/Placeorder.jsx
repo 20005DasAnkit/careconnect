@@ -175,7 +175,13 @@ export default function PlaceOrder() {
             <Toaster position="top-right" />
 
             <div className="min-h-screen bg-[#F8F6F0]">
-                <div className="max-w-xl mx-auto px-4 py-10">
+               <div
+    className="w-full mx-auto"
+    style={{
+        maxWidth: "1500px",
+        padding: "48px 40px",
+    }}
+>
 
                     {step < 2 && (
                         <button
@@ -187,7 +193,15 @@ export default function PlaceOrder() {
                         </button>
                     )}
 
-                    <div className="bg-white rounded-2xl border border-[#E7E2D6] p-6 sm:p-8">
+                    <div
+    className="bg-white shadow-lg"
+    style={{
+        borderRadius: "32px",
+        border: "1px solid #E7E2D6",
+        padding: "48px",
+        minHeight: "82vh",
+    }}
+>
 
                         {step < 2 && <StepHeader step={step} productName={productName} />}
 

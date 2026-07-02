@@ -176,7 +176,13 @@ export default function BookAppointment() {
             <Toaster position="top-right" />
 
             <div className="min-h-screen bg-[#F8F6F0]">
-                <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 py-10">
+                <div
+                    className="w-full mx-auto"
+                    style={{
+                        maxWidth: "1500px",
+                        padding: "48px 40px",
+                    }}
+                >
 
                     {step < 3 && (
                         <button
@@ -188,7 +194,15 @@ export default function BookAppointment() {
                         </button>
                     )}
 
-                    <div className="bg-white rounded-3xl shadow-lg border border-[#E7E2D6] p-8 lg:p-12 min-h-[80vh]">
+                    <div
+                        className="bg-white shadow-lg"
+                        style={{
+                            borderRadius: "32px",
+                            border: "1px solid #E7E2D6",
+                            padding: "48px",
+                            minHeight: "82vh",
+                        }}
+                    >
 
                         <StepHeader step={step} doctorName={doctor?.name} />
 

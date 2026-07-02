@@ -193,6 +193,8 @@ public class AdminController : ControllerBase
 
             TotalDoctors = _context.Doctors.Count(),
 
+            TotalHospitals = _context.Hospitals.Count(),
+
             TotalAmbulances = _context.Ambulances.Count(),
 
             TotalProducts = _context.Products.Count(),
@@ -201,11 +203,9 @@ public class AdminController : ControllerBase
 
             TotalOrders = _context.Orders.Count(),
 
-            PendingAppointments = _context.Appointments
-                .Count(x => x.Status == "Pending"),
+            PendingAppointments = _context.Appointments.Count(x => x.Status == "Pending"),
 
-            PendingAmbulanceRequests = _context.AmbulanceRequests
-                .Count(x => x.Status == "Pending")
+            PendingAmbulanceRequests = _context.AmbulanceRequests.Count(x => x.Status == "Pending")
         };
 
         return Ok(data);
@@ -351,7 +351,7 @@ public class AdminController : ControllerBase
     {
         return Ok(_context.Products.ToList());
     }
-    
+
     [HttpGet("ambulances")]
     public IActionResult GetAmbulances()
     {
@@ -549,6 +549,93 @@ public class AdminController : ControllerBase
         return Ok(new
         {
             Message = "Payment received successfully"
+        });
+    }
+
+    [HttpPost("hospital")]
+    public IActionResult CreateHospital(CreateHospitalDto dto)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+            return BadRequest("Hospital name is required");
+
+        if (_context.Hospitals.Any(x => x.Name == dto.Name))
+            return BadRequest("Hospital already exists");
+
+        var hospital = new Hospital
+        {
+            Name = dto.Name,
+            Address = dto.Address,
+            City = dto.City,
+            Phone = dto.Phone,
+            IsActive = true
+        };
+
+        _context.Hospitals.Add(hospital);
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Hospital created successfully",
+            HospitalId = hospital.Id
+        });
+    }
+
+    [HttpGet("hospitals")]
+    public IActionResult GetHospitals()
+    {
+        var hospitals = _context.Hospitals
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        return Ok(hospitals);
+    }
+
+    [HttpPut("hospital/{id}")]
+    public IActionResult UpdateHospital(int id, CreateHospitalDto dto)
+    {
+        var hospital = _context.Hospitals.FirstOrDefault(x => x.Id == id);
+
+        if (hospital == null)
+            return NotFound("Hospital not found");
+
+        hospital.Name = dto.Name;
+        hospital.Address = dto.Address;
+        hospital.City = dto.City;
+        hospital.Phone = dto.Phone;
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Hospital updated successfully"
+        });
+    }
+
+    [HttpDelete("hospital/{id}")]
+    public IActionResult DeleteHospital(int id)
+    {
+        var hospital = _context.Hospitals.FirstOrDefault(x => x.Id == id);
+
+        if (hospital == null)
+            return NotFound("Hospital not found");
+
+        // Hospital-এর কোনো session আছে?
+        bool hasSessions = _context.HospitalSessions
+            .Any(x => x.HospitalId == id);
+
+        if (hasSessions)
+        {
+            return BadRequest(
+                "Cannot delete hospital. Delete all hospital sessions first."
+            );
+        }
+
+        _context.Hospitals.Remove(hospital);
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Hospital deleted successfully"
         });
     }
 }

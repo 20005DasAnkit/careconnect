@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using HEALTHCARE.Data;
 using HEALTHCARE.DTOs;
 using HEALTHCARE.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace HEALTHCARE.Controllers;
 
@@ -24,24 +25,60 @@ public class DoctorController : ControllerBase
     [HttpPost("availability")]
     public IActionResult AddAvailability(CreateAvailabilityDto dto)
     {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var doctor = _context.Doctors.FirstOrDefault(x => x.UserId == userId);
+        if (doctor == null) return NotFound("Doctor not found");
 
-        var doctor = _context.Doctors
-            .FirstOrDefault(x => x.UserId == userId);
+        var session = _context.HospitalSessions
+            .Include(x => x.Hospital)
+            .FirstOrDefault(x =>
+                x.Id == dto.HospitalSessionId &&
+                x.HospitalId == dto.HospitalId &&
+                x.IsActive);
 
-        if (doctor == null)
-            return NotFound("Doctor not found");
+        if (session == null)
+            return BadRequest("Invalid Hospital Session.");
 
-        var maxPatients = dto.MaxPatients < 1 ? 1 : dto.MaxPatients;
+        // Doctor sudhu FromTime/ToTime dey, Date na — Date session theke ashbe
+        if (dto.FromTime < session.StartTime)
+            return BadRequest($"Start time must be after {session.StartTime}");
+
+        if (dto.ToTime > session.EndTime)
+            return BadRequest($"End time must be before {session.EndTime}");
+
+        if (dto.FromTime >= dto.ToTime)
+            return BadRequest("Invalid time range.");
+
+        // Doctor already ei session e slot niyeche kina check (overlap)
+        bool overlap = _context.DoctorAvailabilities
+        .Where(x =>
+            x.DoctorId == doctor.Id &&
+            x.HospitalSessionId == session.Id)
+        .AsEnumerable() // EF query execute হবে, এরপর TimeOnly conversion হবে
+        .Any(x =>
+        {
+            var existingFrom = TimeOnly.FromDateTime(x.AvailableFrom);
+            var existingTo = TimeOnly.FromDateTime(x.AvailableTo);
+
+            return dto.FromTime < existingTo &&
+                   dto.ToTime > existingFrom;
+        });
+
+        if (overlap)
+            return BadRequest("You already have a slot in this time range for this session.");
+
+        var availableFrom = session.Date.ToDateTime(dto.FromTime);   // session-er Date use hocche
+        var availableTo = session.Date.ToDateTime(dto.ToTime);
 
         var availability = new DoctorAvailability
         {
             DoctorId = doctor.Id,
-            AvailableFrom = dto.AvailableFrom,
-            AvailableTo = dto.AvailableTo,
-            Place = dto.Place,
-            MaxPatients = maxPatients,
+            HospitalId = session.HospitalId,
+            HospitalSessionId = session.Id,
+            Place = session.Hospital.Name,
+            AvailableFrom = availableFrom,
+            AvailableTo = availableTo,
+            MaxPatients = dto.MaxPatients < 1 ? 1 : dto.MaxPatients,
             BookedCount = 0,
             IsBooked = false
         };
@@ -49,34 +86,53 @@ public class DoctorController : ControllerBase
         _context.DoctorAvailabilities.Add(availability);
         _context.SaveChanges();
 
-        return Ok("Availability added");
+        return Ok("Availability added successfully.");
     }
 
     [HttpGet("availability")]
     public IActionResult GetAvailability()
     {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        var doctor = _context.Doctors
-            .FirstOrDefault(x => x.UserId == userId);
+        var doctor = _context.Doctors.FirstOrDefault(x => x.UserId == userId);
 
         if (doctor == null)
             return NotFound();
 
         var data = _context.DoctorAvailabilities
+            .Include(x => x.Hospital)
+            .Include(x => x.HospitalSession)
             .Where(x => x.DoctorId == doctor.Id)
             .OrderBy(x => x.AvailableFrom)
             .Select(x => new
             {
                 x.Id,
+
+                x.HospitalId,
+
+                HospitalName = x.Hospital.Name,
+
+                x.HospitalSessionId,
+
+                Day = x.HospitalSession.Day,
+
+                SessionStart = x.HospitalSession.StartTime,
+
+                SessionEnd = x.HospitalSession.EndTime,
+
                 x.AvailableFrom,
+
                 x.AvailableTo,
+
                 x.Place,
-                x.IsBooked,
+
                 x.MaxPatients,
+
                 x.BookedCount,
-                SeatsLeft = x.MaxPatients - x.BookedCount
+
+                SeatsLeft = x.MaxPatients - x.BookedCount,
+
+                x.IsBooked
             })
             .ToList();
 
@@ -86,37 +142,42 @@ public class DoctorController : ControllerBase
     [HttpPut("availability")]
     public IActionResult UpdateAvailability(UpdateAvailabilityDto dto)
     {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-
-        var doctor = _context.Doctors
-            .FirstOrDefault(x => x.UserId == userId);
-
-        if (doctor == null)
-            return NotFound("Doctor not found");
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        var doctor = _context.Doctors.FirstOrDefault(x => x.UserId == userId);
+        if (doctor == null) return NotFound("Doctor not found");
 
         var availability = _context.DoctorAvailabilities
-            .FirstOrDefault(x => x.Id == dto.Id &&
-                                 x.DoctorId == doctor.Id);
+            .FirstOrDefault(x => x.Id == dto.Id && x.DoctorId == doctor.Id);
 
-        if (availability == null)
-            return NotFound("Availability not found");
+        if (availability == null) return NotFound("Availability not found");
+        if (availability.BookedCount > 0) return BadRequest("Cannot edit booked slot.");
 
-        if (availability.BookedCount > 0)
-            return BadRequest("Cannot edit a slot that already has bookings.");
+        var session = _context.HospitalSessions
+            .Include(x => x.Hospital)
+            .FirstOrDefault(x =>
+                x.Id == dto.HospitalSessionId &&
+                x.HospitalId == dto.HospitalId &&
+                x.IsActive);
 
-        var maxPatients = dto.MaxPatients < 1 ? 1 : dto.MaxPatients;
+        if (session == null) return BadRequest("Invalid Hospital Session.");
 
-        availability.AvailableFrom = dto.AvailableFrom;
-        availability.AvailableTo = dto.AvailableTo;
-        availability.Place = dto.Place;
-        availability.MaxPatients = maxPatients;
+        if (dto.FromTime < session.StartTime)
+            return BadRequest($"Start time must be after {session.StartTime}");
+        if (dto.ToTime > session.EndTime)
+            return BadRequest($"End time must be before {session.EndTime}");
+        if (dto.FromTime >= dto.ToTime)
+            return BadRequest("Invalid time range.");
+
+        availability.HospitalId = session.HospitalId;
+        availability.HospitalSessionId = session.Id;
+        availability.Place = session.Hospital.Name;
+        availability.AvailableFrom = session.Date.ToDateTime(dto.FromTime);  // session date
+        availability.AvailableTo = session.Date.ToDateTime(dto.ToTime);
+        availability.MaxPatients = dto.MaxPatients < 1 ? 1 : dto.MaxPatients;
 
         _context.SaveChanges();
-
-        return Ok("Availability updated successfully");
+        return Ok("Availability updated.");
     }
-
     [HttpGet("appointments")]
     public IActionResult GetAppointments()
     {
@@ -134,7 +195,8 @@ public class DoctorController : ControllerBase
         from a in _context.Appointments
         join u in _context.Users on a.PatientId equals u.Id
         join d in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals d.Id
-        select new{
+        select new
+        {
             a.Id,
             PatientName = u.FullName,
             PatientEmail = u.Email,
@@ -144,7 +206,7 @@ public class DoctorController : ControllerBase
             Place = a.DoctorAvailability.Place,
             BookedAt = a.BookedAt,
             HasPrescription = _context.Prescriptions.Any(p => p.AppointmentId == a.Id)
-            }
+        }
         )
         .Where(x => x.Status != null)
         .Where(x => _context.Appointments
@@ -327,5 +389,47 @@ public class DoctorController : ControllerBase
         {
             imageUrl = doctor.ImageUrl
         });
+    }
+
+    [HttpGet("hospitals")]
+    public IActionResult GetHospitals()
+    {
+        var data = _context.HospitalSessions
+            .Include(x => x.Hospital)
+            .Where(x => x.IsActive)
+            .GroupBy(x => new
+            {
+                x.HospitalId,
+                x.Hospital.Name
+            })
+            .Select(g => new
+            {
+                Id = g.Key.HospitalId,
+                Name = g.Key.Name
+            })
+            .OrderBy(x => x.Name)
+            .ToList();
+
+        return Ok(data);
+    }
+
+    [HttpGet("hospital-sessions/{hospitalId}")]
+    public IActionResult GetHospitalSessions(int hospitalId)
+    {
+        var data = _context.HospitalSessions
+            .Where(x => x.HospitalId == hospitalId && x.IsActive)
+            .OrderBy(x => x.Date)
+            .ThenBy(x => x.StartTime)
+            .Select(x => new
+            {
+                x.Id,
+                x.Day,
+                x.Date,
+                x.StartTime,
+                x.EndTime
+            })
+            .ToList();
+
+        return Ok(data);
     }
 }
