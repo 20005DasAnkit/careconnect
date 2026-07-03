@@ -261,13 +261,13 @@ export default function Profile() {
 
       {/* ── Header band ── */}
       <div
-  style={{
-    width: "100%",
-    maxWidth: "1500px",
-    margin: "0 auto",
-    padding: "48px 40px 24px",
-  }}
->
+        style={{
+          width: "100%",
+          maxWidth: "1500px",
+          margin: "0 auto",
+          padding: "48px 40px 24px",
+        }}
+      >
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
           <ShieldCheck size={13} color={T.terra} />
           <p style={{ fontSize: 11.5, fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: T.terra, margin: 0 }}>Account</p>
@@ -300,13 +300,13 @@ export default function Profile() {
       </div>
 
       <div
-  style={{
-    width: "100%",
-    maxWidth: "1500px",
-    margin: "0 auto",
-    padding: "0 40px",
-  }}
->
+        style={{
+          width: "100%",
+          maxWidth: "1500px",
+          margin: "0 auto",
+          padding: "0 40px",
+        }}
+      >
         <div style={{ borderRadius: 32, overflow: "hidden", backgroundColor: T.white, border: `1px solid ${T.border}`, boxShadow: "0 30px 70px -40px rgba(22,51,43,.35)" }}>
           {/* Identity strip */}
           <div style={{ display: "flex", alignItems: "center", gap: 24, padding: "32px", borderBottom: `1px solid ${T.border}`, background: `linear-gradient(180deg, ${T.greenLight} 0%, ${T.white} 100%)` }}>

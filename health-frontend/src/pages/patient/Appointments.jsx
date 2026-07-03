@@ -22,35 +22,40 @@ const T = {
 };
 
 const STATUS_CFG = {
-    Confirmed: { bg: T.greenLight, 
-                 text: T.green, 
-                 border: "#BBD9A0", 
-                 label: "Confirmed" 
-               },
+    Confirmed: {
+        bg: T.greenLight,
+        text: T.green,
+        border: "#BBD9A0",
+        label: "Confirmed"
+    },
 
-    Pending: { bg: "#FEF3C7", 
-               text: "#D97706", 
-               border: "#FDE68A", 
-               label: "Pending" 
-             },
+    Pending: {
+        bg: "#FEF3C7",
+        text: "#D97706",
+        border: "#FDE68A",
+        label: "Pending"
+    },
 
-    Completed: { bg: "#DBEAFE", 
-                 text: "#1D4ED8", 
-                 border: "#BFDBFE", 
-                 label: "Completed" 
-               },
+    Completed: {
+        bg: "#DBEAFE",
+        text: "#1D4ED8",
+        border: "#BFDBFE",
+        label: "Completed"
+    },
 
-    CancelledByUser: { bg: "#FEE2E2", 
-                       text: "#DC2626", 
-                       border: "#FECACA", 
-                       label: "Cancelled" 
-                     },
+    CancelledByUser: {
+        bg: "#FEE2E2",
+        text: "#DC2626",
+        border: "#FECACA",
+        label: "Cancelled"
+    },
 
-    CancelledByDoctor: { bg: "#FFF7ED", 
-                         text: "#C2410C", 
-                         border: "#FED7AA", 
-                         label: "Doctor Cancelled" 
-                       },
+    CancelledByDoctor: {
+        bg: "#FFF7ED",
+        text: "#C2410C",
+        border: "#FED7AA",
+        label: "Doctor Cancelled"
+    },
 };
 
 const PAYMENT_CFG = {
@@ -75,39 +80,45 @@ function fmtTime(d) {
 /* ─── Skeleton row ────────────────────────────── */
 function SkeletonRow() {
     return (
-        <div style={{ display: "flex", 
-                      alignItems: "center", 
-                      gap: 16, 
-                      padding: "18px 24px", 
-                      animation: "pulse 1.5s infinite" 
-                    }}>
+        <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 16,
+            padding: "18px 24px",
+            animation: "pulse 1.5s infinite"
+        }}>
 
-            <div style={{ width: 40, 
-                          height: 40, 
-                          borderRadius: "50%", 
-                          background: T.creamDark, 
-                          flexShrink: 0 
-                        }} />
+            <div style={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                background: T.creamDark,
+                flexShrink: 0
+            }} />
 
             <div style={{ flex: 1 }}>
-                <div style={{ height: 13, 
-                              background: T.creamDark, 
-                              borderRadius: 6, 
-                              width: "35%", 
-                              marginBottom: 8 
-                            }} />
+                <div style={{
+                    height: 13,
+                    background: T.creamDark,
+                    borderRadius: 6,
+                    width: "35%",
+                    marginBottom: 8
+                }} />
 
-                <div style={{ height: 11, 
-                              background: T.creamDark, 
-                              borderRadius: 6, 
-                              width: "20%" 
-                            }} />
+                <div style={{
+                    height: 11,
+                    background: T.creamDark,
+                    borderRadius: 6,
+                    width: "20%"
+                }} />
             </div>
-                <div style={{ height: 24, 
-                          width: 90, 
-                          background: T.creamDark, 
-                          borderRadius: 99 }} 
-                        />
+            <div style={{
+                height: 24,
+                width: 90,
+                background: T.creamDark,
+                borderRadius: 99
+            }}
+            />
         </div>
     );
 }
@@ -116,82 +127,89 @@ function SkeletonRow() {
 function CancelModal({ open, loading, onClose, onConfirm }) {
     if (!open) return null;
     return (
-        <div style={{ position: "fixed", 
-                      inset: 0, 
-                      zIndex: 100, 
-                      background: "rgba(0,0,0,.45)", 
-                      display: "flex", 
-                      alignItems: "center", 
-                      justifyContent: "center", 
-                      padding: 16 
-                    }}>
+        <div style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 100,
+            background: "rgba(0,0,0,.45)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: 16
+        }}>
 
-            <div style={{ background: T.white, 
-                          borderRadius: 20, 
-                          width: "100%", 
-                          maxWidth: 420, 
-                          padding: 32, 
-                          boxShadow: "0 20px 60px rgba(0,0,0,.2)" 
-                        }}>
+            <div style={{
+                background: T.white,
+                borderRadius: 20,
+                width: "100%",
+                maxWidth: 420,
+                padding: 32,
+                boxShadow: "0 20px 60px rgba(0,0,0,.2)"
+            }}>
 
-                <div style={{ width: 56, 
-                              height: 56, 
-                              borderRadius: "50%", 
-                              background: "#FEE2E2", 
-                              display: "flex", 
-                              alignItems: "center", 
-                              justifyContent: "center", 
-                              marginBottom: 20 
-                            }}>
+                <div style={{
+                    width: 56,
+                    height: 56,
+                    borderRadius: "50%",
+                    background: "#FEE2E2",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    marginBottom: 20
+                }}>
 
                     <AlertCircle size={26} color="#DC2626" />
                 </div>
 
-                <h2 style={{ fontFamily: "Fraunces, serif", 
-                             fontWeight: 700, 
-                             fontSize: 22, 
-                             color: T.ink, 
-                             margin: "0 0 10px" 
-                          }}>Cancel Appointment?
+                <h2 style={{
+                    fontFamily: "Fraunces, serif",
+                    fontWeight: 700,
+                    fontSize: 22,
+                    color: T.ink,
+                    margin: "0 0 10px"
+                }}>Cancel Appointment?
                 </h2>
 
-                <p style={{ fontSize: 14, 
-                            color: T.muted, 
-                            lineHeight: 1.6, 
-                            margin: "0 0 28px" 
-                          }}>
+                <p style={{
+                    fontSize: 14,
+                    color: T.muted,
+                    lineHeight: 1.6,
+                    margin: "0 0 28px"
+                }}>
 
                     This action cannot be undone. If cancelled at least 1 hour before your visit, 50% of the advance is credited to your CareConnect wallet as a refund balance for your next booking.
                 </p>
 
                 <div style={{ display: "flex", gap: 12 }}>
-                    <button onClick={onClose} 
-                        style={{ flex: 1, 
-                                 height: 46, 
-                                 borderRadius: 12, 
-                                 border: `1.5px solid ${T.border}`, 
-                                 background: T.cream, 
-                                 color: T.ink, 
-                                 fontWeight: 600, 
-                                 fontSize: 14, 
-                                 cursor: "pointer" 
-                                }}>
+                    <button onClick={onClose}
+                        style={{
+                            flex: 1,
+                            height: 46,
+                            borderRadius: 12,
+                            border: `1.5px solid ${T.border}`,
+                            background: T.cream,
+                            color: T.ink,
+                            fontWeight: 600,
+                            fontSize: 14,
+                            cursor: "pointer"
+                        }}>
 
                         Keep Appointment
                     </button>
-                    <button onClick={onConfirm} 
-                            disabled={loading} 
-                            style={{ flex: 1, 
-                                     height: 46, 
-                                     borderRadius: 12, 
-                                     border: "none", 
-                                     background: "#DC2626", 
-                                     color: T.white, 
-                                     fontWeight: 700, 
-                                     fontSize: 14, 
-                                     cursor: loading ? "not-allowed" : "pointer", 
-                                     opacity: loading ? .7 : 1 
-                                    }}>
+                    <button onClick={onConfirm}
+                        disabled={loading}
+                        style={{
+                            flex: 1,
+                            height: 46,
+                            borderRadius: 12,
+                            border: "none",
+                            background: "#DC2626",
+                            color: T.white,
+                            fontWeight: 700,
+                            fontSize: 14,
+                            cursor: loading ? "not-allowed" : "pointer",
+                            opacity: loading ? .7 : 1
+                        }}>
                         {loading ? "Cancelling…" : "Yes, Cancel"}
                     </button>
                 </div>
@@ -207,18 +225,18 @@ function PillBtn({ icon, label, loadingLabel, loading, onClick, bg, fg }) {
             onClick={onClick}
             disabled={loading}
             style={{
-                display: "flex", 
-                alignItems: "center", 
+                display: "flex",
+                alignItems: "center",
                 gap: 6,
-                padding: "8px 14px", 
-                border: "none", 
+                padding: "8px 14px",
+                border: "none",
                 borderRadius: 10,
-                background: bg, 
-                color: fg, 
-                fontWeight: 700, 
+                background: bg,
+                color: fg,
+                fontWeight: 700,
                 fontSize: 12,
                 cursor: loading ? "not-allowed" : "pointer",
-                opacity: loading ? 0.7 : 1, 
+                opacity: loading ? 0.7 : 1,
                 whiteSpace: "nowrap",
             }}
         >
@@ -336,70 +354,73 @@ function AppointmentRow({ appt, onCancel, onDownloadRx, onDownloadBill, download
 
             {/* Payment */}
             <span style={{
-                padding: "4px 10px", 
-                borderRadius: 99, 
-                fontSize: 11, 
+                padding: "4px 10px",
+                borderRadius: 99,
+                fontSize: 11,
                 fontWeight: 700,
-                background: payment.bg, 
-                color: payment.text, 
+                background: payment.bg,
+                color: payment.text,
                 width: "fit-content",
             }}>
                 {appt.paymentStatus}
             </span>
 
             {/* Advance */}
-            <div style={{ display: "flex", 
-                          alignItems: "center", 
-                          gap: 2 
-                        }}>
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 2
+            }}>
 
                 <IndianRupee size={13} color={T.green} />
-                <span style={{ fontFamily: "Fraunces, serif", 
-                               fontWeight: 800, 
-                               fontSize: 15, 
-                               color: T.green 
-                            }}>{appt.advanceAmount}
+                <span style={{
+                    fontFamily: "Fraunces, serif",
+                    fontWeight: 800,
+                    fontSize: 15,
+                    color: T.green
+                }}>{appt.advanceAmount}
                 </span>
             </div>
 
             {/* Status */}
             <span style={{
-                display: "inline-flex", 
-                padding: "5px 12px", 
+                display: "inline-flex",
+                padding: "5px 12px",
                 borderRadius: 99,
-                fontSize: 11, 
-                fontWeight: 700, 
-                background: status.bg, 
+                fontSize: 11,
+                fontWeight: 700,
+                background: status.bg,
                 color: status.text,
-                border: `1px solid ${status.border}`, 
+                border: `1px solid ${status.border}`,
                 width: "fit-content",
             }}>
                 {status.label}
             </span>
 
             {/* Actions */}
-            <div style={{ display: "flex", 
-                          flexDirection: "column", 
-                          gap: 6, 
-                          justifySelf: "end" 
-                        }}>
+            <div style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 6,
+                justifySelf: "end"
+            }}>
 
                 {appt.status === "Confirmed" && (
-                    <button onClick={() => onCancel(appt.id)} 
-                            title="Cancel appointment" 
-                            style={{
-                                width: 30, 
-                                height: 30, 
-                                borderRadius: 8, 
-                                border: "none", 
-                                background: "#FEE2E2", 
-                                color: "#DC2626",
-                                display: "flex", 
-                                alignItems: "center", 
-                                justifyContent: "center", 
-                                cursor: "pointer", 
-                                alignSelf: "flex-end",
-                            }}>
+                    <button onClick={() => onCancel(appt.id)}
+                        title="Cancel appointment"
+                        style={{
+                            width: 30,
+                            height: 30,
+                            borderRadius: 8,
+                            border: "none",
+                            background: "#FEE2E2",
+                            color: "#DC2626",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            cursor: "pointer",
+                            alignSelf: "flex-end",
+                        }}>
                         <XCircle size={14} />
                     </button>
                 )}
@@ -440,23 +461,25 @@ function AppointmentRow({ appt, onCancel, onDownloadRx, onDownloadBill, download
 function StatColumn({ label, value, accent, last }) {
     return (
         <div style={{
-            flex: 1, 
-            minWidth: 110, 
+            flex: 1,
+            minWidth: 110,
             padding: "20px 24px",
             borderRight: last ? "none" : `1px solid ${T.border}`,
         }}>
-            <p style={{ fontSize: 12, 
-                        color: T.muted, 
-                        margin: "0 0 6px", 
-                        fontWeight: 500 
-                      }}>{label}
+            <p style={{
+                fontSize: 12,
+                color: T.muted,
+                margin: "0 0 6px",
+                fontWeight: 500
+            }}>{label}
             </p>
 
-            <h3 style={{ fontFamily: "Fraunces, serif", 
-                         fontWeight: 800, 
-                         fontSize: 26, 
-                         color: accent || T.ink, margin: 0 
-                        }}>{value}
+            <h3 style={{
+                fontFamily: "Fraunces, serif",
+                fontWeight: 800,
+                fontSize: 26,
+                color: accent || T.ink, margin: 0
+            }}>{value}
             </h3>
         </div>
     );
@@ -594,25 +617,28 @@ export default function Appointments() {
           .appt-tab.active::after{content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:${T.ink};}
         `}</style>
 
-<div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
+                <div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
 
                     {/* ── Editorial header ── */}
-                    <div style={{ display: "flex", 
-                                  flexWrap: "wrap", 
-                                  justifyContent: "space-between", 
-                                  alignItems: "flex-end", 
-                                  gap: 16, 
-                                  marginBottom: 32 
-                                }}>
+                    <div style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        justifyContent: "space-between",
+                        alignItems: "flex-end",
+                        gap: 16,
+                        marginBottom: 32
+                    }}>
                         <h1
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", 
-                                     fontWeight: 500 
-                                   }}
+                            style={{
+                                fontFamily: "'Fraunces', Georgia, serif",
+                                fontWeight: 500
+                            }}
                             className="leading-[1.05] tracking-tight"
                         >
-                            <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)", 
-                                           color: T.green 
-                                        }}>
+                            <span style={{
+                                fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)",
+                                color: T.green
+                            }}>
                                 Every visit,
                             </span>
                             <br />
@@ -625,18 +651,18 @@ export default function Appointments() {
                         </h1>
 
 
-                        <a href="/patient/doctors" 
+                        <a href="/patient/doctors"
                             style={{
-                                display: "flex", 
-                                alignItems: "center", 
-                                gap: 8, 
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
                                 padding: "13px 22px",
-                                borderRadius: 99, 
-                                background: T.ink, 
+                                borderRadius: 99,
+                                background: T.ink,
                                 color: T.white,
-                                fontWeight: 700, 
-                                fontSize: 14, 
-                                textDecoration: "none", 
+                                fontWeight: 700,
+                                fontSize: 14,
+                                textDecoration: "none",
                                 flexShrink: 0,
                             }}>
                             <Plus size={16} /> Book Appointment
@@ -645,12 +671,12 @@ export default function Appointments() {
 
                     {/* ── Unified stats card ── */}
                     <div style={{
-                        background: T.white, 
-                        borderRadius: 20, 
+                        background: T.white,
+                        borderRadius: 20,
                         border: `1px solid ${T.border}`,
-                        display: "flex", 
-                        flexWrap: "wrap", 
-                        marginBottom: 20, 
+                        display: "flex",
+                        flexWrap: "wrap",
+                        marginBottom: 20,
                         overflow: "hidden",
                     }}>
                         <StatColumn label="Total" value={stats.total} />
@@ -661,20 +687,22 @@ export default function Appointments() {
                     </div>
 
                     {/* ── Search / sort / tabs card ── */}
-                    <div style={{ background: T.white, 
-                                  borderRadius: 20, 
-                                  border: `1px solid ${T.border}`, 
-                                  marginBottom: 20, 
-                                  overflow: "hidden" 
-                                }}>
+                    <div style={{
+                        background: T.white,
+                        borderRadius: 20,
+                        border: `1px solid ${T.border}`,
+                        marginBottom: 20,
+                        overflow: "hidden"
+                    }}>
 
-                        <div style={{ display: "flex", 
-                                      gap: 8, 
-                                      alignItems: "center", 
-                                      padding: "18px 24px 14px", 
-                                      borderBottom: `1px solid ${T.border}`, 
-                                      flexWrap: "wrap" 
-                                    }}>
+                        <div style={{
+                            display: "flex",
+                            gap: 8,
+                            alignItems: "center",
+                            padding: "18px 24px 14px",
+                            borderBottom: `1px solid ${T.border}`,
+                            flexWrap: "wrap"
+                        }}>
 
                             {TABS.map(tab => (
                                 <button
@@ -687,55 +715,60 @@ export default function Appointments() {
                                 </button>
                             ))}
                         </div>
-                        <div style={{ position: "relative", 
-                                      padding: "18px 24px", 
-                                      display: "flex", 
-                                      gap: 12, 
-                                      flexWrap: "wrap" 
-                                    }}>
+                        <div style={{
+                            position: "relative",
+                            padding: "18px 24px",
+                            display: "flex",
+                            gap: 12,
+                            flexWrap: "wrap"
+                        }}>
 
-                            <div style={{ position: "relative", 
-                                          flex: 1, 
-                                          minWidth: 220 
-                                        }}>
+                            <div style={{
+                                position: "relative",
+                                flex: 1,
+                                minWidth: 220
+                            }}>
 
-                                <Search size={15} 
-                                    style={{ position: "absolute", 
-                                             left: 13, 
-                                             top: "50%", 
-                                             transform: "translateY(-50%)", 
-                                             color: T.muted 
-                                           }} 
+                                <Search size={15}
+                                    style={{
+                                        position: "absolute",
+                                        left: 13,
+                                        top: "50%",
+                                        transform: "translateY(-50%)",
+                                        color: T.muted
+                                    }}
                                 />
                                 <input
                                     value={search}
                                     onChange={e => { setSearch(e.target.value); setPage(1); }}
                                     placeholder="Search by doctor name…"
-                                    style={{ width: "100%", 
-                                             height: 44, 
-                                             borderRadius: 12, 
-                                             border: `1.5px solid ${T.border}`, 
-                                             paddingLeft: 38, 
-                                             paddingRight: 14, 
-                                             fontSize: 14, 
-                                             outline: "none", 
-                                             background: T.cream, 
-                                             color: T.ink 
-                                           }}
+                                    style={{
+                                        width: "100%",
+                                        height: 44,
+                                        borderRadius: 12,
+                                        border: `1.5px solid ${T.border}`,
+                                        paddingLeft: 38,
+                                        paddingRight: 14,
+                                        fontSize: 14,
+                                        outline: "none",
+                                        background: T.cream,
+                                        color: T.ink
+                                    }}
                                 />
                             </div>
                             <select
                                 value={sortBy}
                                 onChange={e => setSort(e.target.value)}
-                                style={{ height: 44, 
-                                         borderRadius: 12, 
-                                         border: `1.5px solid ${T.border}`, 
-                                         padding: "0 14px", 
-                                         fontSize: 13, 
-                                         background: T.cream, 
-                                         color: T.ink, 
-                                         cursor: "pointer" 
-                                       }}
+                                style={{
+                                    height: 44,
+                                    borderRadius: 12,
+                                    border: `1.5px solid ${T.border}`,
+                                    padding: "0 14px",
+                                    fontSize: 13,
+                                    background: T.cream,
+                                    color: T.ink,
+                                    cursor: "pointer"
+                                }}
                             >
                                 <option>Newest</option>
                                 <option>Oldest</option>
@@ -745,40 +778,44 @@ export default function Appointments() {
 
                     {/* ── Error ── */}
                     {error && (
-                        <div style={{ background: "#FEF2F2", 
-                                      border: "1px solid #FCA5A5", 
-                                      borderRadius: 16, 
-                                      padding: 28, 
-                                      textAlign: "center", 
-                                      marginBottom: 20 
-                                    }}>
+                        <div style={{
+                            background: "#FEF2F2",
+                            border: "1px solid #FCA5A5",
+                            borderRadius: 16,
+                            padding: 28,
+                            textAlign: "center",
+                            marginBottom: 20
+                        }}>
 
-                            <p style={{ color: "#DC2626", 
-                                        fontWeight: 700, 
-                                        fontSize: 16, 
-                                        margin: "0 0 12px" 
-                                      }}>{error}
+                            <p style={{
+                                color: "#DC2626",
+                                fontWeight: 700,
+                                fontSize: 16,
+                                margin: "0 0 12px"
+                            }}>{error}
                             </p>
-                            <button onClick={load} 
-                                style={{ background: "#DC2626", 
-                                         color: T.white, 
-                                         border: "none", 
-                                         borderRadius: 10, 
-                                         padding: "10px 20px", 
-                                         fontWeight: 700, 
-                                         cursor: "pointer" 
-                                       }}>Retry
+                            <button onClick={load}
+                                style={{
+                                    background: "#DC2626",
+                                    color: T.white,
+                                    border: "none",
+                                    borderRadius: 10,
+                                    padding: "10px 20px",
+                                    fontWeight: 700,
+                                    cursor: "pointer"
+                                }}>Retry
                             </button>
                         </div>
                     )}
 
                     {/* ── List card ── */}
                     {!error && (
-                        <div style={{ background: T.white, 
-                                      borderRadius: 20, 
-                                      border: `1px solid ${T.border}`, 
-                                      overflow: "hidden" 
-                                    }}>
+                        <div style={{
+                            background: T.white,
+                            borderRadius: 20,
+                            border: `1px solid ${T.border}`,
+                            overflow: "hidden"
+                        }}>
 
                             {/* Column headers — desktop only */}
                             {!loading && current.length > 0 && (
@@ -786,8 +823,8 @@ export default function Appointments() {
                                     display: "grid",
                                     gridTemplateColumns:
                                         "2.6fr 1.1fr 1fr 2fr 1fr 1fr 1.2fr 1.6fr",
-                                    gap: 16, 
-                                    padding: "14px 24px", 
+                                    gap: 16,
+                                    padding: "14px 24px",
                                     borderBottom: `1px solid ${T.border}`,
                                 }}>
                                     {[
@@ -800,13 +837,14 @@ export default function Appointments() {
                                         "Status",
                                         "Actions"
                                     ].map((h, i) => (
-                                        <span key={i} 
-                                        style={{ fontSize: 11, 
-                                                 fontWeight: 700, 
-                                                 color: T.muted, 
-                                                 textTransform: "uppercase", 
-                                                 letterSpacing: .5 
-                                               }}>
+                                        <span key={i}
+                                            style={{
+                                                fontSize: 11,
+                                                fontWeight: 700,
+                                                color: T.muted,
+                                                textTransform: "uppercase",
+                                                letterSpacing: .5
+                                            }}>
                                             {h}
                                         </span>
                                     ))}
@@ -829,49 +867,53 @@ export default function Appointments() {
                             ))}
 
                             {!loading && current.length === 0 && (
-                                <div style={{ padding: "64px 24px", 
-                                              textAlign: "center" 
-                                            }}>
-                                    <div style={{ width: 72, 
-                                                  height: 72, 
-                                                  borderRadius: "50%", 
-                                                  background: T.creamDark, 
-                                                  display: "flex", 
-                                                  alignItems: "center", 
-                                                  justifyContent: "center", 
-                                                  margin: "0 auto 18px" 
-                                                }}>
+                                <div style={{
+                                    padding: "64px 24px",
+                                    textAlign: "center"
+                                }}>
+                                    <div style={{
+                                        width: 72,
+                                        height: 72,
+                                        borderRadius: "50%",
+                                        background: T.creamDark,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        margin: "0 auto 18px"
+                                    }}>
                                         <Calendar size={32} color={T.muted} />
                                     </div>
 
-                                    <h2 style={{ fontFamily: "Fraunces, serif", 
-                                                 fontWeight: 700, 
-                                                 fontSize: 22, 
-                                                 color: T.ink, 
-                                                 margin: "0 0 8px" 
-                                                }}>No Appointments Found
+                                    <h2 style={{
+                                        fontFamily: "Fraunces, serif",
+                                        fontWeight: 700,
+                                        fontSize: 22,
+                                        color: T.ink,
+                                        margin: "0 0 8px"
+                                    }}>No Appointments Found
                                     </h2>
-                                    <p style={{ fontSize: 14, 
-                                                color: T.muted, 
-                                                margin: "0 0 24px", 
-                                                maxWidth: 340, 
-                                                marginLeft: "auto", 
-                                                marginRight: "auto" 
-                                              }}>
+                                    <p style={{
+                                        fontSize: 14,
+                                        color: T.muted,
+                                        margin: "0 0 24px",
+                                        maxWidth: 340,
+                                        marginLeft: "auto",
+                                        marginRight: "auto"
+                                    }}>
                                         We couldn't find any appointments matching your search or filter.
                                     </p>
                                     <a href="/patient/doctors" style={{
-                                        display: "inline-flex", 
-                                        alignItems: "center", 
-                                        gap: 8, 
+                                        display: "inline-flex",
+                                        alignItems: "center",
+                                        gap: 8,
                                         padding: "12px 22px",
-                                        borderRadius: 99, 
-                                        background: T.ink, 
-                                        color: T.white, 
-                                        fontWeight: 700, 
-                                        fontSize: 13, 
+                                        borderRadius: 99,
+                                        background: T.ink,
+                                        color: T.white,
+                                        fontWeight: 700,
+                                        fontSize: 13,
                                         textDecoration: "none",
-                                        }}>
+                                    }}>
                                         <Plus size={14} /> Book an Appointment
                                     </a>
                                 </div>
@@ -881,37 +923,38 @@ export default function Appointments() {
 
                     {/* ── Pagination ── */}
                     {!loading && totalPages > 1 && current.length > 0 && (
-                        <div style={{ display: "flex", 
-                                      alignItems: "center", 
-                                      justifyContent: "center", 
-                                      gap: 8, 
-                                      marginTop: 28 
-                                    }}>
-                            <PaginationBtn onClick={() => 
-                                setPage(p => p - 1)} 
-                                disabled={page === 1} 
-                                icon={<ChevronLeft size={16} />} 
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            gap: 8,
+                            marginTop: 28
+                        }}>
+                            <PaginationBtn onClick={() =>
+                                setPage(p => p - 1)}
+                                disabled={page === 1}
+                                icon={<ChevronLeft size={16} />}
                             />
 
                             {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
-                                <button key={n} onClick={() => setPage(n)} 
+                                <button key={n} onClick={() => setPage(n)}
                                     style={{
-                                    width: 38, 
-                                    height: 38, 
-                                    borderRadius: 10, 
-                                    fontWeight: 700, 
-                                    fontSize: 13, 
-                                    cursor: "pointer",
-                                    background: page === n ? T.ink : T.white, 
-                                    color: page === n ? T.white : T.ink,
-                                    border: page === n ? "none" : `1.5px solid ${T.border}`,
+                                        width: 38,
+                                        height: 38,
+                                        borderRadius: 10,
+                                        fontWeight: 700,
+                                        fontSize: 13,
+                                        cursor: "pointer",
+                                        background: page === n ? T.ink : T.white,
+                                        color: page === n ? T.white : T.ink,
+                                        border: page === n ? "none" : `1.5px solid ${T.border}`,
                                     }}>{n}
                                 </button>
                             ))}
-                            <PaginationBtn onClick={() => 
-                                setPage(p => p + 1)} 
-                                disabled={page === totalPages} 
-                                icon={<ChevronRight size={16} />} 
+                            <PaginationBtn onClick={() =>
+                                setPage(p => p + 1)}
+                                disabled={page === totalPages}
+                                icon={<ChevronRight size={16} />}
                             />
                         </div>
                     )}
@@ -924,18 +967,18 @@ export default function Appointments() {
 
 function PaginationBtn({ onClick, disabled, icon }) {
     return (
-        <button onClick={onClick} 
-            disabled={disabled} 
+        <button onClick={onClick}
+            disabled={disabled}
             style={{
-                width: 38, 
-                height: 38, 
-                borderRadius: 10, 
+                width: 38,
+                height: 38,
+                borderRadius: 10,
                 border: `1.5px solid ${T.border}`,
-                background: T.white, 
+                background: T.white,
                 cursor: disabled ? "not-allowed" : "pointer",
-                opacity: disabled ? .4 : 1, 
-                display: "flex", 
-                alignItems: "center", 
+                opacity: disabled ? .4 : 1,
+                display: "flex",
+                alignItems: "center",
                 justifyContent: "center",
                 color: T.ink,
             }}>

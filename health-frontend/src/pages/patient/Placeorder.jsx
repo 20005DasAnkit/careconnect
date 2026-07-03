@@ -175,13 +175,13 @@ export default function PlaceOrder() {
             <Toaster position="top-right" />
 
             <div className="min-h-screen bg-[#F8F6F0]">
-               <div
-    className="w-full mx-auto"
-    style={{
-        maxWidth: "1500px",
-        padding: "48px 40px",
-    }}
->
+                <div
+                    className="w-full mx-auto"
+                    style={{
+                        maxWidth: "1500px",
+                        padding: "48px 40px",
+                    }}
+                >
 
                     {step < 2 && (
                         <button
@@ -194,14 +194,14 @@ export default function PlaceOrder() {
                     )}
 
                     <div
-    className="bg-white shadow-lg"
-    style={{
-        borderRadius: "32px",
-        border: "1px solid #E7E2D6",
-        padding: "48px",
-        minHeight: "82vh",
-    }}
->
+                        className="bg-white shadow-lg"
+                        style={{
+                            borderRadius: "32px",
+                            border: "1px solid #E7E2D6",
+                            padding: "48px",
+                            minHeight: "82vh",
+                        }}
+                    >
 
                         {step < 2 && <StepHeader step={step} productName={productName} />}
 
