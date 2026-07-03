@@ -4,8 +4,12 @@ public class CreateHospitalSessionDto
 
     public string Day { get; set; }
 
+    public DateOnly Date { get; set; }
+
     public TimeOnly StartTime { get; set; }
 
     public TimeOnly EndTime { get; set; }
-     public DateOnly Date { get; set; } 
+
+    // NEW
+    public string PlaceToVisit { get; set; } = "";
 }

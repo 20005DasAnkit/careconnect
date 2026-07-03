@@ -55,9 +55,9 @@ public class HospitalSessionController : ControllerBase
             Date = dto.Date,
             StartTime = dto.StartTime,
             EndTime = dto.EndTime,
+            PlaceToVisit = dto.PlaceToVisit,
             IsActive = true
         };
-
         _context.HospitalSessions.Add(session);
         _context.SaveChanges();
 
@@ -74,17 +74,22 @@ public class HospitalSessionController : ControllerBase
         var data = _context.HospitalSessions
             .Include(x => x.Hospital)
             .OrderByDescending(x => x.Id)   // Latest first
-            .Select(x => new
-            {
-                x.Id,
-                HospitalId = x.HospitalId,
-                HospitalName = x.Hospital.Name,
-                x.Day,
-                x.Date,
-                x.StartTime,
-                x.EndTime,
-                x.IsActive
-            })
+.Select(x => new
+{
+    x.Id,
+    HospitalId = x.HospitalId,
+    HospitalName = x.Hospital.Name,
+
+    x.Day,
+    x.Date,
+
+    x.StartTime,
+    x.EndTime,
+
+    x.PlaceToVisit,
+
+    x.IsActive
+})
             .ToList();
 
         return Ok(data);
@@ -110,6 +115,7 @@ public class HospitalSessionController : ControllerBase
         session.Day = dto.Day;
         session.StartTime = dto.StartTime;
         session.EndTime = dto.EndTime;
+        session.PlaceToVisit = dto.PlaceToVisit;
 
         _context.SaveChanges();
 

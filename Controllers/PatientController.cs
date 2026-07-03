@@ -63,90 +63,118 @@ public class PatientController : ControllerBase
         return Ok(slots);
     }
 
-    [Authorize(Roles = "Patient")]
-    [HttpPost("book")]
-    public IActionResult BookAppointment(BookAppointmentDto dto)
+[Authorize(Roles = "Patient")]
+[HttpPost("book")]
+public IActionResult BookAppointment(BookAppointmentDto dto)
+{
+    var userId = int.Parse(
+        User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+    var slot = _context.DoctorAvailabilities
+        .FirstOrDefault(x => x.Id == dto.DoctorAvailabilityId);
+
+    if (slot == null)
+        return NotFound("Slot not found");
+
+    if (slot.IsBooked || slot.BookedCount >= slot.MaxPatients)
+        return BadRequest("This slot is already fully booked.");
+
+    var doctor = _context.Doctors
+        .FirstOrDefault(x => x.Id == slot.DoctorId);
+
+    if (doctor == null)
+        return NotFound("Doctor not found.");
+
+    var user = _context.Users
+        .FirstOrDefault(x => x.Id == userId);
+
+    if (user == null)
+        return NotFound("User not found.");
+
+    // Original advance (50% of consultation fee)
+    decimal originalAdvance = Math.Round(doctor.Fee * 0.5m, 2);
+
+    // Amount patient actually needs to pay
+    decimal payableAdvance = originalAdvance;
+
+    // Wallet / Refund balance used
+    decimal walletUsed = 0;
+
+    if (dto.UseRefundBalance && user.RefundBalance > 0)
     {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+        walletUsed = Math.Min(user.RefundBalance, payableAdvance);
 
-        var slot = _context.DoctorAvailabilities
-            .FirstOrDefault(x => x.Id == dto.DoctorAvailabilityId);
+        payableAdvance -= walletUsed;
 
-        if (slot == null)
-            return NotFound("Slot not found");
-
-        if (slot.IsBooked || slot.BookedCount >= slot.MaxPatients)
-            return BadRequest("This slot is already fully booked.");
-
-        var doctor = _context.Doctors
-            .FirstOrDefault(x => x.Id == slot.DoctorId);
-
-        var user = _context.Users
-            .FirstOrDefault(x => x.Id == userId);
-
-        decimal advanceAmount = doctor != null
-            ? Math.Round(doctor.Fee * 0.5m, 2)
-            : 0;
-
-        decimal walletUsed = 0;
-
-        // Use refund balance if selected
-        if (dto.UseRefundBalance && user != null)
-        {
-            if (user.RefundBalance >= advanceAmount)
-            {
-                walletUsed = advanceAmount;
-                user.RefundBalance -= advanceAmount;
-                advanceAmount = 0;
-            }
-            else
-            {
-                walletUsed = user.RefundBalance;
-                advanceAmount -= user.RefundBalance;
-                user.RefundBalance = 0;
-            }
-        }
-
-        // Increment booked count instead of a hard single-use lock
-        slot.BookedCount += 1;
-        if (slot.BookedCount >= slot.MaxPatients)
-            slot.IsBooked = true;   // now genuinely full — hidden from new bookings
-
-        var appointment = new Appointment
-        {
-            PatientId = userId,
-            DoctorId = slot.DoctorId,
-            DoctorAvailabilityId = slot.Id,
-            BookedAt = DateTime.UtcNow,
-            Status = "Confirmed",
-
-            PaymentStatus = dto.PaymentMethod == "Online"
-                ? (advanceAmount > 0 ? "Paid" : "Wallet")
-                : "Cash",
-
-            AdvanceAmount = dto.PaymentMethod == "Online"
-                ? advanceAmount
-                : 0,
-
-            RazorpayPaymentId = dto.PaymentMethod == "Online"
-                ? (advanceAmount > 0 ? "DUMMY_PAYMENT" : "WALLET_PAYMENT")
-                : null
-        };
-
-        _context.Appointments.Add(appointment);
-        _context.SaveChanges();
-
-        return Ok(new
-        {
-            AppointmentId = appointment.Id,
-            AdvancePaid = appointment.AdvanceAmount,
-            WalletUsed = walletUsed,
-            WalletBalance = user?.RefundBalance ?? 0,
-            SeatsLeft = slot.MaxPatients - slot.BookedCount,
-            Message = "Appointment booked successfully."
-        });
+        user.RefundBalance -= walletUsed;
     }
+
+    // Increase booked count
+    slot.BookedCount++;
+
+    if (slot.BookedCount >= slot.MaxPatients)
+        slot.IsBooked = true;
+
+var appointment = new Appointment
+{
+    PatientId = userId,
+    DoctorId = slot.DoctorId,
+    DoctorAvailabilityId = slot.Id,
+
+    // Snapshot of patient details at booking time
+    PatientName = dto.PatientName,
+    PatientPhone = dto.PatientPhone,
+    PatientEmail = dto.PatientEmail,
+    PatientDob = dto.PatientDob,
+    Gender = dto.Gender,
+    BloodGroup = dto.BloodGroup,
+    Address = dto.Address,
+    Relationship = dto.Relationship,
+
+    BookedAt = DateTime.UtcNow,
+
+    Status = "Confirmed",
+
+    PaymentStatus = dto.PaymentMethod == "Online"
+        ? (payableAdvance > 0 ? "Paid" : "Wallet")
+        : "Cash",
+
+    AdvanceAmount = originalAdvance,
+
+    WalletUsed = walletUsed,
+
+    RazorpayPaymentId = dto.PaymentMethod == "Online"
+        ? (payableAdvance > 0
+            ? dto.RazorpayPaymentId
+            : "WALLET_PAYMENT")
+        : null
+};
+
+    _context.Appointments.Add(appointment);
+
+    _context.SaveChanges();
+
+    return Ok(new
+    {
+        AppointmentId = appointment.Id,
+
+        ConsultationFee = doctor.Fee,
+
+        OriginalAdvance = originalAdvance,
+
+        WalletUsed = walletUsed,
+
+        PayNow = payableAdvance,
+
+        WalletBalance = user.RefundBalance,
+
+        SeatsLeft = slot.MaxPatients - slot.BookedCount,
+
+        PaymentStatus = appointment.PaymentStatus,
+
+        Message = "Appointment booked successfully."
+    });
+}
 
     [Authorize(Roles = "Patient")]
     [HttpGet("appointments")]
@@ -177,13 +205,13 @@ public class PatientController : ControllerBase
 
                 AppointmentDate = s.AvailableFrom.Date,
                 AppointmentTime = s.AvailableFrom,
+                PlaceToVisit = s.Place,
 
                 a.Status,
                 a.PaymentStatus,
                 a.AdvanceAmount,
 
                 SlotId = s.Id,
-                Place = s.Place
             }
 
         ).ToList();

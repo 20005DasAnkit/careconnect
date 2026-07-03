@@ -186,17 +186,35 @@ namespace HEALTHCARE.Controllers
             {
                 Id = rx.Id,
                 AppointmentId = rx.AppointmentId,
+
                 Diagnosis = rx.Diagnosis,
                 Medicines = medicines,
                 Notes = rx.Notes,
                 AdviceOnFollowUp = rx.AdviceOnFollowUp,
                 CreatedAt = rx.CreatedAt,
+
+                // Doctor
                 DoctorName = appointment.Doctor?.User?.FullName ?? appointment.Doctor?.name ?? "N/A",
                 DoctorSpecialization = appointment.Doctor?.Specialization ?? "",
-                PatientName = appointment.Patient?.FullName ?? "N/A",
+                HospitalName = appointment.Doctor?.HospitalName ?? "N/A",
+                PlaceToVisit = appointment.DoctorAvailability?.Place ?? "",
+                DoctorEmail = appointment.Doctor?.User?.Email ?? "",
+                DoctorPhone = appointment.Doctor?.Phone ?? "",
+                Qualification = appointment.Doctor?.Qualification ?? "",
+                Experience = appointment.Doctor?.Experience ?? "",
+
+                // Patient
+                PatientName = appointment.PatientName,
+                PatientPhone = appointment.PatientPhone,
+                PatientEmail = appointment.PatientEmail,
+                PatientDob = appointment.PatientDob,
+                PatientAddress = appointment.Address,
+                Gender = appointment.Gender,
+                BloodGroup = appointment.BloodGroup,
+                Address = appointment.Address,
+                // Appointment
                 AppointmentDate = slot,
-                AppointmentTime = slot.ToString("hh:mm tt"),
-                HospitalName = appointment.Doctor?.HospitalName ?? "Lakeview Hospital",
+                AppointmentTime = slot.ToString("hh:mm tt")
             };
         }
     }

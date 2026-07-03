@@ -10,10 +10,14 @@ public class HospitalSession
 
     public string Day { get; set; } = "";
 
+    public DateOnly Date { get; set; }
+
     public TimeOnly StartTime { get; set; }
 
     public TimeOnly EndTime { get; set; }
 
+    // NEW
+    public string PlaceToVisit { get; set; } = "";
+
     public bool IsActive { get; set; } = true;
-    public DateOnly Date { get; set; }  
 }

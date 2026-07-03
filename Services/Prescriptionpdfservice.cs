@@ -52,19 +52,92 @@ namespace HEALTHCARE.Services
                             // ── Doctor / Patient info strip ──
                             body.Item().Row(row =>
                             {
+                                // LEFT
                                 row.RelativeItem().Column(c =>
                                 {
-                                    c.Item().PaddingTop(2).Text($"{rx.DoctorName}").FontSize(12).Bold();
-                                    c.Item().Text(rx.DoctorSpecialization).FontSize(9).FontColor(MutedText);
-                                    c.Item().Text(rx.HospitalName).FontSize(9).FontColor(MutedText);
+                                    c.Item().Text(rx.DoctorName).FontSize(12).Bold();
+
+                                    c.Item().Text(rx.DoctorSpecialization)
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item().PaddingTop(4)
+                                        .Text($"Hospital : {rx.HospitalName}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .Text($"Place to Visit : {rx.PlaceToVisit}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+    .Text($"Email : {rx.DoctorEmail}")
+    .FontSize(9)
+    .FontColor(MutedText);
+
+                                    c.Item()
+                                        .Text($"Phone : {rx.DoctorPhone}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .Text($"Qualification : {rx.Qualification}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .Text($"Experience : {rx.Experience}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
                                 });
 
+                                // RIGHT
                                 row.RelativeItem().Column(c =>
                                 {
-                                    c.Item().AlignRight().Text("PATIENT").FontSize(8).FontColor(MutedText).LetterSpacing(0.1f);
-                                    c.Item().AlignRight().PaddingTop(2).Text(rx.PatientName).FontSize(12).Bold();
-                                    c.Item().AlignRight().Text($"Visit: {rx.AppointmentDate:dd MMM yyyy}, {rx.AppointmentTime}")
-                                        .FontSize(9).FontColor(MutedText);
+                                    c.Item()
+                                        .AlignRight()
+                                        .Text("PATIENT DETAILS")
+                                        .FontSize(8)
+                                        .Bold()
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .AlignRight()
+                                        .PaddingTop(2)
+                                        .Text(rx.PatientName)
+                                        .FontSize(12)
+                                        .Bold();
+
+                                    c.Item()
+                                        .AlignRight()
+                                        .Text($"DOB : {(rx.PatientDob.HasValue ? rx.PatientDob.Value.ToString("dd MMM yyyy") : "-")}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .AlignRight()
+                                        .Text($"Phone : {rx.PatientPhone}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .AlignRight()
+                                        .Text($"Email : {rx.PatientEmail}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .AlignRight()
+                                        .Text($"Visit : {rx.AppointmentDate:dd MMM yyyy}, {rx.AppointmentTime}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item()
+                                        .AlignRight()
+                                        .Text($"Address : {rx.PatientAddress}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
                                 });
                             });
 
@@ -151,7 +224,7 @@ namespace HEALTHCARE.Services
                                     c.Item().AlignCenter().Text("Signature").FontSize(8).FontColor(MutedText);
                                 });
                             });
-                                                });
+                        });
                     });
 
                     // ── Footer ──

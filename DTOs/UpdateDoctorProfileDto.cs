@@ -9,4 +9,8 @@ public class UpdateDoctorProfileDto
     public decimal Fee { get; set; }
     public string? About { get; set; }
     public string? ImageUrl { get; set; }
+    public string? Phone { get; set; }
+    public string? Qualification { get; set; }
+    public string? Experience { get; set; }
+
 }

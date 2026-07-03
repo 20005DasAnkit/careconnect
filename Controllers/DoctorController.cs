@@ -192,21 +192,40 @@ public class DoctorController : ControllerBase
         var count = _context.Appointments.Count(a => a.DoctorId == doctor.Id);
 
         var appointments = (
-        from a in _context.Appointments
-        join u in _context.Users on a.PatientId equals u.Id
-        join d in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals d.Id
-        select new
-        {
-            a.Id,
-            PatientName = u.FullName,
-            PatientEmail = u.Email,
-            Status = a.Status,
-            AppointmentDate = a.DoctorAvailability.AvailableFrom.ToString("dd MMM yyyy"),
-            AppointmentTime = a.DoctorAvailability.AvailableFrom.ToString("hh:mm tt"),
-            Place = a.DoctorAvailability.Place,
-            BookedAt = a.BookedAt,
-            HasPrescription = _context.Prescriptions.Any(p => p.AppointmentId == a.Id)
-        }
+from a in _context.Appointments
+join d in _context.DoctorAvailabilities
+    on a.DoctorAvailabilityId equals d.Id
+select new
+{
+    a.Id,
+
+    PatientName = !string.IsNullOrWhiteSpace(a.PatientName)
+        ? a.PatientName
+        : a.Patient.FullName,
+
+    PatientEmail = !string.IsNullOrWhiteSpace(a.PatientEmail)
+        ? a.PatientEmail
+        : a.Patient.Email,
+
+    PatientPhone = a.PatientPhone,
+
+    PatientDob = a.PatientDob,
+
+    PatientAddress = a.Address,
+
+    Status = a.Status,
+
+    AppointmentDate = d.AvailableFrom.ToString("dd MMM yyyy"),
+
+    AppointmentTime = d.AvailableFrom.ToString("hh:mm tt"),
+
+    Place = d.Place,
+
+    BookedAt = a.BookedAt,
+
+    HasPrescription = _context.Prescriptions
+        .Any(p => p.AppointmentId == a.Id)
+}
         )
         .Where(x => x.Status != null)
         .Where(x => _context.Appointments
@@ -241,18 +260,22 @@ public class DoctorController : ControllerBase
 
         var doctor = _context.Doctors
             .Where(d => d.UserId == userId)
-            .Select(d => new
-            {
-                d.Id,
-                d.UserId,
-                Name = d.User.FullName,
-                Email = d.User.Email,
-                d.Specialization,
-                d.HospitalName,
-                d.Fee,
-                d.About,
-                ImageUrl = d.ImageUrl
-            })
+.Select(d => new
+{
+    d.Id,
+    d.UserId,
+
+    Name = d.User.FullName,
+    Email = d.User.Email,
+    Phone = d.Phone,
+    d.Specialization,
+    d.HospitalName,
+    Qualification = d.Qualification,
+    Experience = d.Experience,
+    d.Fee,
+    d.About,
+    ImageUrl = d.ImageUrl
+})
             .FirstOrDefault();
 
         if (doctor == null)
@@ -342,6 +365,9 @@ public class DoctorController : ControllerBase
         doctor.Fee = dto.Fee;
         doctor.About = dto.About;
         doctor.ImageUrl = dto.ImageUrl;
+        doctor.Phone = dto.Phone;
+        doctor.Qualification = dto.Qualification;
+        doctor.Experience = dto.Experience;
         _context.SaveChanges();
 
         return Ok("Profile updated successfully");

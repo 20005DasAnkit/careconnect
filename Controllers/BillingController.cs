@@ -40,15 +40,21 @@ namespace HEALTHCARE.Controllers
             if (appointment.Status != "Confirmed" && appointment.Status != "Completed")
                 return BadRequest(new { message = "Bill is available once the appointment is confirmed." });
 
-            var totalFee = appointment.Doctor?.Fee ?? (appointment.AdvanceAmount * 2);
-            var advance = appointment.AdvanceAmount;
-            var balanceDue = Math.Max(totalFee - advance, 0);
-            var balancePaid = appointment.Status == "Completed";
+                var totalFee = appointment.Doctor?.Fee ?? (appointment.AdvanceAmount * 2);
+                var advance = appointment.AdvanceAmount;
+                var creditApplied = appointment.WalletUsed;
+                var advancePaid = Math.Max(advance - creditApplied, 0);
+                var balanceDue = Math.Max(totalFee - advance, 0);
+                var balancePaid = appointment.Status == "Completed";
 
             var dto = new BillingResponseDto
             {
                 AppointmentId = appointment.Id,
-                PatientName = appointment.Patient?.FullName ?? "N/A",
+                PatientName = appointment.PatientName,
+                PatientPhone = appointment.PatientPhone,
+                PatientEmail = appointment.PatientEmail,
+                PatientDob = appointment.PatientDob,
+                PatientAddress = appointment.Address,
                 DoctorName = appointment.Doctor?.User?.FullName ?? "N/A",
                 DoctorSpecialization = appointment.Doctor?.Specialization ?? "",
                 HospitalName = appointment.Doctor?.HospitalName ?? "CareConnect Partner Hospital",
@@ -56,11 +62,12 @@ namespace HEALTHCARE.Controllers
                 AppointmentTime = (appointment.DoctorAvailability?.AvailableFrom ?? appointment.BookedAt).ToString("hh:mm tt"),
                 BookedAt = appointment.BookedAt,
                 Status = appointment.Status,
+                PlaceToVisit = appointment.DoctorAvailability?.Place ?? "",
 
                 TotalFee = totalFee,
                 AdvanceAmount = advance,
-                CreditApplied = 0,
-                AdvancePayable = advance,
+                CreditApplied = creditApplied,  
+                AdvancePayable = advancePaid,
                 BalanceDue = balanceDue,
                 BalancePaid = balancePaid,
                 RefundAmount = appointment.Status.Contains("Cancelled") ? 0 : null,

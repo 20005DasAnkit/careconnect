@@ -70,17 +70,52 @@ namespace HEALTHCARE.Services
                                 row.RelativeItem().Column(c =>
                                 {
                                     c.Item().Text("BILLED TO").FontSize(8).Bold().FontColor(MutedText).LetterSpacing(0.08f);
+
                                     c.Item().PaddingTop(3).Text(b.PatientName).FontSize(12).Bold();
+
+                                    c.Item().Text($"DOB : {(b.PatientDob.HasValue ? b.PatientDob.Value.ToString("dd MMM yyyy") : "-")}")
+                                        .FontSize(9).FontColor(MutedText);
+
+                                    c.Item().Text($"Phone : {b.PatientPhone}")
+                                        .FontSize(9).FontColor(MutedText);
+
+                                    c.Item().Text($"Email : {b.PatientEmail}")
+                                        .FontSize(9).FontColor(MutedText);
+                                    
+                                    c.Item() .Text($"Address : {b.PatientAddress}")
+                                        .FontSize(9).FontColor(MutedText);
                                 });
+
                                 row.RelativeItem().Column(c =>
                                 {
-                                    c.Item().AlignRight().Text("APPOINTMENT WITH").FontSize(8).Bold().FontColor(MutedText).LetterSpacing(0.08f);
-                                    c.Item().AlignRight().PaddingTop(3).Text(b.DoctorName).FontSize(12).Bold();
-                                    c.Item().AlignRight().Text(b.DoctorSpecialization).FontSize(9).FontColor(MutedText);
-                                    c.Item().AlignRight().Text(b.HospitalName).FontSize(9).FontColor(MutedText);
+                                    c.Item().AlignRight().Text("APPOINTMENT WITH")
+                                        .FontSize(8).Bold().FontColor(MutedText).LetterSpacing(0.08f);
+
                                     c.Item().AlignRight().PaddingTop(3)
-                                        .Text($"Visit: {b.AppointmentDate:dd MMM yyyy}, {b.AppointmentTime}")
-                                        .FontSize(9).FontColor(MutedText);
+                                        .Text(b.DoctorName)
+                                        .FontSize(12)
+                                        .Bold();
+
+                                    c.Item().AlignRight()
+                                        .Text(b.DoctorSpecialization)
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item().AlignRight()
+                                        .Text($"Hospital : {b.HospitalName}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item().AlignRight()
+                                        .Text($"Place to Visit : {b.PlaceToVisit}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
+
+                                    c.Item().AlignRight()
+                                        .PaddingTop(3)
+                                        .Text($"Visit : {b.AppointmentDate:dd MMM yyyy}, {b.AppointmentTime}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
                                 });
                             });
 
@@ -119,13 +154,23 @@ namespace HEALTHCARE.Services
                                 }
 
                                 Row("Consultation Fee (Total)", b.TotalFee, bold: true);
-                                Row("Advance Paid at Booking (50%)", b.AdvanceAmount);
+
+                                Row("Advance Amount (50%)", b.AdvanceAmount);
 
                                 if (b.CreditApplied > 0)
-                                    Row("From your refund balance", b.CreditApplied, negative: true);
+                                {
+                                    Row("Refund Balance Used", b.CreditApplied, negative: true);
+                                }
+
+                                if (b.AdvancePayable > 0)
+                                {
+                                    Row("Paid Online", b.AdvancePayable);
+                                }
 
                                 Row(
-                                    b.BalancePaid ? "Balance Paid at Checkup (50%)" : "Balance Due at Checkup (50%)",
+                                    b.BalancePaid
+                                        ? "Balance Paid at Checkup"
+                                        : "Balance Due at Checkup",
                                     b.BalanceDue
                                 );
                             });

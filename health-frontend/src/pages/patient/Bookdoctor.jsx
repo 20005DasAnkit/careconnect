@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import { FiMapPin } from "react-icons/fi";
 import {
     FiCalendar,
     FiClock,
@@ -10,8 +11,13 @@ import {
 } from "react-icons/fi";
 import { toast, Toaster } from "react-hot-toast";
 
-const STEPS = ["Select slot", "Confirm", "Payment", "Done"];
-
+const STEPS = [
+    "Select Slot",
+    "Patient Details",
+    "Confirm",
+    "Payment",
+    "Done"
+];
 
 function formatSlotDate(date) {
     return new Date(date).toLocaleDateString("en-IN", {
@@ -82,12 +88,36 @@ export default function BookAppointment() {
     const [selectedSlot, setSelectedSlot] = useState(null);
     const [paying, setPaying] = useState(false);
     const [appointmentResult, setAppointmentResult] = useState(null);
+    const [refundBalance, setRefundBalance] = useState(0);
+    const [useRefundBalance, setUseRefundBalance] = useState(false);
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [processingPayment, setProcessingPayment] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState("Online");
+    const [useProfile, setUseProfile] = useState(true);
+
+    const [billing, setBilling] = useState({
+        patientName: "",
+        patientPhone: "",
+        patientEmail: "",
+        patientDob: "",
+        gender: "",
+        bloodGroup: "",
+        address: "",
+        relationship: "Self",
+    });
 
     const advanceAmount = useMemo(() => {
         if (!doctor?.fee) return 0;
         return Math.round(doctor.fee * 0.5 * 100) / 100;
     }, [doctor]);
+    const walletUsed = useMemo(() => {
+        if (!useRefundBalance) return 0;
+        return Math.min(refundBalance, advanceAmount);
+    }, [refundBalance, advanceAmount, useRefundBalance]);
+
+    const payableAmount = useMemo(() => {
+        return advanceAmount - walletUsed;
+    }, [advanceAmount, walletUsed]);
 
     useEffect(() => {
         if (!doctorId) {
@@ -102,11 +132,13 @@ export default function BookAppointment() {
         setLoadingSlots(true);
         setError("");
         try {
-            const [doctorsRes, slotsRes] = await Promise.all([
+            const [doctorsRes, slotsRes, refundRes] = await Promise.all([
                 api.get("/patient/doctors"),
                 api.get(`/patient/doctor/${doctorId}/slots`),
+                api.get("/patient/refund-balance"),
             ]);
 
+            setRefundBalance(refundRes.data.refundBalance ?? 0);
             const found = (doctorsRes.data || []).find(
                 (d) => String(d.id) === String(doctorId)
             );
@@ -118,6 +150,32 @@ export default function BookAppointment() {
         } finally {
             setLoadingSlots(false);
         }
+    }
+    async function loadProfile() {
+
+        try {
+
+            const res = await api.get("/patient/profile");
+
+            setBilling({
+                patientName: res.data.fullName || "",
+                patientPhone: res.data.phone || "",
+                patientEmail: res.data.email || "",
+                patientDob: res.data.dob
+                    ? res.data.dob.substring(0, 10)
+                    : "",
+                gender: res.data.gender || "",
+                bloodGroup: res.data.bloodGroup || "",
+                address: res.data.address || "",
+                relationship: "Self"
+            });
+
+        } catch {
+
+            toast.error("Failed to load profile.");
+
+        }
+
     }
 
     function goToConfirm(slot) {
@@ -131,31 +189,47 @@ export default function BookAppointment() {
         setStep(1);
     }
 
-    async function confirmBooking() {
+    useEffect(() => {
+
+        if (!useProfile) return;
+
+        loadProfile();
+
+    }, [useProfile]);
+
+    async function confirmBooking(paymentId = null) {
         setPaying(true);
 
         try {
             const res = await api.post("/patient/book", {
                 doctorAvailabilityId: selectedSlot.id,
-                paymentMethod: paymentMethod
+
+                paymentMethod,
+
+                useRefundBalance,
+
+                razorpayPaymentId: paymentId,
+
+                patientName: billing.patientName,
+                patientPhone: billing.patientPhone,
+                patientEmail: billing.patientEmail,
+                patientDob: billing.patientDob,
+                gender: billing.gender,
+                bloodGroup: billing.bloodGroup,
+                address: billing.address,
+                relationship: billing.relationship
             });
 
             setAppointmentResult({
-                appointmentId:
-                    res.data?.appointmentId ||
-                    res.data?.id ||
-                    Math.floor(Math.random() * 100000),
-
-                advancePaid:
-                    paymentMethod === "Online"
-                        ? advanceAmount
-                        : 0,
-
-                seatsLeft: res.data?.seatsLeft,
+                appointmentId: res.data.appointmentId,
+                originalAdvance: res.data.originalAdvance,
+                walletUsed: res.data.walletUsed,
+                payNow: res.data.payNow,
+                walletBalance: res.data.walletBalance,
+                seatsLeft: res.data.seatsLeft,
             });
-
             toast.success("Appointment Booked Successfully");
-            setStep(3);
+            setStep(4);
 
         } catch (err) {
             const msg = err?.response?.data;
@@ -247,9 +321,16 @@ export default function BookAppointment() {
                                                     <div className="flex items-center gap-1.5 mt-1.5 text-[#6B6458]">
                                                         <FiClock size={13} />
                                                         <span className="text-sm font-medium">
-                                                            {formatSlotTime(slot.availableFrom)}
+                                                            {formatSlotTime(slot.availableFrom)} - {formatSlotTime(slot.availableTo)}
                                                         </span>
                                                     </div>
+                                                    <div className="flex items-center gap-1.5 mt-1.5 text-[#6B6458]">
+                                                        <FiMapPin size={13} />
+                                                        <span className="text-sm font-medium">
+                                                            {slot.place}
+                                                        </span>
+                                                    </div>
+
                                                     {seatsLeft != null && (
                                                         <span
                                                             className={`inline-block mt-2 text-[11px] font-semibold px-2 py-0.5 rounded-full ${low
@@ -267,14 +348,215 @@ export default function BookAppointment() {
                                 )}
                             </div>
                         )}
-
                         {!error && step === 1 && selectedSlot && (
+                            <div>
+
+                                <div className="flex items-center justify-between mb-6">
+
+                                    <h3 className="text-xl font-semibold text-[#16332B]">
+                                        Patient Details
+                                    </h3>
+
+                                    <label className="flex items-center gap-2 text-sm">
+
+                                        <input
+                                            type="checkbox"
+                                            checked={useProfile}
+                                            onChange={(e) =>
+                                                setUseProfile(e.target.checked)
+                                            }
+                                        />
+
+                                        Use My Profile
+
+                                    </label>
+
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                                    <div>
+                                        <label className="block text-sm mb-1">
+                                            Patient Name
+                                        </label>
+
+                                        <input
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.patientName}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    patientName: e.target.value
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm mb-1">
+                                            Phone
+                                        </label>
+
+                                        <input
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.patientPhone}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    patientPhone: e.target.value
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm mb-1">
+                                            Email
+                                        </label>
+
+                                        <input
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.patientEmail}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    patientEmail: e.target.value
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm mb-1">
+                                            Date of Birth
+                                        </label>
+
+                                        <input
+                                            type="date"
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.patientDob}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    patientDob: e.target.value
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm mb-1">
+                                            Gender
+                                        </label>
+
+                                        <input
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.gender}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    gender: e.target.value
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm mb-1">
+                                            Blood Group
+                                        </label>
+
+                                        <input
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.bloodGroup}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    bloodGroup: e.target.value
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="block text-sm mb-1">
+                                            Relationship
+                                        </label>
+
+                                        <select
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.relationship}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    relationship: e.target.value
+                                                })
+                                            }
+                                        >
+                                            <option>Self</option>
+                                            <option>Father</option>
+                                            <option>Mother</option>
+                                            <option>Brother</option>
+                                            <option>Sister</option>
+                                            <option>Spouse</option>
+                                            <option>Child</option>
+                                            <option>Other</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="md:col-span-2">
+
+                                        <label className="block text-sm mb-1">
+                                            Address
+                                        </label>
+
+                                        <textarea
+                                            rows={3}
+                                            className="w-full border rounded-xl p-3"
+                                            value={billing.address}
+                                            onChange={(e) =>
+                                                setBilling({
+                                                    ...billing,
+                                                    address: e.target.value
+                                                })
+                                            }
+                                        />
+
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    onClick={() => {
+
+                                        if (!billing.patientName.trim()) {
+                                            toast.error("Patient name is required");
+                                            return;
+                                        }
+
+                                        if (!billing.patientPhone.trim()) {
+                                            toast.error("Phone number is required");
+                                            return;
+                                        }
+
+                                        setStep(2);
+
+                                    }}
+                                    className="w-full mt-8 bg-[#16332B] text-white py-3 rounded-xl"
+                                >
+                                    Continue
+                                </button>
+
+                            </div>
+                        )}
+
+                        {!error && step === 2 && selectedSlot && (
                             <div>
                                 <div className="bg-[#F8F6F0] rounded-xl border border-[#E7E2D6] p-5 space-y-3.5">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-[#8B8478]">Doctor</span>
                                         <span className="font-medium text-[#16332B]">
-                                            Dr. {doctor?.name || `#${doctorId}`}
+                                            {doctor?.name || `#${doctorId}`}
                                         </span>
                                     </div>
                                     {doctor?.specialization && (
@@ -292,11 +574,12 @@ export default function BookAppointment() {
                                         </span>
                                     </div>
                                     <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B8478]">Time</span>
+                                        <span className="text-[#8B8478]">Visiting Time</span>
                                         <span className="font-medium text-[#16332B]">
-                                            {formatSlotTime(selectedSlot.availableFrom)}
+                                            {formatSlotTime(selectedSlot.availableFrom)} - {formatSlotTime(selectedSlot.availableTo)}
                                         </span>
                                     </div>
+
                                     <div className="flex justify-between text-sm">
                                         <span className="text-[#8B8478]">Seats left</span>
                                         <span className="font-medium text-[#16332B]">
@@ -308,6 +591,109 @@ export default function BookAppointment() {
                                         <span className="font-medium text-[#16332B]">
                                             ₹{doctor?.fee ?? "—"}
                                         </span>
+                                    </div>
+                                    <div className="mt-6 rounded-2xl border border-[#E7E2D6] bg-white p-5">
+
+                                        <h3 className="text-lg font-semibold text-[#16332B] mb-4">
+                                            Patient Details
+                                        </h3>
+
+                                        <div className="grid md:grid-cols-2 gap-4">
+
+                                            <div>
+                                                <p className="text-xs text-gray-500">Patient Name</p>
+                                                <p className="font-medium">{billing.patientName}</p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-gray-500">Phone</p>
+                                                <p className="font-medium">{billing.patientPhone}</p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-gray-500">Email</p>
+                                                <p className="font-medium">
+                                                    {billing.patientEmail || "-"}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-gray-500">Date of Birth</p>
+                                                <p className="font-medium">
+                                                    {billing.patientDob || "-"}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-gray-500">Gender</p>
+                                                <p className="font-medium">
+                                                    {billing.gender || "-"}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-gray-500">Blood Group</p>
+                                                <p className="font-medium">
+                                                    {billing.bloodGroup || "-"}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-gray-500">Relationship</p>
+                                                <p className="font-medium">
+                                                    {billing.relationship}
+                                                </p>
+                                            </div>
+
+                                            <div className="md:col-span-2">
+                                                <p className="text-xs text-gray-500">Address</p>
+                                                <p className="font-medium">
+                                                    {billing.address || "-"}
+                                                </p>
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                    <div className="rounded-2xl border border-[#E7E2D6] bg-[#FCFBF8] p-5 mb-6">
+
+                                        <h3 className="text-lg font-semibold text-[#16332B] mb-4">
+                                            Booking For
+                                        </h3>
+
+                                        <div className="grid grid-cols-2 gap-4">
+
+                                            <div>
+                                                <p className="text-xs text-[#8B8478]">Patient Name</p>
+                                                <p className="font-semibold text-[#16332B]">
+                                                    {billing.patientName}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-[#8B8478]">Relationship</p>
+                                                <p className="font-semibold text-[#16332B]">
+                                                    {billing.relationship}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-[#8B8478]">Phone</p>
+                                                <p className="font-semibold text-[#16332B]">
+                                                    {billing.patientPhone}
+                                                </p>
+                                            </div>
+
+                                            <div>
+                                                <p className="text-xs text-[#8B8478]">Email</p>
+                                                <p className="font-semibold text-[#16332B]">
+                                                    {billing.patientEmail || "-"}
+                                                </p>
+                                            </div>
+
+                                        </div>
+
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-sm font-semibold text-[#16332B]">
@@ -324,7 +710,7 @@ export default function BookAppointment() {
                                 </p>
 
                                 <button
-                                    onClick={() => setStep(2)}
+                                    onClick={() => setStep(3)}
                                     className="w-full mt-6 bg-[#16332B] hover:bg-[#0F241D] text-white py-3 rounded-xl font-medium transition"
                                 >
                                     Continue to payment
@@ -332,7 +718,7 @@ export default function BookAppointment() {
                             </div>
                         )}
 
-                        {!error && step === 2 && selectedSlot && (
+                        {!error && step === 3 && selectedSlot && (
                             <div>
                                 <div className="bg-[#F8F6F0] rounded-xl border border-[#E7E2D6] p-6">
 
@@ -366,19 +752,64 @@ export default function BookAppointment() {
                                         </label>
                                     </div>
 
-                                    <div className="mt-6 flex justify-between text-lg font-semibold">
-                                        <span>Total</span>
-                                        <span>
-                                            {paymentMethod === "Online"
-                                                ? `₹${advanceAmount}`
-                                                : "₹0"}
-                                        </span>
+                                    <div className="mt-6 border-t border-[#E7E2D6] pt-4 space-y-2">
+
+                                        <div className="flex justify-between text-sm">
+                                            <span>Advance Fee</span>
+                                            <span>₹{advanceAmount}</span>
+                                        </div>
+
+                                        {useRefundBalance && walletUsed > 0 && (
+                                            <div className="flex justify-between text-sm text-green-700">
+                                                <span>Refund Balance Used</span>
+                                                <span>-₹{walletUsed}</span>
+                                            </div>
+                                        )}
+
+                                        <div className="flex justify-between text-lg font-bold border-t border-[#E7E2D6] pt-3">
+                                            <span>Pay Now</span>
+                                            <span>
+                                                {paymentMethod === "Online"
+                                                    ? `₹${payableAmount}`
+                                                    : "₹0"}
+                                            </span>
+                                        </div>
+
                                     </div>
+                                    {refundBalance > 0 && (
+                                        <label
+                                            className={`flex items-center justify-between p-4 rounded-xl border mt-3 cursor-pointer ${useRefundBalance
+                                                ? "border-[#16332B] bg-[#EEF5F2]"
+                                                : "border-[#E7E2D6]"
+                                                }`}
+                                        >
+                                            <div>
+                                                <h4 className="font-semibold text-[#16332B]">
+                                                    Use Refund Balance
+                                                </h4>
+
+                                                <p className="text-sm text-[#6B6458]">
+                                                    Available Balance : ₹{refundBalance}
+                                                </p>
+                                            </div>
+
+                                            <input
+                                                type="checkbox"
+                                                checked={useRefundBalance}
+                                                onChange={(e) => setUseRefundBalance(e.target.checked)}
+                                            />
+                                        </label>
+                                    )}
 
                                     <button
-                                        onClick={confirmBooking}
-                                        disabled={paying}
-                                        className="w-full mt-8 bg-[#16332B] hover:bg-[#0F241D] text-white py-3 rounded-xl font-medium"
+                                        onClick={() => {
+                                            if (paymentMethod === "Online" && payableAmount > 0) {
+                                                setShowPaymentModal(true);
+                                            } else {
+                                                confirmBooking();
+                                            }
+                                        }}
+                                        className="w-full mt-6 bg-[#16332B] hover:bg-[#0F241D] text-white py-3 rounded-xl font-medium transition"
                                     >
                                         {paying
                                             ? "Booking..."
@@ -390,7 +821,7 @@ export default function BookAppointment() {
                             </div>
                         )}
 
-                        {step === 3 && (
+                        {step === 4 && (
                             <div className="text-center py-4">
                                 <div className="w-16 h-16 mx-auto rounded-full bg-[#E9F2EC] flex items-center justify-center">
                                     <FiCheckCircle className="text-[#2F6B47]" size={30} />
@@ -406,9 +837,10 @@ export default function BookAppointment() {
                                 </p>
 
                                 <p className="text-[#8B8478] text-sm">
-                                    {paymentMethod === "Online"
-                                        ? `Advance Paid: ₹${appointmentResult?.advancePaid}`
-                                        : "Advance Paid: ₹0"}
+                                    <div className="text-[#8B8478] text-sm mt-2">
+                                        <p>Wallet Used : ₹{appointmentResult?.walletUsed ?? 0}</p>
+                                        <p>Paid Online : ₹{appointmentResult?.payNow ?? 0}</p>
+                                    </div>
                                 </p>
 
                                 <button
@@ -422,6 +854,57 @@ export default function BookAppointment() {
                     </div>
                 </div>
             </div>
+            {showPaymentModal && (
+                <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+
+                    <div className="bg-white rounded-2xl w-[420px] p-6">
+
+                        <h2 className="text-xl font-bold text-[#16332B]">
+                            Demo Payment Gateway
+                        </h2>
+
+                        <p className="mt-2 text-gray-500">
+                            Amount to Pay
+                        </p>
+
+                        <h1 className="text-3xl font-bold mt-2">
+                            ₹{payableAmount}
+                        </h1>
+
+                        <div className="mt-6 space-y-3">
+
+                            <button className="w-full border rounded-xl p-3 text-left">
+                                💳 Card Payment
+                            </button>
+                            <button className="w-full border rounded-xl p-3 text-left">
+                                📱 UPI
+                            </button>
+                            <button className="w-full border rounded-xl p-3 text-left">
+                                🏦 Net Banking
+                            </button>
+
+                        </div>
+
+                        <button
+                            className="w-full mt-6 bg-[#16332B] text-white py-3 rounded-xl"
+                            onClick={async () => {
+
+                                setProcessingPayment(true);
+                                await new Promise(r => setTimeout(r, 2000));
+                                setShowPaymentModal(false);
+                                confirmBooking("DEMO_PAYMENT_" + Date.now());
+                            }}
+                        >
+                            {processingPayment
+                                ? "Processing..."
+                                : `Pay ₹${payableAmount}`}
+                        </button>
+
+                    </div>
+
+                </div>
+            )}
         </>
+
     );
 }

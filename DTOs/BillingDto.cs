@@ -21,5 +21,13 @@ namespace HEALTHCARE.Dtos
 
         // Only populated when the appointment was cancelled
         public decimal? RefundAmount { get; set; }
+        public string PlaceToVisit { get; set; } = "";
+
+        public string PatientPhone { get; set; } = "";
+
+        public string PatientEmail { get; set; } = "";
+
+        public DateTime? PatientDob { get; set; }
+        public string PatientAddress { get; set; } = "";
     }
 }

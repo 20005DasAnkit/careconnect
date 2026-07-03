@@ -521,7 +521,10 @@ export default function Dashboard() {
                                         </h3>
 
                                         <p className="text-[#16332B]/60 mt-2 text-sm">
-                                            {new Date(a.bookedAt).toLocaleString()}
+                                            {new Date(a.appointmentTime).toLocaleString("en-IN", {
+                                                dateStyle: "medium",
+                                                timeStyle: "short",
+                                            })}
                                         </p>
 
                                         <span className="inline-block mt-4 bg-[#3E7C59]/10 text-[#3E7C59] px-4 py-1.5 rounded-full text-sm font-medium">
