@@ -72,9 +72,9 @@ namespace HEALTHCARE.Services
                                         .FontColor(MutedText);
 
                                     c.Item()
-    .Text($"Email : {rx.DoctorEmail}")
-    .FontSize(9)
-    .FontColor(MutedText);
+                                        .Text($"Email : {rx.DoctorEmail}")
+                                        .FontSize(9)
+                                        .FontColor(MutedText);
 
                                     c.Item()
                                         .Text($"Phone : {rx.DoctorPhone}")
