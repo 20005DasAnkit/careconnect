@@ -594,7 +594,7 @@ export default function Appointments() {
           .appt-tab.active::after{content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:${T.ink};}
         `}</style>
 
-                <div style={{ maxWidth: 1200, margin: "0 auto", padding: "36px 24px" }}>
+<div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
 
                     {/* ── Editorial header ── */}
                     <div style={{ display: "flex", 

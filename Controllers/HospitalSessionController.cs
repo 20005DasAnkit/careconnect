@@ -81,9 +81,7 @@ public class HospitalSessionController : ControllerBase
                 x.Date,
                 x.StartTime,
                 x.EndTime,
-
                 x.PlaceToVisit,
-
                 x.IsActive
             })
             .ToList();

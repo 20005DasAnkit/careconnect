@@ -4,6 +4,7 @@ import { User, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import Chatbot from "./Chatbot";
+import { Stethoscope, Pill, Ambulance, CalendarCheck } from "lucide-react";
 
 // Stock fallback photos — keyed by doctor.id so the same doctor always
 // gets the same photo, regardless of list order/filtering.
@@ -97,7 +98,7 @@ export default function Dashboard() {
                             >
                                 Appointments
                             </a>
-                                                        <a
+                            <a
                                 href={token ? "/patient/orders" : "/login"}
                                 className="hover:text-[#16332B] transition"
                             >
@@ -343,28 +344,28 @@ export default function Dashboard() {
                         {[
                             {
                                 href: "/patient/doctors",
-                                icon: "🩺",
+                                Icon: Stethoscope,
                                 title: "Doctors",
                                 desc: "Book appointments with trusted specialists.",
                                 accent: "#16332B",
                             },
                             {
                                 href: "/patient/products",
-                                icon: "💊",
+                                Icon: Pill,
                                 title: "Medicines",
                                 desc: "Order medicines at affordable prices.",
                                 accent: "#3E7C59",
                             },
                             {
                                 href: "/patient/ambulance",
-                                icon: "🚑",
+                                Icon: Ambulance,
                                 title: "Ambulance",
                                 desc: "Emergency ambulance booking, anytime.",
                                 accent: "#B5562C",
                             },
                             {
                                 href: "/patient/appointments",
-                                icon: "📅",
+                                Icon: CalendarCheck,
                                 title: "My Appointments",
                                 desc: "View and manage all your visits.",
                                 accent: "#8B6BAE",
@@ -376,10 +377,10 @@ export default function Dashboard() {
                                 className="bg-white rounded-2xl p-8 border border-[#E4DFD3] hover:border-[#16332B]/30 hover:shadow-md transition"
                             >
                                 <div
-                                    className="w-14 h-14 rounded-xl flex items-center justify-center text-2xl"
+                                    className="w-14 h-14 rounded-xl flex items-center justify-center"
                                     style={{ backgroundColor: `${s.accent}14` }}
                                 >
-                                    {s.icon}
+                                    <s.Icon size={28} color={s.accent} />
                                 </div>
 
                                 <h3 className="text-xl font-medium mt-6">{s.title}</h3>

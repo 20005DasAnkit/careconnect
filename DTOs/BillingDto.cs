@@ -11,22 +11,17 @@ namespace HEALTHCARE.Dtos
         public string AppointmentTime { get; set; } = "";
         public DateTime BookedAt { get; set; }
         public string Status { get; set; } = "";
-
         public decimal TotalFee { get; set; }
         public decimal AdvanceAmount { get; set; }       // 50% due at booking
         public decimal CreditApplied { get; set; }        // wallet credit used, shown as deduction
         public decimal AdvancePayable { get; set; }        // AdvanceAmount - CreditApplied
         public decimal BalanceDue { get; set; }             // remaining 50%, due at checkup
         public bool BalancePaid { get; set; }
-
         // Only populated when the appointment was cancelled
         public decimal? RefundAmount { get; set; }
         public string PlaceToVisit { get; set; } = "";
-
         public string PatientPhone { get; set; } = "";
-
         public string PatientEmail { get; set; } = "";
-
         public DateTime? PatientDob { get; set; }
         public string PatientAddress { get; set; } = "";
     }

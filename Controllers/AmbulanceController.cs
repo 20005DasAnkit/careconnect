@@ -163,7 +163,6 @@ public class AmbulanceController : ControllerBase
         ambulance.VehicleNumber = dto.VehicleNumber.Trim();
         ambulance.LicenseNumber = dto.LicenseNumber.Trim();
         ambulance.BaseLocation = dto.BaseLocation.Trim();
-
         _context.SaveChanges();
 
         var totalRides = _context.AmbulanceRequests

@@ -28,7 +28,8 @@ function AmbulanceCardSkeleton() {
     return (
         <div className="bg-white rounded-[20px] border border-[#E4DFD3] p-5 flex items-center gap-4 animate-pulse">
             <div className="w-14 h-14 rounded-xl bg-[#EFEAE0] shrink-0" />
-            <div className="flex-1 space-y-2.5 min-w-0">
+
+            <div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
                 <div className="h-3.5 bg-[#EFEAE0] rounded-full w-32" />
                 <div className="h-3 bg-[#EFEAE0] rounded-full w-24" />
             </div>
@@ -62,21 +63,21 @@ export default function Ambulance() {
         }
     }
 
-function goToBooking(amb) {
-    const token = localStorage.getItem("token");
+    function goToBooking(amb) {
+        const token = localStorage.getItem("token");
 
-    if (!token) {
-        navigate("/login");
-        return;
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        const params = new URLSearchParams({
+            ambulanceId: amb.id,
+            driverName: amb.driverName || "",
+        });
+
+        navigate(`/patient/ambulance/request?${params.toString()}`);
     }
-
-    const params = new URLSearchParams({
-        ambulanceId: amb.id,
-        driverName: amb.driverName || "",
-    });
-
-    navigate(`/patient/ambulance/request?${params.toString()}`);
-}
 
     const filtered = ambulances.filter((a) => {
         if (!search) return true;
@@ -240,19 +241,19 @@ function goToBooking(amb) {
                                                         <div className="flex items-center gap-1.5 mt-2">
                                                             <span
                                                                 className={`w-1.5 h-1.5 rounded-full ${amb.myRide
-                                                                        ? "bg-green-600"
-                                                                        : amb.isAvailable
-                                                                            ? "bg-[#3E7C59]"
-                                                                            : "bg-[#A8A192]"
+                                                                    ? "bg-green-600"
+                                                                    : amb.isAvailable
+                                                                        ? "bg-[#3E7C59]"
+                                                                        : "bg-[#A8A192]"
                                                                     }`}
                                                             />
 
                                                             <span
                                                                 className={`text-[12px] font-medium ${amb.myRide
-                                                                        ? "text-green-600"
-                                                                        : amb.isAvailable
-                                                                            ? "text-[#3E7C59]"
-                                                                            : "text-[#16332B]/40"
+                                                                    ? "text-green-600"
+                                                                    : amb.isAvailable
+                                                                        ? "text-[#3E7C59]"
+                                                                        : "text-[#16332B]/40"
                                                                     }`}
                                                             >
                                                                 {amb.myRide

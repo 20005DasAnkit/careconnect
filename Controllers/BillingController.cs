@@ -15,7 +15,6 @@ namespace HEALTHCARE.Controllers
     {
         private readonly AppDbContext _context;
         private readonly BillingPdfService _pdfService;
-
         public BillingController(AppDbContext context, BillingPdfService pdfService)
         {
             _context = context;
@@ -63,7 +62,6 @@ namespace HEALTHCARE.Controllers
                 BookedAt = appointment.BookedAt,
                 Status = appointment.Status,
                 PlaceToVisit = appointment.DoctorAvailability?.Place ?? "",
-
                 TotalFee = totalFee,
                 AdvanceAmount = advance,
                 CreditApplied = creditApplied,  
@@ -75,7 +73,6 @@ namespace HEALTHCARE.Controllers
 
             var pdfBytes = _pdfService.Generate(dto);
             var fileName = $"CareConnect_Bill_{dto.PatientName.Replace(" ", "_")}_{appointment.Id}.pdf";
-
             return File(pdfBytes, "application/pdf", fileName);
         }
     }

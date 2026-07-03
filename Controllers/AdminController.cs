@@ -602,7 +602,6 @@ public class AdminController : ControllerBase
         hospital.Address = dto.Address;
         hospital.City = dto.City;
         hospital.Phone = dto.Phone;
-
         _context.SaveChanges();
 
         return Ok(new
@@ -619,7 +618,6 @@ public class AdminController : ControllerBase
         if (hospital == null)
             return NotFound("Hospital not found");
 
-        // Hospital-এর কোনো session আছে?
         bool hasSessions = _context.HospitalSessions
             .Any(x => x.HospitalId == id);
 

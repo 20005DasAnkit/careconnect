@@ -89,7 +89,7 @@ export default function Orders() {
 
     return (
         <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            <div className="max-w-[1200px] mx-auto px-6 lg:px-10 py-16">
+            <div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
 
                 {/* ───────────────────── HEADER ───────────────────── */}
                 <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
