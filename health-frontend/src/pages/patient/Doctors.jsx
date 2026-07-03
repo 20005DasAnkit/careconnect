@@ -37,8 +37,7 @@ function displayDoctorName(name) {
 function CardSkeleton() {
     return (
         <div className="bg-white rounded-[24px] overflow-hidden animate-pulse border border-[#E4DFD3]">
-            <div className="h-60 bg-[#EFEAE0]" />
-            <div className="p-5 space-y-3">
+            <div className="p-5 space-y-3 bg-[#EFEAE0]">
                 <div className="h-4 bg-[#EFEAE0] rounded-full w-2/3" />
                 <div className="h-3 bg-[#EFEAE0] rounded-full w-1/2" />
                 <div className="h-10 bg-[#EFEAE0] rounded-full mt-3" />
@@ -108,7 +107,7 @@ export default function Doctors() {
 
     return (
         <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            <div className="max-w-[1200px] mx-auto px-6 lg:px-10 py-16">
+            <div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
 
                 {/* ───────────────────── HEADER ───────────────────── */}
                 <div className="mb-10">
