@@ -26,9 +26,6 @@ function getStockImage(doctorId) {
     const idx = doctorId % STOCK_IMAGES.length;
     return STOCK_IMAGES[idx];
 }
-
-// Some doctor names already include "Dr." (e.g. from how they were created
-// in the admin panel), others don't. This avoids "Dr. Dr. Ananya Sen".
 function displayDoctorName(name) {
     if (!name) return "";
     return /^dr\.?\s/i.test(name) ? name : `Dr. ${name}`;
@@ -83,6 +80,22 @@ export default function Dashboard() {
         }
         navigate(`/patient/doctors?${params.toString()}`);
     };
+
+    const upcomingAppointments = appointments
+  .filter((a) => {
+    const status = (a.status || "").toLowerCase();
+
+    return (
+      new Date(a.appointmentTime) > new Date() &&
+      status !== "completed" &&
+      status !== "cancelled" &&
+      status !== "rejected"
+    );
+  })
+  .sort(
+    (a, b) =>
+      new Date(a.appointmentTime) - new Date(b.appointmentTime)
+  );
 
     return (
         <>
@@ -546,7 +559,7 @@ export default function Dashboard() {
                                 </a>
                             </div>
 
-                            {appointments.length === 0 ? (
+                            {upcomingAppointments.length === 0 ? (
                                 <div className="text-center py-12 font-[system-ui,sans-serif]">
                                     <h3 className="text-lg font-medium">No upcoming appointment</h3>
                                     <p className="text-[#16332B]/60 mt-2">
@@ -555,7 +568,7 @@ export default function Dashboard() {
                                 </div>
                             ) : (
                                 <div className="grid md:grid-cols-2 gap-6 font-[system-ui,sans-serif]">
-                                    {appointments.slice(0, 2).map((a) => (
+                                    {upcomingAppointments.slice(0, 2).map((a) => (
                                         <div
                                             key={a.id}
                                             className="border border-[#E4DFD3] rounded-2xl p-6 hover:border-[#16332B]/40 transition"

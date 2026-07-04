@@ -209,7 +209,7 @@ export default function Products() {
                                 <div className="relative aspect-square bg-gradient-to-br from-[#FAF8F3] to-[#EFEAE0] flex items-center justify-center">
                                     {p.imageUrl ? (
                                         <img
-                                            src={p.imageUrl}
+                                            src={`http://localhost:5008${p.imageUrl}`}
                                             alt={p.name}
                                             className="w-full h-full object-contain p-4 group-hover:scale-105 transition duration-300"
                                         />

@@ -72,18 +72,19 @@ public class HospitalSessionController : ControllerBase
         var data = _context.HospitalSessions
             .Include(x => x.Hospital)
             .OrderByDescending(x => x.Id)   // Latest first
-            .Select(x => new
-            {
-                x.Id,
-                HospitalId = x.HospitalId,
-                HospitalName = x.Hospital.Name,
-                x.Day,
-                x.Date,
-                x.StartTime,
-                x.EndTime,
-                x.PlaceToVisit,
-                x.IsActive
-            })
+           .Select(x => new
+{
+    x.Id,
+    HospitalId = x.HospitalId,
+    HospitalName = x.Hospital.Name,
+    x.Day,
+    x.Date,
+    x.StartTime,
+    x.EndTime,
+    x.PlaceToVisit,
+    x.IsActive,
+    IsExpired = x.Date < DateOnly.FromDateTime(DateTime.Today)
+})
             .ToList();
         return Ok(data);
     }
@@ -104,11 +105,11 @@ public class HospitalSessionController : ControllerBase
             return BadRequest("Invalid time.");
 
         session.HospitalId = dto.HospitalId;
-        session.Day = dto.Day;
-        session.StartTime = dto.StartTime;
-        session.EndTime = dto.EndTime;
-        session.PlaceToVisit = dto.PlaceToVisit;
-
+session.Day = dto.Day;
+session.Date = dto.Date;
+session.StartTime = dto.StartTime;
+session.EndTime = dto.EndTime;
+session.PlaceToVisit = dto.PlaceToVisit;
         _context.SaveChanges();
 
         return Ok(new
@@ -126,6 +127,13 @@ public class HospitalSessionController : ControllerBase
     {
         var session = _context.HospitalSessions
             .FirstOrDefault(x => x.Id == id);
+
+        if (session.Date < DateOnly.FromDateTime(DateTime.Today))
+{
+    return BadRequest(
+        "Expired sessions cannot be deleted. Please cancel them instead."
+    );
+}
 
         if (session == null)
             return NotFound("Session not found");
@@ -149,20 +157,50 @@ public class HospitalSessionController : ControllerBase
     // ACTIVE / INACTIVE
     // =========================
 
-    [HttpPut("hospital-session/{id}/toggle")]
-    public IActionResult Toggle(int id)
+[HttpPut("hospital-session/{id}/toggle")]
+public IActionResult Toggle(int id)
+{
+    var session = _context.HospitalSessions
+        .FirstOrDefault(x => x.Id == id);
+
+    if (session == null)
+        return NotFound();
+
+    if (session.Date < DateOnly.FromDateTime(DateTime.Today))
+        return BadRequest("Expired session cannot be activated.");
+
+    session.IsActive = !session.IsActive;
+
+    _context.SaveChanges();
+
+    return Ok(new
     {
-        var session = _context.HospitalSessions
-            .FirstOrDefault(x => x.Id == id);
+        session.IsActive
+    });
+}
+// =========================
+// CANCEL EXPIRED SESSION
+// =========================
 
-        if (session == null)
-            return NotFound();
+[HttpPut("hospital-session/{id}/cancel")]
+public IActionResult Cancel(int id)
+{
+    var session = _context.HospitalSessions
+        .FirstOrDefault(x => x.Id == id);
 
-        session.IsActive = !session.IsActive;
-        _context.SaveChanges();
-        return Ok(new
-        {
-            session.IsActive
-        });
-    }
+    if (session == null)
+        return NotFound("Session not found");
+
+    if (session.Date >= DateOnly.FromDateTime(DateTime.Today))
+        return BadRequest("Only expired sessions can be cancelled.");
+
+    session.IsActive = false;
+
+    _context.SaveChanges();
+
+    return Ok(new
+    {
+        Message = "Expired session cancelled."
+    });
+}
 }

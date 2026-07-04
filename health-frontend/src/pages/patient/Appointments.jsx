@@ -56,6 +56,13 @@ const STATUS_CFG = {
         border: "#FED7AA",
         label: "Doctor Cancelled"
     },
+
+    NotVisited: {
+        bg: "#FEF3C7",
+        text: "#92400E",
+        border: "#FCD34D",
+        label: "Not Visited"
+    },
 };
 
 const PAYMENT_CFG = {
@@ -66,7 +73,14 @@ const PAYMENT_CFG = {
     Wallet: { bg: T.greenLight, text: T.green },
 };
 
-const TABS = ["All", "Confirmed", "Pending", "Completed", "Cancelled"];
+const TABS = [
+    "All",
+    "Confirmed",
+    "Pending",
+    "Completed",
+    "NotVisited",
+    "Cancelled"
+];
 const PER_PAGE = 6;
 
 /* ─── Helpers ─────────────────────────────────── */

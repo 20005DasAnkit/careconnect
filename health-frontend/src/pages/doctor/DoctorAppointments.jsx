@@ -27,6 +27,11 @@ const STATUS_CFG = {
     CancelledByUser: { bg: "#FEE2E2", text: "#991B1B", border: "#FECACA" },
     CancelledByAdmin: { bg: "#FEE2E2", text: "#991B1B", border: "#FECACA" },
     Completed: { bg: "#DBEAFE", text: "#1E40AF", border: "#BFDBFE" },
+    NotVisited: {
+        bg: "#FEF3C7",
+        text: "#92400E",
+        border: "#FCD34D",
+    },
 };
 const th = {
     padding: "14px 20px",
@@ -95,6 +100,7 @@ export default function DoctorAppointments() {
     const load = async () => {
         try {
             const res = await api.get("/Doctor/appointments");
+            console.log(JSON.stringify(res.data[0], null, 2));
             setAppointments(Array.isArray(res.data) ? res.data : []);
         } catch (err) {
             console.error(err);
@@ -193,7 +199,7 @@ export default function DoctorAppointments() {
                             <Filter size={14} style={{ position: "absolute", left: 11, color: T.muted, pointerEvents: "none" }} />
                             <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)}
                                 style={{ paddingLeft: 32, paddingRight: 12, paddingTop: 9, paddingBottom: 9, borderRadius: 10, border: `1px solid ${T.border}`, fontSize: 13, background: T.white, color: T.ink, cursor: "pointer", appearance: "none" }}>
-                                {["All", "Pending", "Confirmed", "Cancelled", "Completed"].map(s => <option key={s}>{s}</option>)}
+                                {["All", "Pending", "Confirmed", "Completed", "NotVisited", "Cancelled"].map(s => <option key={s}>{s}</option>)}
                             </select>
                         </div>
                     </div>
@@ -216,76 +222,114 @@ export default function DoctorAppointments() {
                                         No appointments found.
                                     </td>
                                 </tr>
-                            ) : filtered.map((item, i) => (
-                                <tr key={item.id} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
-                                    onMouseEnter={e => e.currentTarget.style.background = T.cream}
-                                    onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
-                                    <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted, fontWeight: 600 }}>{i + 1}</td>
-                                    <td style={{ padding: "15px 20px" }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                                            <div style={{ width: 36, height: 36, borderRadius: "50%", background: T.greenLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                                <UserCircle2 size={20} color={T.green} />
-                                            </div>
-                                            <span style={{ fontWeight: 700, fontSize: 14, color: T.ink }}>{item.patientName}</span>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: "15px 20px" }}>
-                                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                            <Mail size={13} color={T.muted} />
-                                            <span style={{ fontSize: 13, color: T.muted }}>{item.patientEmail}</span>
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: "15px 20px" }}>
-                                        <div style={{ fontWeight: 600 }}>
-                                            {item.appointmentDate}
-                                        </div>
+                            ) : filtered.map((item, i) => {
 
-                                        <div style={{ fontSize: 12, color: T.muted }}>
-                                            {item.appointmentTime}
-                                        </div>
-                                    </td>
-                                    <td style={{ padding: "15px 20px" }}><Badge status={item.status} /></td>
-                                    <td style={{ padding: "15px 20px" }}>
-                                        {item.status === "Completed" ? (
-                                            <ActionBtn
-                                                label={item.hasPrescription ? "Edit Prescription" : "Write Prescription"}
-                                                bg={item.hasPrescription ? "#DBEAFE" : T.greenLight}
-                                                fg={item.hasPrescription ? "#1E40AF" : T.green}
-                                                onClick={() => setRxAppointment(item)}
-                                            />
-                                        ) : (
-                                            <span style={{ color: T.muted }}>—</span>
-                                        )}
-                                    </td>
-                                    <td style={{ padding: "15px 20px" }}>
-                                        {item.status === "Pending" ? (
-                                            <div style={{ display: "flex", gap: 8 }}>
-                                                <ActionBtn
-                                                    label="Accept"
-                                                    bg={T.greenLight}
-                                                    fg={T.green}
-                                                    onClick={() => updateStatus(item.id, "Confirmed")}
-                                                />
-                                                <ActionBtn
-                                                    label="Reject"
-                                                    bg="#FEE2E2"
-                                                    fg="#DC2626"
-                                                    onClick={() => updateStatus(item.id, "CancelledByAdmin")}
-                                                />
+                                const appointmentDateTime = new Date(item.appointmentDateTime);
+                                const isPast = appointmentDateTime < new Date();
+
+                                return (
+                                    <tr key={item.id} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
+                                        onMouseEnter={e => e.currentTarget.style.background = T.cream}
+                                        onMouseLeave={e => e.currentTarget.style.background = "transparent"}>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted, fontWeight: 600 }}>{i + 1}</td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                                <div style={{ width: 36, height: 36, borderRadius: "50%", background: T.greenLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                                    <UserCircle2 size={20} color={T.green} />
+                                                </div>
+                                                <span style={{ fontWeight: 700, fontSize: 14, color: T.ink }}>{item.patientName}</span>
                                             </div>
-                                        ) : item.status === "Confirmed" ? (
-                                            <ActionBtn
-                                                label="Complete"
-                                                bg={T.greenLight}
-                                                fg={T.green}
-                                                onClick={() => updateStatus(item.id, "Completed")}
-                                            />
-                                        ) : (
-                                            <span style={{ color: T.muted }}>—</span>
-                                        )}
-                                    </td>
-                                </tr>
-                            ))}
+                                        </td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                                                <Mail size={13} color={T.muted} />
+                                                <span style={{ fontSize: 13, color: T.muted }}>{item.patientEmail}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            <div style={{ fontWeight: 600 }}>
+                                                {item.appointmentDate}
+                                            </div>
+
+                                            <div style={{ fontSize: 12, color: T.muted }}>
+                                                {item.appointmentTime}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: "15px 20px" }}><Badge status={item.status} /></td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            {item.status === "Completed" ? (
+                                                <ActionBtn
+                                                    label={item.hasPrescription ? "Edit Prescription" : "Write Prescription"}
+                                                    bg={item.hasPrescription ? "#DBEAFE" : T.greenLight}
+                                                    fg={item.hasPrescription ? "#1E40AF" : T.green}
+                                                    onClick={() => setRxAppointment(item)}
+                                                />
+                                            ) : (
+                                                <span style={{ color: T.muted }}>—</span>
+                                            )}
+                                        </td>
+<td style={{ padding: "15px 20px" }}>
+
+    {item.status === "Pending" ? (
+
+        <div style={{ display: "flex", gap: 8 }}>
+
+            <ActionBtn
+                label="Accept"
+                bg={T.greenLight}
+                fg={T.green}
+                onClick={() => updateStatus(item.id, "Confirmed")}
+            />
+
+            <ActionBtn
+                label="Reject"
+                bg="#FEE2E2"
+                fg="#DC2626"
+                onClick={() => updateStatus(item.id, "CancelledByAdmin")}
+            />
+
+        </div>
+
+    ) : item.status === "Confirmed" ? (
+
+        isPast ? (
+
+            <div style={{ display: "flex", gap: 8 }}>
+
+                <ActionBtn
+                    label="Complete"
+                    bg={T.greenLight}
+                    fg={T.green}
+                    onClick={() => updateStatus(item.id, "Completed")}
+                />
+
+                <ActionBtn
+                    label="Not Visited"
+                    bg="#FEF3C7"
+                    fg="#92400E"
+                    onClick={() => updateStatus(item.id, "NotVisited")}
+                />
+
+            </div>
+
+        ) : (
+
+            <span style={{ color: T.muted }}>
+                Waiting for appointment
+            </span>
+
+        )
+
+    ) : (
+
+        <span style={{ color: T.muted }}>—</span>
+
+    )}
+
+</td>
+                                    </tr>
+                                );
+                            })}
                         </tbody>
                     </table>
                 </div>

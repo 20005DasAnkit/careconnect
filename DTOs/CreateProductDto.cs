@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace HEALTHCARE.DTOs;
 
 public class CreateProductDto
@@ -6,4 +8,6 @@ public class CreateProductDto
     public string Description { get; set; }
     public decimal Price { get; set; }
     public int Stock { get; set; }
+    public string? Category { get; set; }
+    public IFormFile? Image { get; set; }
 }

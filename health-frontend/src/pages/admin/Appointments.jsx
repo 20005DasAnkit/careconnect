@@ -66,31 +66,79 @@ export default function Appointments() {
 
                                 <tbody>
                                     {appointments.length > 0 ? (
-                                        appointments.map((a) => (
-                                            <tr
-                                                key={a.id}
-                                                className="border-b hover:bg-gray-50"
-                                            >
-                                                <td className="p-3">{a.id}</td>
-                                                <td className="p-3">{a.patientName}</td>
-                                                <td className="p-3">{a.doctorName}</td>
-                                                <td className="p-3">{a.status}</td>
-                                                <td className="p-3">
-                                                    {new Date(a.bookedAt).toLocaleString()}
-                                                </td>
+                                        appointments.map((a) => {
 
-                                                <td className="p-3">
-                                                    {a.status !== "Cancelled" && (
-                                                        <button
-                                                            onClick={() => cancelAppointment(a.id)}
-                                                            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                                            const appointmentTime = new Date(a.appointmentTime);
+                                            const isPast = appointmentTime < new Date();
+
+                                            const canCancel =
+                                                !isPast &&
+                                                a.status !== "Cancelled" &&
+                                                a.status !== "CancelledByUser" &&
+                                                a.status !== "Completed" &&
+                                                a.status !== "Rejected";
+
+                                            let displayStatus = a.status;
+
+                                            if (isPast && a.status === "Confirmed") {
+                                                displayStatus = "Not Visited";
+                                            }
+
+                                            return (
+                                                <tr
+                                                    key={a.id}
+                                                    className="border-b hover:bg-gray-50"
+                                                >
+                                                    <td className="p-3">{a.id}</td>
+
+                                                    <td className="p-3">
+                                                        {a.patientName}
+                                                    </td>
+
+                                                    <td className="p-3">
+                                                        {a.doctorName}
+                                                    </td>
+
+                                                    <td className="p-3">
+                                                        <span
+                                                            className={`px-3 py-1 rounded-full text-sm font-semibold
+                            ${displayStatus === "Completed"
+                                                                    ? "bg-green-100 text-green-700"
+                                                                    : displayStatus === "Not Visited"
+                                                                        ? "bg-yellow-100 text-yellow-700"
+                                                                        : displayStatus === "Cancelled" ||
+                                                                            displayStatus === "CancelledByUser"
+                                                                            ? "bg-red-100 text-red-700"
+                                                                            : displayStatus === "Rejected"
+                                                                                ? "bg-gray-200 text-gray-700"
+                                                                                : "bg-blue-100 text-blue-700"
+                                                                }`}
                                                         >
-                                                            Cancel
-                                                        </button>
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        ))
+                                                            {displayStatus}
+                                                        </span>
+                                                    </td>
+
+                                                    <td className="p-3">
+                                                        {new Date(a.appointmentTime).toLocaleString()}
+                                                    </td>
+
+                                                    <td className="p-3">
+                                                        {canCancel ? (
+                                                            <button
+                                                                onClick={() => cancelAppointment(a.id)}
+                                                                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded"
+                                                            >
+                                                                Cancel
+                                                            </button>
+                                                        ) : (
+                                                            <span className="text-gray-400">
+                                                                —
+                                                            </span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
                                     ) : (
                                         <tr>
                                             <td

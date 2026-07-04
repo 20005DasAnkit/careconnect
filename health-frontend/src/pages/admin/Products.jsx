@@ -84,7 +84,14 @@ export default function Products() {
   const [products, setProducts] = useState([]);
   const [showForm, setShowForm] = useState(false);
 
-  const emptyForm = { name: "", description: "", price: "", stock: "", category: "" };
+  const emptyForm = {
+    name: "",
+    description: "",
+    price: "",
+    stock: "",
+    category: "",
+    image: null
+  };
   const [form, setForm] = useState(emptyForm);
 
   const [editCatProduct, setEditCatProduct] = useState(null);
@@ -94,6 +101,16 @@ export default function Products() {
   const [stockModalProduct, setStockModalProduct] = useState(null);
   const [stockInput, setStockInput] = useState("");
   const [updatingStock, setUpdatingStock] = useState(false);
+  const [imageProduct, setImageProduct] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [editProduct, setEditProduct] = useState(null);
+
+  const [editForm, setEditForm] = useState({
+    name: "",
+    description: "",
+    price: "",
+    category: ""
+  });
 
   useEffect(() => {
     load();
@@ -112,14 +129,22 @@ export default function Products() {
       return;
     }
     try {
-      const payload = {
-        name: form.name,
-        description: form.description,
-        price: Number(form.price),
-        stock: Number(form.stock),
-        category: form.category || null,
-      };
-      await api.post("/admin/product", payload);
+      const data = new FormData();
+
+      data.append("name", form.name);
+      data.append("description", form.description);
+      data.append("price", form.price);
+      data.append("stock", form.stock);
+      data.append("category", form.category);
+
+      if (form.image)
+        data.append("image", form.image);
+
+      await api.post("/admin/product", data, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setForm(emptyForm);
       setShowForm(false);
       load();
@@ -182,6 +207,74 @@ export default function Products() {
     }
   };
 
+  const updateImage = async () => {
+    try {
+
+      if (!imageFile) {
+        alert("Choose an image");
+        return;
+      }
+
+      const data = new FormData();
+
+      data.append("image", imageFile);
+
+      await api.put(
+        `/admin/product/${imageProduct.id}/image`,
+        data,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      );
+
+      setImageProduct(null);
+      setImageFile(null);
+
+      load();
+
+    } catch (err) {
+      console.log(err);
+      alert(err.response?.data || "Image upload failed");
+    }
+  };
+
+  const openEditProduct = (product) => {
+
+    setEditProduct(product);
+
+    setEditForm({
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      category: product.category || ""
+    });
+  };
+
+  const updateProduct = async () => {
+
+    try {
+
+      await api.put(
+        `/admin/product/${editProduct.id}`,
+        editForm
+      );
+
+      setEditProduct(null);
+
+      load();
+
+    } catch (err) {
+
+      console.log(err);
+
+      alert("Update failed");
+
+    }
+
+  };
+
   return (
     <div style={{ display: "flex", minHeight: "100vh", background: C.cream }}>
       <Sidebar />
@@ -209,6 +302,16 @@ export default function Products() {
               <input style={inputStyle} name="description" onChange={handleChange} value={form.description} placeholder="Description" />
               <input style={inputStyle} name="price" type="number" onChange={handleChange} value={form.price} placeholder="Price *" />
               <input style={inputStyle} name="stock" type="number" onChange={handleChange} value={form.stock} placeholder="Stock *" />
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) =>
+                  setForm({
+                    ...form,
+                    image: e.target.files[0]
+                  })
+                }
+              />
 
               <select
                 name="category"
@@ -232,7 +335,7 @@ export default function Products() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: C.forestSoft }}>
-                  {["ID", "Name", "Category", "Price", "Stock", "Actions"].map((h) => (
+                  {["ID", "Image", "Name", "Category", "Price", "Stock", "Actions"].map((h) => (
                     <th key={h} style={{ ...body, textAlign: "left", padding: "12px 16px", fontSize: 12, letterSpacing: 0.5, textTransform: "uppercase", color: C.forestDark }}>
                       {h}
                     </th>
@@ -243,6 +346,23 @@ export default function Products() {
                 {products.map((p) => (
                   <tr key={p.id} style={{ borderTop: `1px solid ${C.border}` }}>
                     <td style={{ ...body, padding: "14px 16px", color: C.muted, fontSize: 13.5 }}>{p.id}</td>
+                    <td>
+                      {p.imageUrl ? (
+                        <img
+                          src={`http://localhost:5008${p.imageUrl}`}
+                          alt=""
+                          style={{
+                            width: 60,
+                            height: 60,
+                            objectFit: "cover",
+                            borderRadius: 8
+                          }}
+                        />
+                      ) : (
+                        "No Image"
+                      )}
+
+                    </td>
                     <td style={{ ...body, padding: "14px 16px", fontWeight: 600, fontSize: 14 }}>{p.name}</td>
                     <td style={{ padding: "14px 16px" }}>
                       {p.category ? (
@@ -269,11 +389,24 @@ export default function Products() {
                         <button style={smallBtn(C.forestSoft, C.forestDark)} onClick={() => openStockModal(p)}>
                           Add Stock
                         </button>
+                        <button
+                          style={smallBtn(C.forestSoft, C.forestDark)}
+                          onClick={() => setImageProduct(p)}
+                        >
+                          {p.imageUrl ? "Change Image" : "Add Image"}
+                        </button>
                         <button style={smallBtn(C.dangerSoft, C.danger)} onClick={() => remove(p.id)}>
                           Delete
                         </button>
+                        <button
+                          style={smallBtn(C.terracottaSoft, C.terracottaDark)}
+                          onClick={() => openEditProduct(p)}
+                        >
+                          Edit
+                        </button>
                       </div>
                     </td>
+
                   </tr>
                 ))}
               </tbody>
@@ -342,6 +475,145 @@ export default function Products() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {imageProduct && (
+        <div style={modalOverlay}>
+          <div style={modalCard}>
+
+            <h3 style={{ ...heading, fontSize: 18, marginBottom: 10 }}>
+              {imageProduct.imageUrl ? "Change Product Image" : "Add Product Image"}
+            </h3>
+
+            {imageProduct.imageUrl && (
+              <img
+                src={`http://localhost:5008${imageProduct.imageUrl}`}
+                alt=""
+                style={{
+                  width: 120,
+                  height: 120,
+                  objectFit: "cover",
+                  borderRadius: 10,
+                  marginBottom: 16,
+                  border: "1px solid #ddd"
+                }}
+              />
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => setImageFile(e.target.files[0])}
+              style={{ marginBottom: 20 }}
+            />
+
+            <div style={{ display: "flex", gap: 10 }}>
+              <button
+                style={{
+                  flex: 1,
+                  padding: 10,
+                  border: "1px solid #ddd",
+                  borderRadius: 8,
+                  cursor: "pointer"
+                }}
+                onClick={() => {
+                  setImageProduct(null);
+                  setImageFile(null);
+                }}
+              >
+                Cancel
+              </button>
+
+              <button
+                style={{
+                  ...primaryBtn,
+                  flex: 1
+                }}
+                onClick={updateImage}
+              >
+                Save Image
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {editProduct && (
+        <div style={modalOverlay}>
+
+          <div style={modalCard}>
+
+            <h2>Edit Product</h2>
+
+            <input
+              value={editForm.name}
+              onChange={(e) =>
+                setEditForm({
+                  ...editForm,
+                  name: e.target.value
+                })
+              }
+            />
+
+            <textarea
+              value={editForm.description}
+              onChange={(e) =>
+                setEditForm({
+                  ...editForm,
+                  description: e.target.value
+                })
+              }
+            />
+
+            <input
+              type="number"
+              value={editForm.price}
+              onChange={(e) =>
+                setEditForm({
+                  ...editForm,
+                  price: e.target.value
+                })
+              }
+            />
+
+            <select
+              value={editForm.category}
+              onChange={(e) =>
+                setEditForm({
+                  ...editForm,
+                  category: e.target.value
+                })
+              }
+            >
+              <option>Tablets</option>
+              <option>Syrup</option>
+              <option>Injection</option>
+              <option>Capsule</option>
+              <option>Cream</option>
+            </select>
+
+            <div style={{ display: "flex", gap: 10 }}>
+
+              <button
+                onClick={() =>
+                  setEditProduct(null)
+                }
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={updateProduct}
+              >
+                Save
+              </button>
+
+            </div>
+
+          </div>
+
         </div>
       )}
     </div>

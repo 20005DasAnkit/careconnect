@@ -108,17 +108,47 @@ public class AdminController : ControllerBase
     }
 
     [HttpPost("product")]
-    public IActionResult AddProduct(CreateProductDto dto)
+    public async Task<IActionResult> AddProduct([FromForm] CreateProductDto dto)
     {
+        string? imagePath = null;
+
+        if (dto.Image != null)
+        {
+            var folder = Path.Combine(
+                Directory.GetCurrentDirectory(),
+                "wwwroot",
+                "uploads",
+                "products"
+            );
+
+            if (!Directory.Exists(folder))
+                Directory.CreateDirectory(folder);
+
+            var fileName =
+                Guid.NewGuid() +
+                Path.GetExtension(dto.Image.FileName);
+
+            var fullPath = Path.Combine(folder, fileName);
+
+            using var stream = new FileStream(fullPath, FileMode.Create);
+
+            await dto.Image.CopyToAsync(stream);
+
+            imagePath = "/uploads/products/" + fileName;
+        }
+
         var product = new Product
         {
             Name = dto.Name,
             Description = dto.Description,
             Price = dto.Price,
-            Stock = dto.Stock
+            Stock = dto.Stock,
+            Category = dto.Category,
+            ImageUrl = imagePath
         };
 
         _context.Products.Add(product);
+
         _context.SaveChanges();
 
         return Ok(product);
@@ -380,14 +410,21 @@ public class AdminController : ControllerBase
             join p in _context.Users on a.PatientId equals p.Id
             join d in _context.Doctors on a.DoctorId equals d.Id
             join du in _context.Users on d.UserId equals du.Id
+            join av in _context.DoctorAvailabilities
+                on a.DoctorAvailabilityId equals av.Id
+
+            orderby av.AvailableFrom descending
+
             select new
             {
                 a.Id,
                 PatientName = p.FullName,
                 DoctorName = du.FullName,
                 a.Status,
-                a.BookedAt
+                BookedAt = a.BookedAt,
+                AppointmentTime = av.AvailableFrom
             }
+
         ).ToList();
 
         return Ok(appointments);
@@ -396,16 +433,35 @@ public class AdminController : ControllerBase
     [HttpPut("appointment/cancel/{id}")]
     public IActionResult CancelAppointment(int id)
     {
-        var appointment = _context.Appointments.FirstOrDefault(x => x.Id == id);
+        var appointment = _context.Appointments
+            .FirstOrDefault(x => x.Id == id);
 
         if (appointment == null)
             return NotFound("Appointment not found");
+
+        var slot = _context.DoctorAvailabilities
+            .FirstOrDefault(x => x.Id == appointment.DoctorAvailabilityId);
+
+        if (slot == null)
+            return NotFound("Slot not found");
+
+        if (slot.AvailableFrom <= DateTime.Now)
+            return BadRequest("Past appointment cannot be cancelled.");
+
+        if (appointment.Status == "Completed")
+            return BadRequest("Completed appointment cannot be cancelled.");
+
+        if (appointment.Status == "Cancelled")
+            return BadRequest("Already cancelled.");
+
+        if (appointment.Status == "CancelledByUser")
+            return BadRequest("Already cancelled by patient.");
 
         appointment.Status = "Cancelled";
 
         _context.SaveChanges();
 
-        return Ok("Appointment cancelled");
+        return Ok("Appointment cancelled.");
     }
 
     [HttpDelete("ambulance/{id}")]
@@ -636,4 +692,61 @@ public class AdminController : ControllerBase
             Message = "Hospital deleted successfully"
         });
     }
+
+    [HttpPut("product/{id}/image")]
+    public async Task<IActionResult> UpdateProductImage(
+    int id,
+    IFormFile image)
+    {
+        var product = _context.Products.FirstOrDefault(x => x.Id == id);
+
+        if (product == null)
+            return NotFound("Product not found");
+
+        if (image == null || image.Length == 0)
+            return BadRequest("Image is required");
+
+        var folder = Path.Combine(
+            Directory.GetCurrentDirectory(),
+            "wwwroot",
+            "uploads",
+            "products"
+        );
+
+        if (!Directory.Exists(folder))
+            Directory.CreateDirectory(folder);
+        var fileName =
+            Guid.NewGuid() +
+            Path.GetExtension(image.FileName);
+        var path = Path.Combine(folder, fileName);
+        using var stream = new FileStream(path, FileMode.Create);
+        await image.CopyToAsync(stream);
+        product.ImageUrl = "/uploads/products/" + fileName;
+        _context.SaveChanges();
+        return Ok(new
+        {
+            product.ImageUrl
+        });
+    }
+
+    [HttpPut("product/{id}")]
+public IActionResult UpdateProduct(
+    int id,
+    UpdateProductDto dto)
+{
+    var product = _context.Products
+        .FirstOrDefault(x => x.Id == id);
+
+    if (product == null)
+        return NotFound();
+
+    product.Name = dto.Name;
+    product.Description = dto.Description;
+    product.Price = dto.Price;
+    product.Category = dto.Category;
+
+    _context.SaveChanges();
+
+    return Ok(product);
+}
 }

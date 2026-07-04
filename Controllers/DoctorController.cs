@@ -215,6 +215,7 @@ public IActionResult GetAppointments()
                 : 0,
             appointmentDate = a.DoctorAvailability!.AvailableFrom.ToString("dd MMM yyyy"),
             appointmentTime = a.DoctorAvailability.AvailableFrom.ToString("hh:mm tt"),
+            appointmentDateTime = a.DoctorAvailability.AvailableFrom,
             status = a.Status,
             amount = a.AdvanceAmount,
             bookedAt = a.BookedAt,

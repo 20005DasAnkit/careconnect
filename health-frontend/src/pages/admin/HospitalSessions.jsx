@@ -31,11 +31,11 @@ const DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 
 const EMPTY_HOSPITAL = { name: "", address: "", city: "", phone: "" };
 const EMPTY_SESSION = {
-    hospitalId: "",
-    day: "Monday",
-    date: "",
-    startTime: "06:00",
-    endTime: "08:00"
+  hospitalId: "",
+  day: "Monday",
+  date: "",
+  startTime: "06:00",
+  endTime: "08:00"
 };
 
 /* ─── Shared bits ─────────────────────────────────── */
@@ -109,7 +109,11 @@ export default function AdminHospitalSessions() {
     try {
       const [hRes, sRes] = await Promise.all([api.get("/admin/hospitals"), api.get("/admin/hospital-sessions")]);
       setHospitals(Array.isArray(hRes.data) ? hRes.data : []);
-      setSessions(Array.isArray(sRes.data) ? sRes.data : []);
+      const allSessions = Array.isArray(sRes.data) ? sRes.data : [];
+
+setSessions(
+    allSessions.filter(s => !(s.isExpired && !s.isActive))
+);
     } catch (err) {
       console.error(err);
       alert("Failed to load hospitals/sessions.");
@@ -166,57 +170,57 @@ export default function AdminHospitalSessions() {
   function openEditSession(s) {
     setEditingSession(s.id);
     setSessionForm({
-    hospitalId: s.hospitalId,
-    day: s.day,
-    date: s.date,
-    startTime: s.startTime?.slice(0, 5) || "06:00",
-    endTime: s.endTime?.slice(0, 5) || "08:00"
-});
+      hospitalId: s.hospitalId,
+      day: s.day,
+      date: s.date,
+      startTime: s.startTime?.slice(0, 5) || "06:00",
+      endTime: s.endTime?.slice(0, 5) || "08:00"
+    });
     setShowSessionModal(true);
   }
-async function saveSession() {
+  async function saveSession() {
 
     if (!sessionForm.hospitalId)
-        return alert("Please select a hospital.");
+      return alert("Please select a hospital.");
 
     // এটা নতুন যোগ করুন
     if (!sessionForm.date)
-        return alert("Please select a date.");
+      return alert("Please select a date.");
 
     if (sessionForm.startTime >= sessionForm.endTime)
-        return alert("Start time must be before end time.");
+      return alert("Start time must be before end time.");
 
     const payload = {
-        hospitalId: Number(sessionForm.hospitalId),
-        day: sessionForm.day,
-        date: sessionForm.date,
-        startTime: sessionForm.startTime + ":00",
-        endTime: sessionForm.endTime + ":00"
+      hospitalId: Number(sessionForm.hospitalId),
+      day: sessionForm.day,
+      date: sessionForm.date,
+      startTime: sessionForm.startTime + ":00",
+      endTime: sessionForm.endTime + ":00"
     };
 
     console.log(payload);
 
     try {
-        if (editingSession) {
-            await api.put(
-                `/admin/hospital-session/${editingSession}`,
-                payload
-            );
-        } else {
-            await api.post(
-                "/admin/hospital-session",
-                payload
-            );
-        }
+      if (editingSession) {
+        await api.put(
+          `/admin/hospital-session/${editingSession}`,
+          payload
+        );
+      } else {
+        await api.post(
+          "/admin/hospital-session",
+          payload
+        );
+      }
 
-        setShowSessionModal(false);
-        loadAll();
+      setShowSessionModal(false);
+      loadAll();
 
     } catch (err) {
-        console.log(err.response?.data);
-        alert(JSON.stringify(err.response?.data, null, 2));
+      console.log(err.response?.data);
+      alert(JSON.stringify(err.response?.data, null, 2));
     }
-}
+  }
   async function deleteSession(id) {
     if (!window.confirm("Delete this time slot? Doctors using it will lose this option.")) return;
     try {
@@ -234,6 +238,19 @@ async function saveSession() {
       alert("Toggle failed.");
     }
   }
+async function cancelSession(id) {
+    try {
+        const res = await api.put(`/admin/hospital-session/${id}/cancel`);
+
+        console.log(res.data);
+
+        loadAll();
+    } catch (err) {
+        console.log(err.response);
+
+        alert(err.response?.data || "Cancel failed.");
+    }
+}
 
   if (loading) {
     return (
@@ -415,7 +432,7 @@ async function saveSession() {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ background: T.cream }}>
-                  {["Hospital", "Day", "Time Window", "Status", "Actions"].map((h) => (
+                  {["Hospital", "Day & Date", "Time Window", "Status", "Actions"].map((h) => (
                     <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: 0.6, whiteSpace: "nowrap" }}>
                       {h}
                     </th>
@@ -434,7 +451,25 @@ async function saveSession() {
                   sessions.map((s) => (
                     <tr key={s.id} style={{ borderTop: `1px solid ${T.border}` }}>
                       <td style={{ padding: "15px 20px", fontWeight: 700, color: T.ink }}>{s.hospitalName}</td>
-                      <td style={{ padding: "15px 20px", fontSize: 13.5, color: T.ink }}>{s.day}</td>
+                      <td style={{ padding: "15px 20px" }}>
+                        <div style={{ fontWeight: 600 }}>
+                          {s.day}
+                        </div>
+
+                        <div
+                          style={{
+                            fontSize: 12,
+                            color: T.muted,
+                            marginTop: 3,
+                          }}
+                        >
+                          {new Date(s.date).toLocaleDateString("en-GB", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </div>
+                      </td>
                       <td style={{ padding: "15px 20px", fontSize: 13.5, color: T.ink }}>
                         {to12h(s.startTime)} – {to12h(s.endTime)}
                       </td>
@@ -445,31 +480,58 @@ async function saveSession() {
                             borderRadius: 99,
                             fontSize: 12,
                             fontWeight: 700,
-                            background: s.isActive ? T.greenLight : "#FEE2E2",
-                            color: s.isActive ? T.green : "#991B1B",
-                            border: `1px solid ${s.isActive ? "#BBD9A0" : "#FECACA"}`,
+                            background: s.isExpired
+                              ? "#FEF3C7"
+                              : s.isActive
+                                ? T.greenLight
+                                : "#FEE2E2",
+                            color: s.isExpired
+                              ? "#92400E"
+                              : s.isActive
+                                ? T.green
+                                : "#991B1B",
+                            border: `1px solid ${s.isExpired ? "#FCD34D"
+                                : s.isActive ? "#BBD9A0"
+                                  : "#FECACA"
+                              }`,
                           }}
                         >
-                          {s.isActive ? "Active" : "Inactive"}
+                          {s.isExpired
+                            ? "Expired"
+                            : s.isActive
+                              ? "Active"
+                              : "Inactive"}
                         </span>
                       </td>
                       <td style={{ padding: "15px 20px" }}>
                         <div style={{ display: "flex", gap: 8 }}>
                           <button
+                            disabled={s.isExpired}
                             onClick={() => toggleSession(s.id)}
                             title={s.isActive ? "Deactivate" : "Activate"}
-                            style={{ width: 32, height: 32, borderRadius: 8, border: "none", cursor: "pointer", background: s.isActive ? "#FEE2E2" : T.greenLight, color: s.isActive ? "#DC2626" : T.green, display: "flex", alignItems: "center", justifyContent: "center" }}
+                            style={{
+                              width: 32, height: 32, borderRadius: 8, border: "none", cursor: "pointer", background: s.isActive ? "#FEE2E2" : T.greenLight, color: s.isActive ? "#DC2626" : T.green, display: "flex", alignItems: "center", justifyContent: "center", opacity: s.isExpired ? .5 : 1,
+                              cursor: s.isExpired ? "not-allowed" : "pointer",
+                            }}
                           >
                             <Power size={14} />
                           </button>
                           <button
+                            disabled={s.isExpired}
                             onClick={() => openEditSession(s)}
-                            style={{ width: 32, height: 32, borderRadius: 8, border: "none", cursor: "pointer", background: T.greenLight, color: T.green, display: "flex", alignItems: "center", justifyContent: "center" }}
+                            style={{
+                              width: 32, height: 32, borderRadius: 8, border: "none", cursor: "pointer", background: T.greenLight, color: T.green, display: "flex", alignItems: "center", justifyContent: "center", opacity: s.isExpired ? .5 : 1,
+                              cursor: s.isExpired ? "not-allowed" : "pointer",
+                            }}
                           >
                             <Edit2 size={14} />
                           </button>
                           <button
-                            onClick={() => deleteSession(s.id)}
+                            onClick={() =>
+                              s.isExpired
+                                ? cancelSession(s.id)
+                                : deleteSession(s.id)
+                            }
                             style={{ width: 32, height: 32, borderRadius: 8, border: "none", cursor: "pointer", background: "#FEE2E2", color: "#DC2626", display: "flex", alignItems: "center", justifyContent: "center" }}
                           >
                             <Trash2 size={14} />
@@ -532,16 +594,16 @@ async function saveSession() {
             </div>
             <div style={{ flex: 1 }}>
               <LabeledInput
-    label="Date"
-    type="date"
-    value={sessionForm.date}
-    onChange={(e) =>
-        setSessionForm({
-            ...sessionForm,
-            date: e.target.value
-        })
-    }
-/>
+                label="Date"
+                type="date"
+                value={sessionForm.date}
+                onChange={(e) =>
+                  setSessionForm({
+                    ...sessionForm,
+                    date: e.target.value
+                  })
+                }
+              />
             </div>
           </div>
 
