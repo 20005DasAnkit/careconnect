@@ -718,11 +718,8 @@ public class AdminController : ControllerBase
             Path.GetExtension(image.FileName);
 
         var path = Path.Combine(folder, fileName);
-
         using var stream = new FileStream(path, FileMode.Create);
-
         await image.CopyToAsync(stream);
-
         product.ImageUrl = "/uploads/products/" + fileName;
 
         _context.SaveChanges();
