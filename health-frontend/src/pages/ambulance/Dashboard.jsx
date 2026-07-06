@@ -215,17 +215,28 @@ export default function AmbulanceDashboard() {
   const [drawer, setDrawer] = useState(false);
   const [driver, setDriver] = useState({ name: "Driver", vehicleType: "Basic", isAvailable: true });
 
-  const load = async () => {
-    try {
-      setLoading(true);
-      const res = await API.get("/Ambulance/requests");
-      setRequests(Array.isArray(res.data) ? res.data : []);
-    } catch (err) {
-      toast.error("Failed to load requests.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const load = async () => {
+  try {
+    setLoading(true);
+
+    const [reqRes, profileRes] = await Promise.all([
+      API.get("/Ambulance/requests"),
+      API.get("/Ambulance/profile"),
+    ]);
+
+    setRequests(Array.isArray(reqRes.data) ? reqRes.data : []);
+
+    setDriver({
+      name: profileRes.data.driverName,
+      vehicleType: profileRes.data.type,
+      isAvailable: profileRes.data.isAvailable,
+    });
+  } catch {
+    toast.error("Failed to load dashboard.");
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => { load(); }, []);
 
@@ -286,9 +297,13 @@ export default function AmbulanceDashboard() {
             <div style={{ fontWeight: 700, color: T.white, fontSize: 14 }}>{driver.name}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: driver.isAvailable ? "#22C55E" : "#EF4444" }} />
-              <span style={{ fontSize: 11, color: driver.isAvailable ? "#22C55E" : "#EF4444", fontWeight: 600 }}>
-                {driver.isAvailable ? "Available" : "On Ride"}
-              </span>
+<span style={{
+    fontSize: 11,
+    color: driver.isAvailable ? "#22C55E" : "#EF4444",
+    fontWeight: 600
+}}>
+    {driver.isAvailable ? "Available" : "Offline"}
+</span>
             </div>
           </div>
         </div>

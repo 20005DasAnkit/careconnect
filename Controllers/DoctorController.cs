@@ -404,9 +404,13 @@ public class DoctorController : ControllerBase
     [HttpGet("hospitals")]
     public IActionResult GetHospitals()
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
         var data = _context.HospitalSessions
             .Include(x => x.Hospital)
-            .Where(x => x.IsActive)
+            .Where(x =>
+                x.IsActive &&
+                x.Date >= today)
             .GroupBy(x => new
             {
                 x.HospitalId,
@@ -426,8 +430,29 @@ public class DoctorController : ControllerBase
     [HttpGet("hospital-sessions/{hospitalId}")]
     public IActionResult GetHospitalSessions(int hospitalId)
     {
+        var today = DateOnly.FromDateTime(DateTime.Today);
+
+        // Automatically deactivate expired sessions
+        var expiredSessions = _context.HospitalSessions
+            .Where(x => x.IsActive && x.Date < today)
+            .ToList();
+
+        if (expiredSessions.Any())
+        {
+            foreach (var session in expiredSessions)
+            {
+                session.IsActive = false;
+            }
+
+            _context.SaveChanges();
+        }
+
+        // Return only today and future sessions
         var data = _context.HospitalSessions
-            .Where(x => x.HospitalId == hospitalId && x.IsActive)
+            .Where(x =>
+                x.HospitalId == hospitalId &&
+                x.IsActive &&
+                x.Date >= today)
             .OrderBy(x => x.Date)
             .ThenBy(x => x.StartTime)
             .Select(x => new

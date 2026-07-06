@@ -1025,6 +1025,13 @@ export default function DoctorAvailability() {
                                     toTime: e.target.value,
                                 })
                             }
+                            style={{
+                                width: "100%",
+                                padding: "11px 14px",
+                                borderRadius: 10,
+                                border: `1px solid ${T.border}`,
+                                background: T.cream,
+                            }}
                         />
                     </div>
 

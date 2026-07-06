@@ -13,31 +13,32 @@ import {
 } from "react-icons/fi";
 import { toast, Toaster } from "react-hot-toast";
 
-const STEPS = ["Pickup", "Destination", "Vehicle", "Confirm"];
+const STEPS = ["Pickup", "Destination", "Confirm"];
 
-const VEHICLE_TYPES = [
-    {
-        key: "NonAC",
+
+// Only Non-AC is offered on this flow — kept as a constant so the rate
+// and label stay in one place instead of being hardcoded inline.
+const VEHICLES = {
+    NonAC: {
         label: "Basic (Non-AC)",
         rate: 25,
         icon: "🚑",
         note: "Standard transport for stable patients",
     },
-    {
-        key: "AC",
-        label: "Advanced (AC)",
-        rate: 50,
-        icon: "🚨",
-        note: "Climate-controlled, for longer transfers",
+    AC: {
+        label: "AC Ambulance",
+        rate: 35,
+        icon: "❄️",
+        note: "Comfortable transport",
     },
-    {
-        key: "Big",
-        label: "Critical care (Big vehicle)",
-        rate: 150,
+    Big: {
+        label: "Big / ICU Ambulance",
+        rate: 60,
         icon: "🏥",
-        note: "Fully equipped for critical & trauma cases",
+        note: "Critical care support",
     },
-];
+};
+
 
 function haversineKm(lat1, lon1, lat2, lon2) {
     const toRad = (d) => (d * Math.PI) / 180;
@@ -80,8 +81,11 @@ function StepHeader({ step, driverName }) {
 export default function AmbulanceRequest() {
     const navigate = useNavigate();
     const [searchParams] = useSearchParams();
-    const ambulanceId = searchParams.get("ambulanceId");
     const driverName = searchParams.get("driverName") || "";
+    const vehicleType = searchParams.get("type") || "NonAC";
+    const VEHICLE = VEHICLES[vehicleType] || VEHICLES.NonAC;
+    const [ambulances, setAmbulances] = useState([]);
+    const [loadingAmbulances, setLoadingAmbulances] = useState(false);
 
     const [step, setStep] = useState(0);
 
@@ -90,19 +94,18 @@ export default function AmbulanceRequest() {
     const [pickup, setPickup] = useState(null); // { lat, lng }
     const [pickupLabel, setPickupLabel] = useState("");
 
-
     const [destination, setDestination] = useState(null);
     const [destinationAddress, setDestinationAddress] = useState("");
     const [search, setSearch] = useState("");
     const [searchResults, setSearchResults] = useState([]);
     const [searching, setSearching] = useState(false);
 
-    const [vehicleType, setVehicleType] = useState(null);
+    
     const [submitting, setSubmitting] = useState(false);
     const [result, setResult] = useState(null);
     const [error, setError] = useState("");
 
-    // --- Waiting-for-driver state (step 4) ---
+    // --- Waiting-for-driver state (final step) ---
     const [rideStatus, setRideStatus] = useState("Pending"); // Pending | Accepted | Rejected | Cancelled
     const [rideInfo, setRideInfo] = useState(null);
     const pollRef = useRef(null);
@@ -113,10 +116,9 @@ export default function AmbulanceRequest() {
     }, [pickup, destination]);
 
     const estimatedFare = useMemo(() => {
-        if (distanceKm == null || !vehicleType) return null;
-        const rate = VEHICLE_TYPES.find((v) => v.key === vehicleType)?.rate || 0;
-        return Math.round(rate * distanceKm * 100) / 100;
-    }, [distanceKm, vehicleType]);
+        if (distanceKm == null) return null;
+        return Math.round(VEHICLE.rate * distanceKm * 100) / 100;
+    }, [distanceKm]);
 
     function detectPickup() {
         if (!navigator.geolocation) {
@@ -148,36 +150,25 @@ export default function AmbulanceRequest() {
     }, []);
 
     async function searchLocation(value) {
-
         if (value.length < 3) {
             setSearchResults([]);
             return;
         }
 
         try {
-
             setSearching(true);
-
-            const res = await api.get(
-                `/maps/search?q=${encodeURIComponent(value)}`
-            );
-
+            const res = await api.get(`/maps/search?q=${encodeURIComponent(value)}`);
             setSearchResults(res.data);
-
         } catch (err) {
-
             console.error(err);
-
         } finally {
-
             setSearching(false);
-
         }
     }
 
-    // Poll ride status once we're on step 4 ("waiting for driver" / done)
+    // Poll ride status once we're on the final "waiting for driver" step
     useEffect(() => {
-        if (step !== 4 || !result?.requestId) return;
+        if (step !== 3 || !result?.requestId) return;
 
         const checkStatus = async () => {
             try {
@@ -185,7 +176,6 @@ export default function AmbulanceRequest() {
                 setRideInfo(res.data);
                 setRideStatus(res.data.status);
 
-                // stop polling once the driver has responded either way
                 if (res.data.status !== "Pending") {
                     clearInterval(pollRef.current);
                 }
@@ -194,7 +184,7 @@ export default function AmbulanceRequest() {
             }
         };
 
-        checkStatus(); // run immediately
+        checkStatus();
         pollRef.current = setInterval(checkStatus, 5000);
 
         return () => clearInterval(pollRef.current);
@@ -213,11 +203,38 @@ export default function AmbulanceRequest() {
         return () => clearTimeout(timer);
     }, [search]);
 
-    async function submitRequest() {
-        if (!ambulanceId) {
-            setError("No ambulance selected. Please go back and pick one.");
+    // Load Non-AC ambulances once we move into the Confirm step,
+    // replacing the old separate "choose vehicle" step.
+    async function loadAmbulances() {
+        setLoadingAmbulances(true);
+        try {
+            const res = await api.get(`/patient/ambulances?type=${vehicleType}`);
+            setAmbulances(res.data);
+            return res.data;
+        } catch {
+            toast.error("Failed to load ambulances");
+            return [];
+        } finally {
+            setLoadingAmbulances(false);
+        }
+    }
+
+    async function goToConfirm() {
+        const list = await loadAmbulances();
+        if (!list || list.length === 0) {
+            toast.error("No ambulance available right now.");
             return;
         }
+        setStep(2);
+    }
+
+    async function submitRequest() {
+        if (ambulances.length === 0) {
+            setError("No ambulance available.");
+            return;
+        }
+
+        const ambulanceId = ambulances[0].id;
         setSubmitting(true);
         setError("");
         try {
@@ -234,7 +251,7 @@ export default function AmbulanceRequest() {
 
             setResult(res.data);
             setRideStatus("Pending");
-            setStep(4);
+            setStep(3);
             toast.success("Request sent — waiting for driver to accept.");
         } catch (err) {
             setError(err?.response?.data || "Couldn't send the request. Please try again.");
@@ -257,7 +274,7 @@ export default function AmbulanceRequest() {
                     }}
                 >
 
-                    {step < 4 && (
+                    {step < 3 && (
                         <button
                             onClick={() => (step === 0 ? navigate(-1) : setStep((s) => s - 1))}
                             className="flex items-center gap-1.5 text-sm text-[#6B6458] hover:text-[#16332B] mb-6 transition"
@@ -277,7 +294,7 @@ export default function AmbulanceRequest() {
                         }}
                     >
 
-                        {step < 4 && <StepHeader step={step} driverName={driverName} />}
+                        {step < 3 && <StepHeader step={step} driverName={driverName} />}
 
                         {/* Step 0: Pickup */}
                         {step === 0 && (
@@ -354,121 +371,72 @@ export default function AmbulanceRequest() {
                                         className="w-full h-12 px-4 rounded-xl border border-[#E7E2D6] focus:outline-none focus:ring-2 focus:ring-[#16332B]/20"
                                     />
                                     {searching && (
-
                                         <p className="text-sm mt-2 text-gray-500">
                                             Searching...
                                         </p>
-
                                     )}
 
                                     {searchResults.length > 0 && (
-
                                         <div className="border rounded-xl mt-2 max-h-60 overflow-y-auto">
-
                                             {searchResults.map((item, index) => (
-
                                                 <button
                                                     key={index}
                                                     className="w-full text-left p-3 hover:bg-gray-100 border-b"
                                                     onClick={() => {
-
                                                         setDestination({
                                                             lat: parseFloat(item.lat),
                                                             lng: parseFloat(item.lon)
                                                         });
-
                                                         setDestinationAddress(item.display_name);
-
                                                         setSearch(item.display_name);
-
                                                         setSearchResults([]);
-
                                                     }}
                                                 >
-
                                                     {item.display_name}
-
                                                 </button>
-
                                             ))}
-
                                         </div>
-
                                     )}
                                 </div>
 
                                 {destination && (
                                     <div className="bg-[#F8F6F0] rounded-xl border border-[#E7E2D6] p-4">
-
                                         <p className="font-medium text-[#16332B]">
                                             Selected Location
                                         </p>
-
                                         <p className="text-sm text-[#777] mt-2">
                                             Latitude : {destination.lat.toFixed(6)}
                                         </p>
-
                                         <p className="text-sm text-[#777]">
                                             Longitude : {destination.lng.toFixed(6)}
                                         </p>
-
                                     </div>
                                 )}
 
                                 <button
-                                    onClick={() => setStep(2)}
-                                    disabled={!destination}
+                                    onClick={goToConfirm}
+                                    disabled={!destination || loadingAmbulances}
                                     className="w-full mt-4 bg-[#16332B] hover:bg-[#0F241D] disabled:opacity-40 text-white py-3 rounded-xl font-medium transition"
                                 >
-                                    Continue
+                                    {loadingAmbulances ? "Checking availability…" : "Continue"}
                                 </button>
-
                             </div>
                         )}
-                        {/* Step 2: Vehicle type */}
+
+                        {/* Step 2: Confirm — distance & fare shown directly, Non-AC only */}
                         {step === 2 && (
                             <div>
-                                <div className="space-y-3">
-                                    {VEHICLE_TYPES.map((v) => (
-                                        <button
-                                            key={v.key}
-                                            onClick={() => setVehicleType(v.key)}
-                                            className={`w-full text-left rounded-xl border p-4 flex items-center gap-4 transition ${vehicleType === v.key
-                                                ? "border-[#16332B] bg-[#F8F6F0]"
-                                                : "border-[#E7E2D6] hover:border-[#16332B]/30"
-                                                }`}
-                                        >
-                                            <span className="text-2xl shrink-0">{v.icon}</span>
-                                            <div className="flex-1">
-                                                <p className="text-sm font-semibold text-[#16332B]">{v.label}</p>
-                                                <p className="text-xs text-[#8B8478] mt-0.5">{v.note}</p>
-                                            </div>
-                                            <span className="text-sm font-medium text-[#C9683F] shrink-0">
-                                                ₹{v.rate}/km
-                                            </span>
-                                        </button>
-                                    ))}
+                                <div className="rounded-xl border border-[#E7E2D6] p-4 flex items-center gap-4 mb-5 bg-[#F8F6F0]">
+                                    <span className="text-2xl shrink-0">{VEHICLE.icon}</span>
+                                    <div className="flex-1">
+                                        <p className="text-sm font-semibold text-[#16332B]">{VEHICLE.label}</p>
+                                        <p className="text-xs text-[#8B8478] mt-0.5">{VEHICLE.note}</p>
+                                    </div>
+                                    <span className="text-sm font-medium text-[#C9683F] shrink-0">
+                                        ₹{VEHICLE.rate}/km
+                                    </span>
                                 </div>
 
-                                {distanceKm != null && (
-                                    <p className="text-xs text-[#A8A192] mt-4 text-center">
-                                        Estimated distance: {distanceKm.toFixed(1)} km
-                                    </p>
-                                )}
-
-                                <button
-                                    onClick={() => setStep(3)}
-                                    disabled={!vehicleType}
-                                    className="w-full mt-6 bg-[#16332B] hover:bg-[#0F241D] disabled:opacity-40 text-white py-3 rounded-xl font-medium transition"
-                                >
-                                    Continue
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Step 3: Confirm */}
-                        {step === 3 && (
-                            <div>
                                 <div className="bg-[#F8F6F0] rounded-xl border border-[#E7E2D6] p-5 space-y-3.5">
                                     <div className="flex justify-between text-sm">
                                         <span className="text-[#8B8478]">Pickup</span>
@@ -478,12 +446,6 @@ export default function AmbulanceRequest() {
                                         <span className="text-[#8B8478]">Destination</span>
                                         <span className="font-medium text-[#16332B] text-right">
                                             {destinationAddress}
-                                        </span>
-                                    </div>
-                                    <div className="flex justify-between text-sm">
-                                        <span className="text-[#8B8478]">Vehicle</span>
-                                        <span className="font-medium text-[#16332B]">
-                                            {VEHICLE_TYPES.find((v) => v.key === vehicleType)?.label}
                                         </span>
                                     </div>
                                     {distanceKm != null && (
@@ -524,8 +486,8 @@ export default function AmbulanceRequest() {
                             </div>
                         )}
 
-                        {/* Step 4: Waiting / Accepted / Rejected */}
-                        {step === 4 && result && (
+                        {/* Step 3: Waiting / Accepted / Rejected */}
+                        {step === 3 && result && (
                             <div className="text-center py-4">
                                 {rideStatus === "Pending" && (
                                     <>

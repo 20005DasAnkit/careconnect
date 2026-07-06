@@ -82,7 +82,13 @@ public class AmbulanceController : ControllerBase
 
         request.Status = dto.Status;
 
-        // Free up the ambulance again once the ride is no longer active
+        // Driver accepts a ride → go offline
+        if (dto.Status == "Accepted")
+        {
+            ambulance.IsAvailable = false;
+        }
+
+        // Ride finished/cancelled/rejected → come back online
         if (dto.Status is "Rejected" or "Cancelled" or "Completed")
         {
             ambulance.IsAvailable = true;

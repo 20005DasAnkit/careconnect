@@ -283,44 +283,67 @@ public class PatientController : ControllerBase
 
     [Authorize(Roles = "Patient")]
     [HttpGet("ambulances")]
-    public IActionResult GetAmbulances()
+    public IActionResult GetAmbulances(string? type)
     {
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
+        // Only available ambulances
+        var ambulanceQuery = _context.Ambulances
+            .Where(a => a.IsAvailable);
+
+        // Filter by vehicle type (NonAC / AC / Big)
+        if (!string.IsNullOrWhiteSpace(type))
+        {
+            ambulanceQuery = ambulanceQuery
+                .Where(a => a.Type == type);
+        }
+
         var ambulances =
-            (from a in _context.Ambulances
+        (
+            from a in ambulanceQuery
 
-             let activeRequest = _context.AmbulanceRequests
-                 .Where(r =>
-                     r.AmbulanceId == a.Id &&
-                     r.Status != "Completed" &&
-                     r.Status != "Rejected" &&
-                     r.Status != "Cancelled")
-                 .OrderByDescending(r => r.RequestTime)
-                 .FirstOrDefault()
+            let activeRequest = _context.AmbulanceRequests
+                .Where(r =>
+                    r.AmbulanceId == a.Id &&
+                    r.Status != "Completed" &&
+                    r.Status != "Rejected" &&
+                    r.Status != "Cancelled")
+                .OrderByDescending(r => r.RequestTime)
+                .FirstOrDefault()
 
-             select new
-             {
-                 a.Id,
-                 a.DriverName,
-                 a.VehicleNumber,
-                 a.Type,
-                 IsAvailable = a.IsAvailable,
-                 MyRide =
-                     activeRequest != null &&
-                     activeRequest.UserId == userId,
-                 RequestId =
-                     activeRequest != null &&
-                     activeRequest.UserId == userId
-                         ? activeRequest.Id
-                         : (int?)null,
-                 RideStatus =
-                     activeRequest != null &&
-                     activeRequest.UserId == userId
-                         ? activeRequest.Status
-                         : null
-             }).ToList();
+            orderby a.DriverName
+
+            select new
+            {
+                a.Id,
+                a.DriverName,
+                a.DriverPhone,
+                a.VehicleNumber,
+                a.Type,
+                a.Rating,
+                a.BaseLocation,
+                IsAvailable = a.IsAvailable,
+
+                MyRide =
+                    activeRequest != null &&
+                    activeRequest.UserId == userId,
+
+                RequestId =
+                    activeRequest != null &&
+                    activeRequest.UserId == userId
+                        ? activeRequest.Id
+                        : (int?)null,
+
+                RideStatus =
+                    activeRequest != null &&
+                    activeRequest.UserId == userId
+                        ? activeRequest.Status
+                        : null
+            }
+
+        ).ToList();
+
         return Ok(ambulances);
     }
     private static readonly Dictionary<string, string[]> CityKeywords = new()

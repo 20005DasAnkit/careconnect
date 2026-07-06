@@ -20,6 +20,13 @@ const TYPE_META = {
     Big: { tag: "Critical care", note: "Fully equipped for trauma cases", icon: Siren },
 };
 
+// Same three types, used for the selector filter cards above the results.
+const TYPE_OPTIONS = [
+    { key: "NonAC", icon: Truck, title: "Non-AC", desc: "Standard transport" },
+    { key: "AC", icon: Snowflake, title: "AC", desc: "Comfortable ride" },
+    { key: "Big", icon: Siren, title: "Big / ICU", desc: "Critical care" },
+];
+
 function getTypeMeta(type) {
     return TYPE_META[type] || TYPE_META.NonAC;
 }
@@ -44,16 +51,21 @@ export default function Ambulance() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
     const [search, setSearch] = useState("");
+    const [selectedType, setSelectedType] = useState("");
 
     useEffect(() => {
         loadAmbulances();
-    }, []);
+    }, [selectedType]);
 
     async function loadAmbulances() {
         setLoading(true);
         setError("");
         try {
-            const res = await api.get("/patient/ambulances");
+            const url = selectedType
+                ? `/patient/ambulances?type=${selectedType}`
+                : "/patient/ambulances";
+
+            const res = await api.get(url);
             setAmbulances(res.data || []);
         } catch (err) {
             setError("Unable to load ambulances right now.");
@@ -63,21 +75,25 @@ export default function Ambulance() {
         }
     }
 
-    function goToBooking(amb) {
-        const token = localStorage.getItem("token");
+function goToBooking(amb) {
+    const token = localStorage.getItem("token");
 
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
-        const params = new URLSearchParams({
-            ambulanceId: amb.id,
-            driverName: amb.driverName || "",
-        });
-
-        navigate(`/patient/ambulance/request?${params.toString()}`);
+    if (!token) {
+        navigate("/login");
+        return;
     }
+
+    const params = new URLSearchParams({
+        ambulanceId: amb.id,
+        driverName: amb.driverName || "",
+        type: amb.type,
+    });
+
+    console.log(amb);
+    console.log(params.toString());
+
+    navigate(`/patient/ambulance/request?${params.toString()}`);
+}
 
     const filtered = ambulances.filter((a) => {
         if (!search) return true;
@@ -151,6 +167,66 @@ export default function Ambulance() {
                             Call 108
                         </span>
                     </a>
+
+                    {/* ───────────────────── TYPE SELECTOR ───────────────────── */}
+                    <div className="mb-10">
+                        <div className="flex items-baseline justify-between mb-4">
+                            <h3
+                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                className="text-[1.15rem]"
+                            >
+                                Choose ambulance type
+                            </h3>
+                            {selectedType && (
+                                <button
+                                    onClick={() => setSelectedType("")}
+                                    className="text-[13px] text-[#16332B]/45 hover:text-[#16332B] transition"
+                                >
+                                    Clear filter
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="grid grid-cols-3 gap-4">
+                            {TYPE_OPTIONS.map((opt) => {
+                                const Icon = opt.icon;
+                                const active = selectedType === opt.key;
+                                return (
+                                    <button
+                                        key={opt.key}
+                                        onClick={() => setSelectedType(active ? "" : opt.key)}
+                                        className={`text-left p-5 rounded-[20px] border transition-all ${active
+                                                ? "bg-[#16332B] border-[#16332B] shadow-[0_15px_35px_-22px_rgba(22,51,43,0.4)]"
+                                                : "bg-white border-[#E4DFD3] hover:border-[#16332B]/25"
+                                            }`}
+                                    >
+                                        <div
+                                            className={`w-11 h-11 rounded-xl flex items-center justify-center mb-3 ${active ? "bg-white/15" : "bg-[#FAF8F3]"
+                                                }`}
+                                        >
+                                            <Icon
+                                                size={20}
+                                                strokeWidth={1.75}
+                                                className={active ? "text-white" : "text-[#3E7C59]"}
+                                            />
+                                        </div>
+                                        <h4
+                                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                            className={`text-[15px] ${active ? "text-white" : "text-[#16332B]"}`}
+                                        >
+                                            {opt.title}
+                                        </h4>
+                                        <p
+                                            className={`text-[13px] mt-1 ${active ? "text-white/70" : "text-[#16332B]/50"
+                                                }`}
+                                        >
+                                            {opt.desc}
+                                        </p>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
 
                     {/* ───────────────────── SEARCH ───────────────────── */}
                     <div className="relative mb-10 max-w-md">
@@ -241,19 +317,19 @@ export default function Ambulance() {
                                                         <div className="flex items-center gap-1.5 mt-2">
                                                             <span
                                                                 className={`w-1.5 h-1.5 rounded-full ${amb.myRide
-                                                                    ? "bg-green-600"
-                                                                    : amb.isAvailable
                                                                         ? "bg-[#3E7C59]"
-                                                                        : "bg-[#A8A192]"
+                                                                        : amb.isAvailable
+                                                                            ? "bg-[#3E7C59]"
+                                                                            : "bg-[#A8A192]"
                                                                     }`}
                                                             />
 
                                                             <span
                                                                 className={`text-[12px] font-medium ${amb.myRide
-                                                                    ? "text-green-600"
-                                                                    : amb.isAvailable
                                                                         ? "text-[#3E7C59]"
-                                                                        : "text-[#16332B]/40"
+                                                                        : amb.isAvailable
+                                                                            ? "text-[#3E7C59]"
+                                                                            : "text-[#16332B]/40"
                                                                     }`}
                                                             >
                                                                 {amb.myRide
