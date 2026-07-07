@@ -44,8 +44,7 @@ export default function Dashboard() {
     const [aboutOpen, setAboutOpen] = useState(false);
     const [reviews, setReviews] = useState([]);
 
-    // ── Testimonial carousel state ──
-    const testimonialTrackRef = useRef(null);
+    // ── Testimonial carousel state (single full-width slide) ──
     const [testimonialPaused, setTestimonialPaused] = useState(false);
     const [activeTestimonial, setActiveTestimonial] = useState(0);
 
@@ -102,42 +101,24 @@ export default function Dashboard() {
                 new Date(a.appointmentTime) - new Date(b.appointmentTime)
         );
 
-    // ── Testimonial carousel helpers ──
-    function scrollToTestimonial(index) {
-        const track = testimonialTrackRef.current;
-        if (!track || reviews.length === 0) return;
-        const clamped = (index + reviews.length) % reviews.length;
-        const card = track.children[clamped];
-        if (card) {
-            card.scrollIntoView({
-                behavior: "smooth",
-                inline: "center",
-                block: "nearest",
-            });
-        }
-        setActiveTestimonial(clamped);
-    }
-
+    // ── Testimonial carousel helpers (single slide, index based) ──
     function goToTestimonial(direction) {
-        scrollToTestimonial(activeTestimonial + direction);
+        setActiveTestimonial((prev) => {
+            if (reviews.length === 0) return 0;
+            return (prev + direction + reviews.length) % reviews.length;
+        });
     }
 
-    // Auto-advance every 4s, paused on hover/interaction
+    // Auto-advance every 5s, paused on hover/interaction
     useEffect(() => {
         if (testimonialPaused || reviews.length <= 1) return;
         const timer = setInterval(() => {
-            setActiveTestimonial((prev) => {
-                const next = (prev + 1) % reviews.length;
-                const track = testimonialTrackRef.current;
-                const card = track?.children[next];
-                if (card) {
-                    track.scrollTo({ left: card.offsetLeft, behavior: "smooth" });
-                }
-                return next;
-            });
-        }, 4000);
+            setActiveTestimonial((prev) => (prev + 1) % reviews.length);
+        }, 5000);
         return () => clearInterval(timer);
     }, [testimonialPaused, reviews.length]);
+
+    const activeReview = reviews[activeTestimonial];
 
     return (
         <>
@@ -792,143 +773,110 @@ export default function Dashboard() {
                     </section>
                 )}
 
-                {/* TESTIMONIALS — premium auto-scrolling carousel */}
-                <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
-                    <div className="flex justify-between items-end mb-12">
-                        <div>
-                            <p className="font-[system-ui,sans-serif] text-sm uppercase tracking-wide text-[#B5562C] font-semibold mb-3">
-                                Testimonials
-                            </p>
-                            <h2 className="text-4xl font-normal">
-                                What our patients say
-                            </h2>
-                        </div>
+                {/* TESTIMONIALS — Capgemini-style full-width single-slide carousel */}
+                <section className="mt-24">
+                    <div
+                        className="relative overflow-hidden bg-[#16332B]"
+                        onMouseEnter={() => setTestimonialPaused(true)}
+                        onMouseLeave={() => setTestimonialPaused(false)}
+                    >
+                        {reviews.length === 0 ? (
+                            <div className="max-w-7xl mx-auto px-6 lg:px-10 py-24 text-center font-[system-ui,sans-serif] text-white/60">
+                                No reviews yet.
+                            </div>
+                        ) : (
+                            <div className="max-w-7xl mx-auto grid lg:grid-cols-[1.1fr_0.9fr] min-h-[440px]">
 
-                        {reviews.length > 1 && (
-                            <div className="hidden sm:flex items-center gap-3">
-                                <button
-                                    onClick={() => goToTestimonial(-1)}
-                                    aria-label="Previous testimonial"
-                                    className="w-12 h-12 rounded-full bg-white border border-[#E4DFD3] flex items-center justify-center text-[#16332B] hover:bg-[#16332B] hover:text-white hover:border-[#16332B] transition-all shadow-sm"
-                                >
-                                    <ChevronLeft size={20} />
-                                </button>
-                                <button
-                                    onClick={() => goToTestimonial(1)}
-                                    aria-label="Next testimonial"
-                                    className="w-12 h-12 rounded-full bg-white border border-[#E4DFD3] flex items-center justify-center text-[#16332B] hover:bg-[#16332B] hover:text-white hover:border-[#16332B] transition-all shadow-sm"
-                                >
-                                    <ChevronRight size={20} />
-                                </button>
+                                {/* LEFT — text content */}
+                                <div className="px-6 lg:px-10 py-16 lg:py-0 flex flex-col justify-center">
+
+                                    <p className="font-[system-ui,sans-serif] text-sm uppercase tracking-widest text-[#C1633B] font-semibold mb-5">
+                                        Testimonials
+                                    </p>
+
+                                    <div className="text-[#C1633B] text-xl tracking-wide mb-6">
+                                        {"★".repeat(activeReview.rating)}
+                                        <span className="text-white/20">
+                                            {"★".repeat(Math.max(0, 5 - activeReview.rating))}
+                                        </span>
+                                    </div>
+
+                                    <h2 className="text-3xl lg:text-[2.6rem] leading-[1.25] font-normal text-white max-w-xl">
+                                        "{activeReview.comment}"
+                                    </h2>
+
+                                    <div className="flex items-center gap-4 mt-9 font-[system-ui,sans-serif]">
+                                        <div className="w-12 h-12 rounded-full bg-white/10 text-white flex items-center justify-center font-semibold font-[Georgia,serif] text-lg">
+                                            {(activeReview.patientName || "P")[0].toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold text-white font-[Georgia,serif]">
+                                                {activeReview.patientName}
+                                            </h3>
+                                            <p className="text-sm text-white/50">
+                                                Reviewed {activeReview.doctorName}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {/* Controls: arrows + dots, bottom-left like the reference */}
+                                    {reviews.length > 1 && (
+                                        <div className="flex items-center gap-6 mt-12 font-[system-ui,sans-serif]">
+                                            <div className="flex items-center gap-3">
+                                                <button
+                                                    onClick={() => goToTestimonial(-1)}
+                                                    aria-label="Previous testimonial"
+                                                    className="w-11 h-11 rounded-full border border-white/25 flex items-center justify-center text-white hover:bg-white hover:text-[#16332B] transition-all"
+                                                >
+                                                    <ChevronLeft size={18} />
+                                                </button>
+
+                                                <div className="flex items-center gap-2 px-2">
+                                                    {reviews.map((_, idx) => (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => setActiveTestimonial(idx)}
+                                                            aria-label={`Go to testimonial ${idx + 1}`}
+                                                            className={`h-2 rounded-full transition-all duration-300 ${idx === activeTestimonial
+                                                                ? "w-6 bg-[#C1633B]"
+                                                                : "w-2 bg-white/25 hover:bg-white/50"
+                                                                }`}
+                                                        />
+                                                    ))}
+                                                </div>
+
+                                                <button
+                                                    onClick={() => goToTestimonial(1)}
+                                                    aria-label="Next testimonial"
+                                                    className="w-11 h-11 rounded-full border border-white/25 flex items-center justify-center text-white hover:bg-white hover:text-[#16332B] transition-all"
+                                                >
+                                                    <ChevronRight size={18} />
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+
+                                </div>
+
+                                {/* RIGHT — visual panel */}
+                                <div className="relative hidden lg:block">
+                                    <img
+                                        src="https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=900&q=80"
+                                        alt="Patient care"
+                                        className="w-full h-full object-cover"
+                                    />
+                                    <div className="absolute inset-0 bg-gradient-to-r from-[#16332B] via-[#16332B]/10 to-transparent" />
+
+                                    <Quote
+                                        size={90}
+                                        className="absolute bottom-8 right-8 text-white/15"
+                                        strokeWidth={1.2}
+                                    />
+                                </div>
+
                             </div>
                         )}
                     </div>
-
-                    {reviews.length === 0 ? (
-                        <div className="bg-white border border-[#E4DFD3] rounded-2xl py-16 text-center font-[system-ui,sans-serif] text-[#16332B]/60">
-                            No reviews yet.
-                        </div>
-                    ) : (
-                        <div
-                            className="relative"
-                            onMouseEnter={() => setTestimonialPaused(true)}
-                            onMouseLeave={() => setTestimonialPaused(false)}
-                        >
-                            {/* Edge fades for a premium, non-abrupt cutoff */}
-                            <div className="pointer-events-none absolute left-0 top-0 bottom-4 w-16 z-10 bg-gradient-to-r from-[#FAF8F3] to-transparent" />
-                            <div className="pointer-events-none absolute right-0 top-0 bottom-4 w-16 z-10 bg-gradient-to-l from-[#FAF8F3] to-transparent" />
-
-                            {/* Mobile-only arrows, overlaid */}
-                            {reviews.length > 1 && (
-                                <>
-                                    <button
-                                        onClick={() => goToTestimonial(-1)}
-                                        aria-label="Previous testimonial"
-                                        className="sm:hidden absolute left-1 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/90 backdrop-blur border border-[#E4DFD3] flex items-center justify-center text-[#16332B] shadow-md"
-                                    >
-                                        <ChevronLeft size={18} />
-                                    </button>
-                                    <button
-                                        onClick={() => goToTestimonial(1)}
-                                        aria-label="Next testimonial"
-                                        className="sm:hidden absolute right-1 top-1/2 -translate-y-1/2 z-20 w-10 h-10 rounded-full bg-white/90 backdrop-blur border border-[#E4DFD3] flex items-center justify-center text-[#16332B] shadow-md"
-                                    >
-                                        <ChevronRight size={18} />
-                                    </button>
-                                </>
-                            )}
-
-                            <div
-                                ref={testimonialTrackRef}
-                                className="
-                                        flex
-                                        gap-7
-                                        overflow-x-hidden
-                                        scroll-smooth
-                                        items-stretch
-                                        "
-                            >
-                                {reviews.map((item, idx) => (
-                                    <div
-                                        key={item.id}
-                                        data-card
-                                        className={`min-w-[380px] lg:min-w-[390px] max-w-[340px] bg-white rounded-2xl border p-8 shrink-0 snap-start relative transition-all duration-300 ${idx === activeTestimonial
-                                            ? "border-[#16332B]/30 shadow-lg -translate-y-1"
-                                            : "border-[#E4DFD3] shadow-sm"
-                                            }`}
-                                    >
-                                        <Quote
-                                            size={34}
-                                            className="text-[#16332B]/10 absolute top-6 right-6"
-                                            strokeWidth={1.5}
-                                        />
-
-                                        <div className="text-[#B5562C] text-lg tracking-wide">
-                                            {"★".repeat(item.rating)}
-                                            <span className="text-[#E4DFD3]">
-                                                {"★".repeat(Math.max(0, 5 - item.rating))}
-                                            </span>
-                                        </div>
-
-                                        <p className="text-[#16332B]/75 mt-5 leading-7 min-h-[90px] font-[system-ui,sans-serif] text-[15px]">
-                                            "{item.comment}"
-                                        </p>
-
-                                        <div className="flex items-center gap-3 mt-6 pt-6 border-t border-[#E4DFD3]">
-                                            <div className="w-10 h-10 rounded-full bg-[#16332B]/10 text-[#16332B] flex items-center justify-center font-semibold font-[Georgia,serif]">
-                                                {(item.patientName || "P")[0].toUpperCase()}
-                                            </div>
-                                            <div>
-                                                <h3 className="font-semibold font-[Georgia,serif] text-[15px]">
-                                                    {item.patientName}
-                                                </h3>
-                                                <p className="text-sm text-gray-500 font-[system-ui,sans-serif]">
-                                                    Reviewed {item.doctorName}
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* Progress dots */}
-                            {reviews.length > 1 && (
-                                <div className="flex justify-center gap-2 mt-8">
-                                    {reviews.map((_, idx) => (
-                                        <button
-                                            key={idx}
-                                            onClick={() => scrollToTestimonial(idx)}
-                                            aria-label={`Go to testimonial ${idx + 1}`}
-                                            className={`h-2 rounded-full transition-all duration-300 ${idx === activeTestimonial
-                                                ? "w-7 bg-[#16332B]"
-                                                : "w-2 bg-[#E4DFD3] hover:bg-[#16332B]/40"
-                                                }`}
-                                        />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
                 </section>
 
                 {/* FAQ */}
