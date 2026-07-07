@@ -62,7 +62,6 @@ export default function AppRoutes() {
 
         {/* AUTH */}
         <Route path="/" element={<PatientDashboard />} />
-
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -87,16 +86,10 @@ export default function AppRoutes() {
         <Route path="/doctor/appointments" element={<DoctorAppointments />} />
         <Route path="/doctor/availability" element={<DoctorAvailabilitys />} />
         <Route path="/doctor/profile" element={<DoctorProfile />} />
-        <Route
-          path="/doctor/request-slot"
-          element={<DoctorSlotRequest />}
-        />
-
+        <Route path="/doctor/request-slot" element={<DoctorSlotRequest />} />
 
 
         {/* PATIENT */}
-        {/* PATIENT */}
-
         <Route path="/patient" element={<PatientDashboard />} />
 
         <Route
@@ -117,8 +110,6 @@ export default function AppRoutes() {
         <Route path="/patient/EmergencyInfo" element={<EmergencyInfos />} />
         <Route path="/patient/Contacts" element={<ContactUs />} />
         <Route path="/patient/EmergencyInfo" element={<EmergencyInfos />} />
-
-        {/* BLOG */}
         <Route path="/patient/blog" element={<Blog />} />
         <Route path="/patient/blog/:id" element={<BlogDetails />} />
 

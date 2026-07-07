@@ -260,13 +260,43 @@ export default function Dashboard() {
                             <a href="/patient/products">Products</a>
                             <a href="/patient/appointments">Appoinments</a>
                             <a href="/patient/AboutUs">About Us</a>
-                            <a href="/login" className="font-medium">Log in</a>
-                            <a
-                                href="/patient/doctors"
-                                className="bg-[#16332B] text-white px-6 py-3 rounded-full font-medium text-center"
-                            >
-                                Sign up
-                            </a>
+                            <a href="/patient/profile" className="font-medium">Profile</a>
+                            <div className="hidden lg:flex items-center gap-4">
+
+                                {token ? (
+                                    <button
+                                        onClick={() => navigate("/patient/profile")}
+                                        className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
+                                    >
+                                        <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
+                                            <User size={18} />
+                                        </div>
+
+                                        <div className="text-left">
+                                            <p className="text-sm font-semibold">{userName}</p>
+                                            <p className="text-xs text-gray-500">My Profile</p>
+                                        </div>
+                                    </button>
+                                ) : (
+                                    <>
+                                        <button
+                                            onClick={() => navigate("/login")}
+                                            className="text-[#16332B] font-medium hover:underline"
+                                        >
+                                            Sign In
+                                        </button>
+
+                                        <button
+                                            onClick={() => navigate("/register")}
+                                            className="bg-[#16332B] text-white px-5 py-2 rounded-full hover:bg-[#0F231D]"
+                                        >
+                                            Sign Up
+                                        </button>
+                                    </>
+                                )}
+
+                            </div>
+
                         </div>
                     )}
                 </header>

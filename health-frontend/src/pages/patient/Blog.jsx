@@ -89,12 +89,12 @@ export default function Blog() {
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
             <div
-    className="w-full mx-auto"
-    style={{
-        maxWidth: "1500px",
-        padding: "48px 40px",
-    }}
->
+                className="w-full mx-auto"
+                style={{
+                    maxWidth: "1500px",
+                    padding: "48px 40px",
+                }}
+            >
 
                 {/* ── Header ── */}
                 <div className="mb-12 max-w-xl">

@@ -29,42 +29,29 @@ const T = {
 };
 
 export default function AmbulanceRequest() {
+
     const navigate = useNavigate();
-
     const location = useLocation();
-
     const [params] = useSearchParams();
-
     const ambulanceId = Number(params.get("ambulanceId"));
-
     const driverName = params.get("driverName");
-
     const vehicleType = params.get("type");
 
     // -------- Data from previous page --------
-
     const pickup = location.state?.pickup;
-
     const pickupLabel = location.state?.pickupLabel;
 
     // -------- Destination is selected on THIS page now --------
-
     const [destination, setDestination] = useState(null);
-
     const [destinationAddress, setDestinationAddress] = useState("");
 
     // ---------- States ----------
-
     const [loading, setLoading] = useState(false);
-
     const [status, setStatus] = useState("idle");
-
     const [requestId, setRequestId] = useState(null);
-
     const [driver, setDriver] = useState(null);
 
     // ---------- Validation ----------
-
     useEffect(() => {
         if (
             !pickup ||
@@ -80,7 +67,7 @@ export default function AmbulanceRequest() {
         }
     }, []);
 
-        useEffect(() => {
+    useEffect(() => {
         if (status !== "waiting" || !requestId) return;
 
         const timer = setInterval(async () => {
@@ -111,13 +98,10 @@ export default function AmbulanceRequest() {
                 console.log(err);
             }
         }, 5000);
-
         return () => clearInterval(timer);
-
     }, [status, requestId]);
 
     // ---------- Distance ----------
-
     const distanceKm = useMemo(() => {
         if (!pickup || !destination)
             return 0;
@@ -158,7 +142,6 @@ export default function AmbulanceRequest() {
     }, [pickup, destination]);
 
     // ---------- Fare ----------
-
     const fare = useMemo(() => {
         const base = 0;
 
@@ -170,7 +153,6 @@ export default function AmbulanceRequest() {
     }, [distanceKm]);
 
     // ---------- Confirm Booking ----------
-
     async function confirmBooking() {
         if (!destination) {
             toast.error("Please select destination.");
@@ -187,18 +169,13 @@ export default function AmbulanceRequest() {
 
             const res = await api.post("/patient/ambulance-request", {
                 ambulanceId: ambulanceId,
-
                 pickupLocation: pickupLabel,
                 destinationLocation: destinationAddress,
-
                 pickupLat: pickup.lat,
                 pickupLng: pickup.lng,
-
                 destinationLat: destination.lat,
                 destinationLng: destination.lng,
-
                 vehicleType: vehicleType,
-
                 estimatedFare: fare
             });
             setRequestId(res.data.requestId);
@@ -227,7 +204,6 @@ export default function AmbulanceRequest() {
                 <div className="max-w-5xl mx-auto">
 
                     {/* Header */}
-
                     <button
                         onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-sm mb-8 hover:opacity-70"
@@ -239,7 +215,6 @@ export default function AmbulanceRequest() {
                     <div className="bg-white rounded-3xl shadow-sm border overflow-hidden"
                         style={{ borderColor: T.border }}
                     >
-
                         <div className="p-8 border-b">
 
                             <p
@@ -261,7 +236,6 @@ export default function AmbulanceRequest() {
                         <div className="p-8 space-y-6">
 
                             {/* Pickup */}
-
                             <div className="rounded-2xl border p-5">
                                 <div className="flex gap-4">
 
@@ -286,7 +260,6 @@ export default function AmbulanceRequest() {
                             </div>
 
                             {/* Destination - select on map */}
-
                             <div className="rounded-2xl border p-5">
 
                                 <div className="flex gap-4 mb-4">
@@ -336,13 +309,11 @@ export default function AmbulanceRequest() {
                             </div>
 
                             {/* Driver */}
-
                             <div className="rounded-2xl border p-5">
 
                                 <div className="flex justify-between items-center">
 
                                     <div>
-
                                         <p className="text-sm text-gray-500">
                                             Driver
                                         </p>
@@ -352,20 +323,17 @@ export default function AmbulanceRequest() {
                                         </h3>
 
                                     </div>
-
                                     <div
                                         className="w-12 h-12 rounded-xl flex items-center justify-center"
                                         style={{ background: "#EEF5F1" }}
                                     >
                                         <Car size={22} />
                                     </div>
-
                                 </div>
 
                             </div>
 
                             {/* Summary */}
-
                             <div
                                 className="rounded-2xl p-6"
                                 style={{
@@ -375,25 +343,17 @@ export default function AmbulanceRequest() {
                             >
 
                                 <div className="flex justify-between py-2">
-
                                     <span>Vehicle</span>
-
                                     <strong>{vehicleType}</strong>
-
                                 </div>
 
                                 <div className="flex justify-between py-2">
-
                                     <span>Distance</span>
-
                                     <strong>{distanceKm} km</strong>
-
                                 </div>
 
                                 <div className="flex justify-between py-2">
-
                                     <span>Estimated Fare</span>
-
                                     <strong
                                         style={{
                                             color: T.green,
@@ -402,9 +362,7 @@ export default function AmbulanceRequest() {
                                     >
                                         ₹{fare}
                                     </strong>
-
                                 </div>
-
                             </div>
 
                             {/* Button */}
@@ -423,7 +381,6 @@ export default function AmbulanceRequest() {
                             </button>
 
                         </div>
-
                     </div>
 
                 </div>

@@ -141,12 +141,12 @@ export default function BlogDetails() {
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
             <div
-    className="w-full mx-auto"
-    style={{
-        maxWidth: "1500px",
-        padding: "48px 40px",
-    }}
->
+                className="w-full mx-auto"
+                style={{
+                    maxWidth: "1500px",
+                    padding: "48px 40px",
+                }}
+            >
 
                 {/* ── Back ── */}
                 <button
@@ -209,10 +209,10 @@ export default function BlogDetails() {
                                 <Calendar size={14} />
                                 {blog.publishedAt
                                     ? new Date(blog.publishedAt).toLocaleDateString(undefined, {
-                                          year: "numeric",
-                                          month: "long",
-                                          day: "numeric",
-                                      })
+                                        year: "numeric",
+                                        month: "long",
+                                        day: "numeric",
+                                    })
                                     : "—"}
                             </span>
                             <span className="flex items-center gap-1.5">
