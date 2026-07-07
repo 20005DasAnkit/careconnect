@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../api/axios";
+import MapPicker from "../../components/MapPicker";
 import {
     Search,
     MapPin,
@@ -50,20 +51,56 @@ export default function Ambulance() {
     const [ambulances, setAmbulances] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [search, setSearch] = useState("");
+    const [locationSelected, setLocationSelected] = useState(false);
     const [selectedType, setSelectedType] = useState("");
+    const [pickup, setPickup] = useState(null);
+    const [pickupLabel, setPickupLabel] = useState("");
 
-    useEffect(() => {
-        loadAmbulances();
-    }, [selectedType]);
+
+
+    function detectLocation() {
+        if (!navigator.geolocation) {
+            toast.error("Geolocation is not supported.");
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+
+            const res = await fetch(
+                `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+            );
+
+            const data = await res.json();
+
+            const address = data.display_name;
+
+            setPickup({
+                lat,
+                lng,
+            });
+
+            setPickupLabel(address);
+
+            setLocationSelected(true);
+
+        });
+    }
 
     async function loadAmbulances() {
         setLoading(true);
         setError("");
         try {
+            if (!pickup) {
+                toast.error("Please select your pickup location.");
+                return;
+            }
+
             const url = selectedType
-                ? `/patient/ambulances?type=${selectedType}`
-                : "/patient/ambulances";
+                ? `/patient/ambulances/nearby?lat=${pickup.lat}&lng=${pickup.lng}&type=${selectedType}`
+                : `/patient/ambulances/nearby?lat=${pickup.lat}&lng=${pickup.lng}`;
 
             const res = await api.get(url);
             setAmbulances(res.data || []);
@@ -75,31 +112,39 @@ export default function Ambulance() {
         }
     }
 
-function goToBooking(amb) {
-    const token = localStorage.getItem("token");
+    function goToBooking(amb) {
+        const token = localStorage.getItem("token");
 
-    if (!token) {
-        navigate("/login");
-        return;
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        const params = new URLSearchParams({
+            ambulanceId: amb.id,
+            driverName: amb.driverName || "",
+            type: amb.type,
+        });
+
+        console.log(amb);
+        console.log(params.toString());
+
+        navigate(
+            `/patient/ambulance/request?${params.toString()}`,
+            {
+                state: {
+                    pickup,
+                    pickupLabel,
+
+                    // আপাতত destination না থাকলে pickup-ই পাঠাও
+                    destination: pickup,
+                    destinationAddress: pickupLabel,
+                },
+            }
+        );
     }
 
-    const params = new URLSearchParams({
-        ambulanceId: amb.id,
-        driverName: amb.driverName || "",
-        type: amb.type,
-    });
-
-    console.log(amb);
-    console.log(params.toString());
-
-    navigate(`/patient/ambulance/request?${params.toString()}`);
-}
-
-    const filtered = ambulances.filter((a) => {
-        if (!search) return true;
-        const haystack = `${a.driverName || ""} ${a.vehicleNumber || ""}`.toLowerCase();
-        return haystack.includes(search.toLowerCase());
-    });
+    const filtered = ambulances;
 
     const grouped = filtered.reduce((acc, a) => {
         const type = a.type || "NonAC";
@@ -196,8 +241,8 @@ function goToBooking(amb) {
                                         key={opt.key}
                                         onClick={() => setSelectedType(active ? "" : opt.key)}
                                         className={`text-left p-5 rounded-[20px] border transition-all ${active
-                                                ? "bg-[#16332B] border-[#16332B] shadow-[0_15px_35px_-22px_rgba(22,51,43,0.4)]"
-                                                : "bg-white border-[#E4DFD3] hover:border-[#16332B]/25"
+                                            ? "bg-[#16332B] border-[#16332B] shadow-[0_15px_35px_-22px_rgba(22,51,43,0.4)]"
+                                            : "bg-white border-[#E4DFD3] hover:border-[#16332B]/25"
                                             }`}
                                     >
                                         <div
@@ -229,15 +274,43 @@ function goToBooking(amb) {
                     </div>
 
                     {/* ───────────────────── SEARCH ───────────────────── */}
-                    <div className="relative mb-10 max-w-md">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35" size={16} />
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search by driver or vehicle number"
-                            className="w-full h-12 pl-11 pr-4 rounded-full border border-[#E4DFD3] bg-white focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 text-sm placeholder:text-[#16332B]/35 transition"
+                    <div className="mb-10">
+
+                        <h3
+                            className="text-xl font-semibold mb-5"
+                            style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+                        >
+                            Choose Pickup Location
+                        </h3>
+
+                        <button
+                            onClick={detectLocation}
+                            className="mb-5 px-5 py-3 rounded-xl bg-[#16332B] text-white hover:bg-[#0F231D]"
+                        >
+                            📍 Use Current Location
+                        </button>
+
+                        <MapPicker
+                            currentLocation={pickup}
+                            destination={pickup}
+                            setDestination={(loc) => {
+                                setPickup(loc);
+                                setLocationSelected(true);
+                            }}
+                            setAddress={setPickupLabel}
                         />
+                        <div className="mt-5">
+                            <button
+                                disabled={!locationSelected}
+                                onClick={loadAmbulances}
+                                className="px-6 py-3 rounded-xl bg-[#C9683F] text-white disabled:opacity-40"
+                            >
+                                Find Nearby Ambulances
+                            </button>
+                        </div>
+
                     </div>
+
 
                     {/* ───────────────────── ERROR ───────────────────── */}
                     {error && (
@@ -313,23 +386,26 @@ function goToBooking(amb) {
                                                         <p className="text-[13px] text-[#16332B]/50 mt-1">
                                                             {amb.vehicleNumber}
                                                         </p>
+                                                        <p className="text-xs text-[#3E7C59] mt-1">
+                                                            📍 {amb.distanceKm} km away
+                                                        </p>
 
                                                         <div className="flex items-center gap-1.5 mt-2">
                                                             <span
                                                                 className={`w-1.5 h-1.5 rounded-full ${amb.myRide
+                                                                    ? "bg-[#3E7C59]"
+                                                                    : amb.isAvailable
                                                                         ? "bg-[#3E7C59]"
-                                                                        : amb.isAvailable
-                                                                            ? "bg-[#3E7C59]"
-                                                                            : "bg-[#A8A192]"
+                                                                        : "bg-[#A8A192]"
                                                                     }`}
                                                             />
 
                                                             <span
                                                                 className={`text-[12px] font-medium ${amb.myRide
+                                                                    ? "text-[#3E7C59]"
+                                                                    : amb.isAvailable
                                                                         ? "text-[#3E7C59]"
-                                                                        : amb.isAvailable
-                                                                            ? "text-[#3E7C59]"
-                                                                            : "text-[#16332B]/40"
+                                                                        : "text-[#16332B]/40"
                                                                     }`}
                                                             >
                                                                 {amb.myRide
@@ -388,12 +464,10 @@ function goToBooking(amb) {
                                 style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
                                 className="text-[1.3rem] mt-6"
                             >
-                                {search ? "No matches found" : "No ambulances nearby"}
+                                {"No ambulances nearby"}
                             </h2>
                             <p className="text-[#16332B]/55 text-[14px] mt-2 max-w-xs mx-auto">
-                                {search
-                                    ? "Try a different name or vehicle number."
-                                    : "Call 108 for an immediate dispatch while we connect you to a driver."}
+                                "Call 108 for an immediate dispatch while we connect you to a driver."
                             </p>
                         </div>
                     )}

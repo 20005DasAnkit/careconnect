@@ -52,14 +52,12 @@ export default function DoctorDetails() {
 
     const { id } = useParams();
     const navigate = useNavigate();
-
     const [doctor, setDoctor] = useState(null);
     const [appointment, setAppointment] = useState(null);
     const [slots, setSlots] = useState([]);
     const [reviews, setReviews] = useState(null);
     const [searchParams] = useSearchParams();
     const appointmentId = searchParams.get("appointmentId");
-
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -67,7 +65,6 @@ export default function DoctorDetails() {
     }, [id]);
 
     const loadDoctor = async () => {
-
         try {
 
             const [doctorRes, slotRes, reviewRes] = await Promise.all([
@@ -79,57 +76,54 @@ export default function DoctorDetails() {
                 const res = await api.get(`/patient/appointment/${appointmentId}`);
                 setAppointment(res.data);
             }
-
             setDoctor(doctorRes.data);
             setSlots(slotRes.data);
             setReviews(reviewRes.data);
-
         }
         catch (err) {
-
             console.log(err);
-
         }
         finally {
-
             setLoading(false);
-
         }
-
     };
 
     if (loading) {
-
         return (
-
-            <div style={{ minHeight: "100vh", background: colors.cream, display: "flex", alignItems: "center", justifyContent: "center", ...fontBody }}>
+            <div style={{
+                minHeight: "100vh",
+                background: colors.cream,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                ...fontBody
+            }}>
                 <div style={{ color: colors.forestDark, fontSize: 15, fontWeight: 500 }}>
                     Loading doctor profile…
                 </div>
             </div>
-
         );
-
     }
 
     if (!doctor) {
-
         return (
-
-            <div style={{ minHeight: "100vh", background: colors.cream, display: "flex", alignItems: "center", justifyContent: "center", ...fontBody, color: colors.inkSoft }}>
+            <div style={{
+                minHeight: "100vh",
+                background: colors.cream,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                ...fontBody,
+                color: colors.inkSoft
+            }}>
                 Doctor not found.
             </div>
-
         );
-
     }
 
     function AppointmentActions({ appointment }) {
-
         return (
-
             <div className="bg-white rounded-[30px] border border-[#E5DED0] p-10 mt-8">
-
                 <h2
                     className="text-3xl"
                     style={{ fontFamily: "Fraunces" }}
@@ -175,9 +169,7 @@ export default function DoctorDetails() {
                     >
                         Prescription
                     </button>
-
                     {
-
                         appointment.status === "Completed" &&
                         !appointment.isReviewed &&
 
@@ -186,15 +178,11 @@ export default function DoctorDetails() {
                         >
                             Rate Doctor
                         </button>
-
                     }
 
                 </div>
-
             </div>
-
         );
-
     }
 
     return (
@@ -204,7 +192,6 @@ export default function DoctorDetails() {
             <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-16">
 
                 <button
-
                     onClick={() => navigate(-1)}
 
                     style={{
@@ -230,13 +217,16 @@ export default function DoctorDetails() {
                 {/* ================= DOCTOR HEADER ================= */}
                 <div style={{ ...card, padding: 28 }}>
 
-                    <div style={{ display: "flex", gap: 24, alignItems: "flex-start", flexWrap: "wrap" }}>
+                    <div style={{
+                        display: "flex",
+                        gap: 24,
+                        alignItems: "flex-start",
+                        flexWrap: "wrap"
+                    }}>
 
                         {/* Avatar */}
                         {
-
                             doctor.imageUrl ?
-
                                 (
                                     <img
                                         src={`http://localhost:5008${doctor.imageUrl}`}
@@ -249,11 +239,7 @@ export default function DoctorDetails() {
                                             border: `1px solid ${colors.border}`
                                         }}
                                     />
-                                )
-
-                                :
-
-                                (
+                                ) : (
                                     <div
                                         style={{
                                             width: 88,
@@ -273,70 +259,153 @@ export default function DoctorDetails() {
                                         {doctor.name?.charAt(0)}
                                     </div>
                                 )
-
                         }
 
                         {/* Identity */}
                         <div style={{ flex: 1, minWidth: 240 }}>
 
-                            <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                                <h1 style={{ fontSize: 26, fontWeight: 600, color: colors.forestDark, margin: 0, ...fontHeading }}>
+                            <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: 8,
+                                flexWrap: "wrap"
+                            }}>
+
+                                <h1 style={{
+                                    fontSize: 26,
+                                    fontWeight: 600,
+                                    color: colors.forestDark,
+                                    margin: 0, ...fontHeading
+                                }}>
                                     {doctor.name}
                                 </h1>
-                                <BadgeCheck size={18} color={colors.terracottaLight} />
+
+                                <BadgeCheck
+                                    size={18}
+                                    color={colors.terracottaLight}
+                                />
                             </div>
 
-                            <p style={{ marginTop: 4, fontSize: 15, color: colors.inkSoft }}>
+                            <p style={{
+                                marginTop: 4,
+                                fontSize: 15,
+                                color: colors.inkSoft
+                            }}>
                                 {doctor.specialization}
                             </p>
 
-                            <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginTop: 14 }}>
+                            <div style={{
+                                display: "flex",
+                                flexWrap: "wrap",
+                                gap: 16,
+                                marginTop: 14
+                            }}>
 
-                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                    <Star size={15} fill={colors.terracottaLight} color={colors.terracottaLight} />
-                                    <span style={{ fontSize: 14, fontWeight: 600, color: colors.forestDark }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 6
+                                }}>
+
+                                    <Star size={15}
+                                        fill={colors.terracottaLight}
+                                        color={colors.terracottaLight}
+                                    />
+                                    <span style={{
+                                        fontSize: 14,
+                                        fontWeight: 600,
+                                        color: colors.forestDark
+                                    }}>
+
                                         {reviews?.averageRating ?? "New"}
                                     </span>
-                                    <span style={{ fontSize: 14, color: colors.inkMuted }}>
+                                    <span style={{
+                                        fontSize: 14,
+                                        color: colors.inkMuted
+                                    }}>
                                         ({reviews?.totalReviews ?? 0} reviews)
                                     </span>
                                 </div>
 
-                                <div style={{ width: 1, background: colors.border }} />
+                                <div style={{
+                                    width: 1,
+                                    background: colors.border
+                                }}
+                                />
 
-                                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, color: colors.inkSoft }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                    fontSize: 14,
+                                    color: colors.inkSoft
+                                }}>
+
                                     <MapPin size={15} />
                                     {doctor.hospitalName}
                                 </div>
 
-                                <div style={{ width: 1, background: colors.border }} />
+                                <div style={{
+                                    width: 1,
+                                    background: colors.border
+                                }}
+                                />
 
-                                <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 14, color: colors.inkSoft }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: 6,
+                                    fontSize: 14,
+                                    color: colors.inkSoft
+                                }}>
                                     <Stethoscope size={15} />
                                     {doctor.experience} yrs experience
                                 </div>
 
                             </div>
-
                         </div>
 
                         {/* Fee + CTA */}
-                        <div style={{ textAlign: "right", minWidth: 180 }}>
+                        <div style={{
+                            textAlign: "right",
+                            minWidth: 180
+                        }}>
 
-                            <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: 2 }}>
-                                <IndianRupee size={20} color={colors.forestDark} />
-                                <span style={{ fontSize: 28, fontWeight: 700, color: colors.forestDark }}>
+                            <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "flex-end",
+                                gap: 2
+                            }}>
+
+                                <IndianRupee
+                                    size={20}
+                                    color={colors.forestDark}
+                                />
+
+                                <span style={{
+                                    fontSize: 28,
+                                    fontWeight: 700,
+                                    color: colors.forestDark
+                                }}>
+
                                     {doctor.fee}
                                 </span>
                             </div>
-                            <p style={{ margin: "2px 0 12px", fontSize: 13, color: colors.inkMuted }}>
+
+                            <p style={{
+                                margin: "2px 0 12px",
+                                fontSize: 13,
+                                color: colors.inkMuted
+                            }}>
                                 Consultation fee
                             </p>
 
                             <button
-
                                 onClick={
-                                    () => navigate(`/patient/bookdoctor?doctorId=${doctor.id}`)}
+                                    () =>
+                                        navigate(`/patient/bookdoctor?doctorId=${doctor.id}`)
+                                }
 
                                 style={{
                                     width: "100%",
@@ -351,57 +420,108 @@ export default function DoctorDetails() {
                                     ...fontBody
                                 }}
 
-                                onMouseOver={e => e.currentTarget.style.background = colors.forestDarker}
-                                onMouseOut={e => e.currentTarget.style.background = colors.forestDark}
-
+                                onMouseOver=
+                                {e => e.currentTarget.style.background = colors.forestDarker}
+                                onMouseOut=
+                                {e => e.currentTarget.style.background = colors.forestDark}
                             >
                                 Book appointment
                             </button>
 
                         </div>
-
                     </div>
 
                 </div>
 
                 {/* ================= BODY GRID ================= */}
-                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 20, marginTop: 20 }}>
+                <div style={{
+                    display: "grid",
+                    gridTemplateColumns: "2fr 1fr",
+                    gap: 20,
+                    marginTop: 20
+                }}>
 
-                    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 20
+                    }}>
 
                         {/* ABOUT */}
                         <div style={{ ...card, padding: 28 }}>
+
                             <h2 style={sectionTitle}>About</h2>
-                            <p style={{ marginTop: 12, lineHeight: 1.7, color: colors.inkSoft, fontSize: 14.5 }}>
+
+                            <p style={{
+                                marginTop: 12,
+                                lineHeight: 1.7,
+                                color: colors.inkSoft,
+                                fontSize: 14.5
+                            }}>
                                 {doctor.about || "No biography has been added yet."}
                             </p>
 
-                            <div style={{ display: "flex", gap: 24, marginTop: 20, paddingTop: 20, borderTop: `1px solid ${colors.border}` }}>
+                            <div style={{
+                                display: "flex",
+                                gap: 24,
+                                marginTop: 20,
+                                paddingTop: 20,
+                                borderTop: `1px solid ${colors.border}`
+                            }}>
 
                                 <div>
-                                    <p style={{ fontSize: 12, color: colors.inkMuted, margin: 0, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                                    <p style={{
+                                        fontSize: 12,
+                                        color: colors.inkMuted,
+                                        margin: 0,
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.04em"
+                                    }}>
                                         Qualification
                                     </p>
-                                    <p style={{ marginTop: 4, fontSize: 14.5, fontWeight: 600, color: colors.forestDark }}>
+
+                                    <p style={{
+                                        marginTop: 4,
+                                        fontSize: 14.5,
+                                        fontWeight: 600,
+                                        color: colors.forestDark
+                                    }}>
+
                                         {doctor.qualification || "Not available"}
                                     </p>
                                 </div>
 
                                 <div>
-                                    <p style={{ fontSize: 12, color: colors.inkMuted, margin: 0, textTransform: "uppercase", letterSpacing: "0.04em" }}>
+                                    <p style={{
+                                        fontSize: 12,
+                                        color: colors.inkMuted,
+                                        margin: 0,
+                                        textTransform: "uppercase",
+                                        letterSpacing: "0.04em"
+                                    }}>
                                         Experience
                                     </p>
-                                    <p style={{ marginTop: 4, fontSize: 14.5, fontWeight: 600, color: colors.forestDark }}>
+                                    <p style={{
+                                        marginTop: 4,
+                                        fontSize: 14.5,
+                                        fontWeight: 600,
+                                        color: colors.forestDark
+                                    }}>
                                         {doctor.experience || 0} years
                                     </p>
                                 </div>
 
                             </div>
-
                         </div>
 
                         {/* HOSPITAL */}
-                        <div style={{ ...card, padding: 28, display: "flex", alignItems: "center", gap: 16 }}>
+                        <div style={{
+                            ...card,
+                            padding: 28,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 16
+                        }}>
 
                             <div
                                 style={{
@@ -415,14 +535,26 @@ export default function DoctorDetails() {
                                     flexShrink: 0
                                 }}
                             >
-                                <MapPin size={20} color={colors.forestSoft} />
+                                <MapPin
+                                    size={20}
+                                    color={colors.forestSoft}
+                                />
                             </div>
 
                             <div>
-                                <p style={{ margin: 0, fontWeight: 600, fontSize: 15, color: colors.forestDark }}>
+                                <p style={{
+                                    margin: 0,
+                                    fontWeight: 600,
+                                    fontSize: 15,
+                                    color: colors.forestDark
+                                }}>
                                     {doctor.hospitalName}
                                 </p>
-                                <p style={{ marginTop: 2, fontSize: 13.5, color: colors.inkMuted }}>
+                                <p style={{
+                                    marginTop: 2,
+                                    fontSize: 13.5,
+                                    color: colors.inkMuted
+                                }}>
                                     Consultation available at this hospital
                                 </p>
                             </div>
@@ -432,21 +564,36 @@ export default function DoctorDetails() {
                         {/* SLOTS */}
                         <div style={{ ...card, padding: 28 }}>
 
-                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                                <h2 style={sectionTitle}>Available slots</h2>
-                                <span style={{ fontSize: 13, color: colors.inkMuted }}>
-                                    {slots.length} slot{slots.length !== 1 ? "s" : ""}
+                            <div style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center"
+                            }}>
+
+                                <h2
+                                    style={sectionTitle}>
+                                    Available slots
+                                </h2>
+
+                                <span style={{
+                                    fontSize: 13,
+                                    color: colors.inkMuted
+                                }}>
+                                    {slots.length}
+                                    slot{slots.length !== 1 ? "s" : ""}
                                 </span>
                             </div>
 
-                            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginTop: 16 }}>
+                            <div style={{
+                                display: "grid",
+                                gridTemplateColumns: "1fr 1fr",
+                                gap: 12,
+                                marginTop: 16
+                            }}>
 
                                 {
-
                                     slots.length > 0 ?
-
                                         slots.map(slot => (
-
                                             <div
                                                 key={slot.id}
                                                 style={{
@@ -458,23 +605,45 @@ export default function DoctorDetails() {
                                                     alignItems: "flex-start"
                                                 }}
                                             >
-
                                                 <div>
-                                                    <p style={{ fontWeight: 600, color: colors.forestDark, margin: 0, fontSize: 14 }}>
+                                                    <p style={{
+                                                        fontWeight: 600,
+                                                        color: colors.forestDark,
+                                                        margin: 0,
+                                                        fontSize: 14
+                                                    }}>
                                                         {
                                                             new Date(slot.availableFrom)
-                                                                .toLocaleDateString("en-IN", { weekday: "short", day: "numeric", month: "short" })
+                                                                .toLocaleDateString("en-IN",
+                                                                    {
+                                                                        weekday: "short",
+                                                                        day: "numeric",
+                                                                        month: "short"
+                                                                    })
                                                         }
                                                     </p>
-                                                    <p style={{ marginTop: 4, color: colors.inkMuted, fontSize: 13.5 }}>
+
+                                                    <p style={{
+                                                        marginTop: 4,
+                                                        color: colors.inkMuted,
+                                                        fontSize: 13.5
+                                                    }}>
                                                         {
                                                             new Date(slot.availableFrom)
-                                                                .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                                                                .toLocaleTimeString([],
+                                                                    {
+                                                                        hour: "2-digit",
+                                                                        minute: "2-digit"
+                                                                    })
                                                         }
                                                         {" – "}
                                                         {
                                                             new Date(slot.availableTo)
-                                                                .toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+                                                                .toLocaleTimeString([],
+                                                                    {
+                                                                        hour: "2-digit",
+                                                                        minute: "2-digit"
+                                                                    })
                                                         }
                                                     </p>
                                                 </div>
@@ -495,64 +664,154 @@ export default function DoctorDetails() {
 
                                             </div>
 
-                                        ))
+                                        )) : (
+                                            <div style={{
+                                                gridColumn: "span 2",
+                                                textAlign: "center",
+                                                padding: "36px 0"
+                                            }}>
 
-                                        :
-
-                                        (
-
-                                            <div style={{ gridColumn: "span 2", textAlign: "center", padding: "36px 0" }}>
-                                                <CalendarDays size={32} color={colors.inkMuted} style={{ margin: "0 auto" }} />
-                                                <p style={{ marginTop: 12, color: colors.inkMuted, fontSize: 14 }}>
+                                                <CalendarDays
+                                                    size={32}
+                                                    color={colors.inkMuted}
+                                                    style={{ margin: "0 auto" }}
+                                                />
+                                                <p style={{
+                                                    marginTop: 12,
+                                                    color: colors.inkMuted,
+                                                    fontSize: 14
+                                                }}>
                                                     No available slots right now
                                                 </p>
+
                                             </div>
-
                                         )
-
                                 }
-
                             </div>
-
                         </div>
-
                     </div>
 
                     {/* RIGHT RAIL */}
-                    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+                    <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 20
+                    }}>
 
-                        <div style={{ ...card, padding: 24, position: "sticky", top: 24 }}>
+                        <div style={{
+                            ...card,
+                            padding: 24,
+                            position: "sticky",
+                            top: 24
+                        }}>
 
-                            <h3 style={{ ...sectionTitle, fontSize: 15 }}>Snapshot</h3>
+                            <h3 style={{
+                                ...sectionTitle,
+                                fontSize: 15
+                            }}>
+                                Snapshot
+                            </h3>
 
-                            <div style={{ marginTop: 16, display: "flex", flexDirection: "column", gap: 14 }}>
+                            <div style={{
+                                marginTop: 16,
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 14
+                            }}>
 
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                                    <span style={{ color: colors.inkMuted }}>Experience</span>
-                                    <span style={{ fontWeight: 600, color: colors.forestDark }}>{doctor.experience || 0} yrs</span>
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    fontSize: 14
+                                }}>
+
+                                    <span style={{
+                                        color: colors.inkMuted
+                                    }}>Experience
+                                    </span>
+
+                                    <span style={{
+                                        fontWeight: 600,
+                                        color: colors.forestDark
+                                    }}>{doctor.experience || 0} yrs
+                                    </span>
                                 </div>
 
-                                <div style={{ height: 1, background: colors.border }} />
+                                <div style={{
+                                    height: 1,
+                                    background: colors.border
+                                }}
+                                />
 
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                                    <span style={{ color: colors.inkMuted }}>Reviews</span>
-                                    <span style={{ fontWeight: 600, color: colors.forestDark }}>{reviews?.totalReviews || 0}</span>
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    fontSize: 14
+                                }}>
+
+                                    <span style={{
+                                        color: colors.inkMuted
+                                    }}>Reviews
+                                    </span>
+
+                                    <span style={{
+                                        fontWeight: 600,
+                                        color: colors.forestDark
+                                    }}>{reviews?.totalReviews || 0}
+                                    </span>
                                 </div>
 
-                                <div style={{ height: 1, background: colors.border }} />
+                                <div style={{
+                                    height: 1,
+                                    background: colors.border
+                                }}
+                                />
 
-                                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 14 }}>
-                                    <span style={{ color: colors.inkMuted }}>Open slots</span>
-                                    <span style={{ fontWeight: 600, color: colors.forestDark }}>{slots.length}</span>
+                                <div style={{
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    fontSize: 14
+                                }}>
+
+                                    <span style={{
+                                        color: colors.inkMuted
+                                    }}>Open slots
+                                    </span>
+
+                                    <span style={{
+                                        fontWeight: 600,
+                                        color: colors.forestDark
+                                    }}>{slots.length}
+                                    </span>
                                 </div>
 
                             </div>
 
                         </div>
 
-                        <div style={{ ...card, padding: 24, display: "flex", gap: 12, alignItems: "flex-start" }}>
-                            <ShieldCheck size={20} color={colors.forestSoft} style={{ flexShrink: 0, marginTop: 2 }} />
-                            <p style={{ fontSize: 13.5, color: colors.inkSoft, margin: 0, lineHeight: 1.6 }}>
+                        <div style={{
+                            ...card,
+                            padding: 24,
+                            display: "flex",
+                            gap: 12,
+                            alignItems: "flex-start"
+                        }}>
+
+                            <ShieldCheck
+                                size={20}
+                                color={colors.forestSoft}
+                                style={{
+                                    flexShrink: 0,
+                                    marginTop: 2
+                                }}
+                            />
+
+                            <p style={{
+                                fontSize: 13.5,
+                                color: colors.inkSoft,
+                                margin: 0,
+                                lineHeight: 1.6
+                            }}>
                                 Verified credentials reviewed by hospital administration.
                             </p>
                         </div>
@@ -562,71 +821,143 @@ export default function DoctorDetails() {
                 </div>
 
                 {/* ======================= REVIEWS ======================= */}
-                <div style={{ ...card, padding: 28, marginTop: 20 }}>
+                <div style={{
+                    ...card,
+                    padding: 28,
+                    marginTop: 20
+                }}>
 
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}>
+                    <div style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                        flexWrap: "wrap",
+                        gap: 12
+                    }}>
 
                         <div>
-                            <h2 style={sectionTitle}>Patient reviews</h2>
-                            <p style={{ marginTop: 4, fontSize: 13.5, color: colors.inkMuted }}>
+                            <h2
+                                style={sectionTitle}>
+                                Patient reviews
+                            </h2>
+
+                            <p style={{
+                                marginTop: 4,
+                                fontSize: 13.5,
+                                color: colors.inkMuted
+                            }}>
                                 From patients who completed appointments
                             </p>
                         </div>
 
-                        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                            <Star size={18} fill={colors.terracottaLight} color={colors.terracottaLight} />
-                            <span style={{ fontSize: 20, fontWeight: 700, color: colors.forestDark }}>
+                        <div style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8
+                        }}>
+
+                            <Star
+                                size={18}
+                                fill={colors.terracottaLight}
+                                color={colors.terracottaLight}
+                            />
+
+                            <span
+                                style={{
+                                    fontSize: 20,
+                                    fontWeight: 700,
+                                    color: colors.forestDark
+                                }}>
                                 {reviews?.averageRating ?? 0}
                             </span>
-                            <span style={{ fontSize: 13.5, color: colors.inkMuted }}>
+
+                            <span style={{
+                                fontSize: 13.5,
+                                color: colors.inkMuted
+                            }}>
                                 ({reviews?.totalReviews ?? 0})
                             </span>
                         </div>
 
                     </div>
 
-                    <div style={{ marginTop: 20, display: "flex", flexDirection: "column", gap: 16 }}>
-
+                    <div style={{
+                        marginTop: 20,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 16
+                    }}>
                         {
-
                             reviews?.reviews?.length > 0 ?
-
                                 reviews.reviews.map((review, index) => (
-
                                     <div
                                         key={index}
-                                        style={{ borderTop: index === 0 ? "none" : `1px solid ${colors.border}`, paddingTop: index === 0 ? 0 : 16 }}
+                                        style={{
+                                            borderTop: index === 0
+                                                ? "none"
+                                                : `1px solid ${colors.border}`,
+                                            paddingTop: index === 0 ? 0 : 16
+                                        }}
                                     >
 
-                                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                        <div style={{
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center"
+                                        }}>
 
                                             <div>
-                                                <p style={{ fontWeight: 600, fontSize: 14.5, color: colors.forestDark, margin: 0 }}>
+                                                <p style={{
+                                                    fontWeight: 600,
+                                                    fontSize: 14.5,
+                                                    color: colors.forestDark,
+                                                    margin: 0
+                                                }}>
                                                     {review.patientName}
                                                 </p>
-                                                <p style={{ fontSize: 12.5, color: colors.inkMuted, marginTop: 2 }}>
-                                                    {new Date(review.createdAt).toLocaleDateString()}
+
+                                                <p style={{
+                                                    fontSize: 12.5,
+                                                    color: colors.inkMuted,
+                                                    marginTop: 2
+                                                }}>
+                                                    {new Date(review.createdAt)
+                                                        .toLocaleDateString()}
                                                 </p>
                                             </div>
 
-                                            <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                                                <Star size={14} fill={colors.terracottaLight} color={colors.terracottaLight} />
-                                                <span style={{ fontWeight: 600, fontSize: 13.5 }}>{review.rating}</span>
+                                            <div style={{
+                                                display: "flex",
+                                                alignItems: "center",
+                                                gap: 4
+                                            }}>
+
+                                                <Star
+                                                    size={14}
+                                                    fill={colors.terracottaLight}
+                                                    color={colors.terracottaLight}
+                                                />
+                                                <span style={{
+                                                    fontWeight: 600,
+                                                    fontSize: 13.5
+                                                }}>{review.rating}
+                                                </span>
                                             </div>
 
                                         </div>
 
-                                        <p style={{ marginTop: 8, color: colors.inkSoft, lineHeight: 1.65, fontSize: 14 }}>
+                                        <p style={{
+                                            marginTop: 8,
+                                            color: colors.inkSoft,
+                                            lineHeight: 1.65,
+                                            fontSize: 14
+                                        }}>
                                             {review.comment}
                                         </p>
 
                                     </div>
 
-                                ))
-
-                                :
-
-                                (
+                                )) : (
 
                                     <div style={{ textAlign: "center", padding: "40px 0" }}>
                                         <Star size={32} color={colors.inkMuted} style={{ margin: "0 auto" }} />
@@ -639,11 +970,9 @@ export default function DoctorDetails() {
                                     </div>
 
                                 )
-
                         }
 
                     </div>
-
                 </div>
 
                 {/* ======================= CTA ======================= */}
@@ -673,7 +1002,6 @@ export default function DoctorDetails() {
                     <button
 
                         onClick={() => navigate(`/patient/bookdoctor?doctorId=${doctor.id}`)}
-
                         style={{
                             background: "#fff",
                             color: colors.forestDark,
@@ -700,9 +1028,6 @@ export default function DoctorDetails() {
                 )}
 
             </div>
-
         </div>
-
     );
-
 }

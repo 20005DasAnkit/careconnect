@@ -216,4 +216,37 @@ public class AmbulanceController : ControllerBase
 
         return Ok(new { ambulance.IsAvailable });
     }
+
+    [HttpPut("location")]
+    public IActionResult UpdateLocation(
+    double lat,
+    double lng,
+    string? baseLocation)
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var ambulance = _context.Ambulances
+            .FirstOrDefault(x => x.UserId == userId);
+
+        if (ambulance == null)
+            return NotFound("Ambulance profile not found");
+
+        ambulance.Latitude = lat;
+        ambulance.Longitude = lng;
+
+        if (!string.IsNullOrWhiteSpace(baseLocation))
+        {
+            ambulance.BaseLocation = baseLocation.Trim();
+        }
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            ambulance.Latitude,
+            ambulance.Longitude,
+            ambulance.BaseLocation
+        });
+    }
 }

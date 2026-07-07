@@ -215,30 +215,95 @@ export default function AmbulanceDashboard() {
   const [drawer, setDrawer] = useState(false);
   const [driver, setDriver] = useState({ name: "Driver", vehicleType: "Basic", isAvailable: true });
 
-const load = async () => {
-  try {
-    setLoading(true);
+  const load = async () => {
+    try {
+      setLoading(true);
 
-    const [reqRes, profileRes] = await Promise.all([
-      API.get("/Ambulance/requests"),
-      API.get("/Ambulance/profile"),
-    ]);
+      const [reqRes, profileRes] = await Promise.all([
+        API.get("/Ambulance/requests"),
+        API.get("/Ambulance/profile"),
+      ]);
 
-    setRequests(Array.isArray(reqRes.data) ? reqRes.data : []);
+      setRequests(Array.isArray(reqRes.data) ? reqRes.data : []);
 
-    setDriver({
-      name: profileRes.data.driverName,
-      vehicleType: profileRes.data.type,
-      isAvailable: profileRes.data.isAvailable,
-    });
-  } catch {
-    toast.error("Failed to load dashboard.");
-  } finally {
-    setLoading(false);
-  }
-};
+      setDriver({
+        name: profileRes.data.driverName,
+        vehicleType: profileRes.data.type,
+        isAvailable: profileRes.data.isAvailable,
+      });
+    } catch {
+      toast.error("Failed to load dashboard.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  useEffect(() => { load(); }, []);
+  const updateCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Geolocation is not supported.");
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        try {
+          const lat = pos.coords.latitude;
+          const lng = pos.coords.longitude;
+
+          // Reverse Geocoding
+          const geoRes = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
+            {
+              headers: {
+                Accept: "application/json",
+              },
+            }
+          );
+
+          const geo = await geoRes.json();
+
+          const baseLocation =
+            geo.address?.suburb ||
+            geo.address?.neighbourhood ||
+            geo.address?.city ||
+            geo.address?.town ||
+            geo.address?.village ||
+            geo.display_name;
+
+          await API.put(
+            `/Ambulance/location?lat=${lat}&lng=${lng}&baseLocation=${encodeURIComponent(baseLocation)}`
+          );
+
+          console.log("Location Updated:", baseLocation);
+
+        } catch (err) {
+          console.error(err);
+        }
+      },
+      () => {
+        toast.error(
+          "Please enable location permission."
+        );
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      }
+    );
+  };
+
+  useEffect(() => {
+    load();
+
+    updateCurrentLocation();
+
+    const interval = setInterval(() => {
+      updateCurrentLocation();
+    }, 20000);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const updateStatus = async (id, status) => {
     try {
@@ -297,13 +362,13 @@ const load = async () => {
             <div style={{ fontWeight: 700, color: T.white, fontSize: 14 }}>{driver.name}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 4 }}>
               <div style={{ width: 7, height: 7, borderRadius: "50%", background: driver.isAvailable ? "#22C55E" : "#EF4444" }} />
-<span style={{
-    fontSize: 11,
-    color: driver.isAvailable ? "#22C55E" : "#EF4444",
-    fontWeight: 600
-}}>
-    {driver.isAvailable ? "Available" : "Offline"}
-</span>
+              <span style={{
+                fontSize: 11,
+                color: driver.isAvailable ? "#22C55E" : "#EF4444",
+                fontWeight: 600
+              }}>
+                {driver.isAvailable ? "Available" : "Offline"}
+              </span>
             </div>
           </div>
         </div>
