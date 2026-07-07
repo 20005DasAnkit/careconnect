@@ -98,10 +98,14 @@ public class AdminSlotRequestController : ControllerBase
             Status = "Approved",
             IsApproved = true
         };
+
         _context.DoctorAvailabilities.Add(availability);
+        
         request.Status = "Approved";
         request.AdminRemark = dto.AdminRemark;
+
         _context.SaveChanges();
+
         return Ok("Request approved.");
     }
 }

@@ -58,11 +58,11 @@ public class PatientController : ControllerBase
         }
 
         var slots = _context.DoctorAvailabilities
-    .Where(x =>
-        x.DoctorId == doctorId &&
-        x.IsActive &&
-        !x.IsBooked &&
-        x.AvailableFrom >= now)
+        .Where(x =>
+            x.DoctorId == doctorId &&
+            x.IsActive &&
+            !x.IsBooked &&
+            x.AvailableFrom >= now)
             .OrderBy(x => x.AvailableFrom)
             .Select(x => new
             {
@@ -219,17 +219,24 @@ public class PatientController : ControllerBase
     {
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
         if (string.IsNullOrWhiteSpace(dto.DeliveryAddress))
             return BadRequest("Delivery address is required");
+
         var product = _context.Products
             .FirstOrDefault(x => x.Id == dto.ProductId);
+
         if (product == null)
             return NotFound("Product not found");
+
         if (product.Stock < dto.Quantity)
             return BadRequest("Insufficient stock");
+
         var paymentMode = dto.PaymentMode == "Online" ? "Online" : "COD";
+
         if (paymentMode == "Online" && string.IsNullOrWhiteSpace(dto.RazorpayPaymentId))
             return BadRequest("Payment verification required for online payment");
+
         var total = product.Price * dto.Quantity;
 
         var order = new Order
@@ -444,6 +451,7 @@ public class PatientController : ControllerBase
         // Server-side recalculation — never trust client-sent fare
         double distanceKm = HaversineKm(dto.PickupLat, dto.PickupLng, dto.DestinationLat, dto.DestinationLng);
         decimal fare = Math.Round(RatePerKm(dto.VehicleType) * (decimal)distanceKm, 2);
+
         var request = new AmbulanceRequest
         {
             UserId = userId,
@@ -514,8 +522,10 @@ public class PatientController : ControllerBase
 
         if (slot == null)
             return BadRequest("Appointment slot not found");
+
         var user = _context.Users.First(x => x.Id == userId);
         decimal refund = 0;
+
         var hoursLeft = (slot.AvailableFrom - DateTime.UtcNow).TotalHours;
         if (hoursLeft >= 1)
         {
@@ -636,6 +646,7 @@ public class PatientController : ControllerBase
         user.Country = dto.Country;
         user.PinCode = dto.PinCode;
         user.AvatarUrl = dto.AvatarUrl;
+
         _context.SaveChanges();
 
         return Ok(new
@@ -660,6 +671,7 @@ public class PatientController : ControllerBase
     {
         if (file == null || file.Length == 0)
             return BadRequest("No file selected.");
+
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         var user = _context.Users
@@ -675,6 +687,7 @@ public class PatientController : ControllerBase
 
         if (!Directory.Exists(folder))
             Directory.CreateDirectory(folder);
+
         var fileName = Guid.NewGuid().ToString() +
                        Path.GetExtension(file.FileName);
         var path = Path.Combine(folder, fileName);
@@ -684,6 +697,7 @@ public class PatientController : ControllerBase
         }
 
         user.AvatarUrl = "/avatars/" + fileName;
+
         _context.SaveChanges();
 
         return Ok(new
@@ -857,6 +871,7 @@ public class PatientController : ControllerBase
                 on a.DoctorAvailabilityId equals s.Id
              where a.Id == id &&
                    a.PatientId == userId
+
              select new
              {
                  a.Id,
@@ -864,12 +879,9 @@ public class PatientController : ControllerBase
                  a.PaymentStatus,
                  a.AdvanceAmount,
                  a.IsReviewed,
-
                  AppointmentDate = s.AvailableFrom,
                  AppointmentTime = s.AvailableFrom,
-
                  Place = s.Place,
-
                  DoctorId = d.Id,
                  d.HospitalName
              })
@@ -904,10 +916,7 @@ public class PatientController : ControllerBase
 
     [Authorize(Roles = "Patient")]
     [HttpGet("ambulances/nearby")]
-    public IActionResult GetNearbyAmbulances(
-    double lat,
-    double lng,
-    string? type)
+    public IActionResult GetNearbyAmbulances(double lat, double lng, string? type)
     {
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
@@ -952,9 +961,7 @@ public class PatientController : ControllerBase
                     a.Type,
                     a.Rating,
                     a.BaseLocation,
-
                     DistanceKm = Math.Round(distance, 2),
-
                     IsAvailable = a.IsAvailable,
 
                     MyRide =

@@ -562,6 +562,7 @@ public class AdminController : ControllerBase
 
         product.Category = dto.Category;
         _context.SaveChanges();
+
         return Ok();
     }
 
@@ -569,12 +570,10 @@ public class AdminController : ControllerBase
     public IActionResult UpdateProductOrderStatus(int id, [FromBody] string status)
     {
         var order = _context.Orders.FirstOrDefault(x => x.Id == id);
-
         if (order == null)
             return NotFound("Order not found");
 
         order.Status = status;
-
         _context.SaveChanges();
 
         return Ok(new
@@ -588,7 +587,6 @@ public class AdminController : ControllerBase
     public IActionResult UpdatePaymentStatus(int id)
     {
         var order = _context.Orders.FirstOrDefault(x => x.Id == id);
-
         if (order == null)
             return NotFound("Order not found");
 
@@ -596,7 +594,6 @@ public class AdminController : ControllerBase
             return BadRequest("Order must be delivered first");
 
         order.PaymentStatus = "Paid";
-
         _context.SaveChanges();
 
         return Ok(new
@@ -647,7 +644,6 @@ public class AdminController : ControllerBase
     public IActionResult UpdateHospital(int id, CreateHospitalDto dto)
     {
         var hospital = _context.Hospitals.FirstOrDefault(x => x.Id == id);
-
         if (hospital == null)
             return NotFound("Hospital not found");
 
