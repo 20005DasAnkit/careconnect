@@ -183,8 +183,9 @@ public class PatientController : ControllerBase
             join d in _context.Doctors on a.DoctorId equals d.Id
             join u in _context.Users on d.UserId equals u.Id
             join s in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals s.Id
-            where a.PatientId == userId
-            orderby a.BookedAt descending
+
+            where a.PatientId == userId orderby a.BookedAt descending
+
             select new
             {
                 a.Id,
@@ -283,13 +284,15 @@ public class PatientController : ControllerBase
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
         var orders = (
-            from o in _context.Orders
-            where o.UserId == userId
+            from o in _context.Orders where o.UserId == userId
             join oi in _context.OrderItems on o.Id equals oi.OrderId into items
             from oi in items.DefaultIfEmpty()
+
             join p in _context.Products on oi.ProductId equals p.Id into products
             from p in products.DefaultIfEmpty()
+            
             orderby o.OrderDate descending
+
             select new
             {
                 o.Id,
@@ -419,6 +422,7 @@ public class PatientController : ControllerBase
         var ambulances = _context.Ambulances.Where(a => a.IsAvailable).ToList();
         var productCount = _context.Products.Count();
         var cityNames = CityKeywords.Keys.ToList();
+
         var coverage = cityNames.Select(city => new
         {
             City = city,
@@ -439,6 +443,7 @@ public class PatientController : ControllerBase
     {
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
         var ambulance = _context.Ambulances
             .FirstOrDefault(x => x.Id == dto.AmbulanceId);
 
@@ -450,6 +455,7 @@ public class PatientController : ControllerBase
 
         // Server-side recalculation — never trust client-sent fare
         double distanceKm = HaversineKm(dto.PickupLat, dto.PickupLng, dto.DestinationLat, dto.DestinationLng);
+
         decimal fare = Math.Round(RatePerKm(dto.VehicleType) * (decimal)distanceKm, 2);
 
         var request = new AmbulanceRequest
@@ -511,6 +517,7 @@ public class PatientController : ControllerBase
     {
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
         var appointment = _context.Appointments
             .FirstOrDefault(x => x.Id == id && x.PatientId == userId);
 
@@ -555,6 +562,7 @@ public class PatientController : ControllerBase
     {
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
         var request = _context.AmbulanceRequests
             .FirstOrDefault(x => x.Id == id && x.UserId == userId);
 
@@ -627,10 +635,9 @@ public class PatientController : ControllerBase
     [HttpPut("profile")]
     public IActionResult UpdateProfile(UpdateProfileDto dto)
     {
-        var userId = int.Parse(
-            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
-        var user = _context.Users
-            .FirstOrDefault(x => x.Id == userId);
+        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var user = _context.Users.FirstOrDefault(x => x.Id == userId);
 
         if (user == null)
             return NotFound("User not found");
@@ -674,6 +681,7 @@ public class PatientController : ControllerBase
 
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
         var user = _context.Users
             .FirstOrDefault(x => x.Id == userId);
 
@@ -715,21 +723,21 @@ public class PatientController : ControllerBase
 
         var ride =
             (from r in _context.AmbulanceRequests
-             join a in _context.Ambulances
-                on r.AmbulanceId equals a.Id
-             where r.Id == id &&
-                   r.UserId == userId
+             join a in _context.Ambulances on r.AmbulanceId equals a.Id
+
+             where r.Id == id && r.UserId == userId
+
              select new
              {
-                 r.Id,
-                 r.Status,
-                 r.Fare,
-                 r.DistanceKm,
-                 r.PickupLocation,
-                 r.DestinationLocation,
-                 DriverName = a.DriverName,
-                 DriverPhone = a.DriverPhone,
-                 VehicleNumber = a.VehicleNumber
+                r.Id,
+                r.Status,
+                r.Fare,
+                r.DistanceKm,
+                r.PickupLocation,
+                r.DestinationLocation,
+                DriverName = a.DriverName,
+                DriverPhone = a.DriverPhone,
+                VehicleNumber = a.VehicleNumber
              }).FirstOrDefault();
 
         if (ride == null)
@@ -865,25 +873,23 @@ public class PatientController : ControllerBase
 
         var appointment =
             (from a in _context.Appointments
-             join d in _context.Doctors
-                on a.DoctorId equals d.Id
-             join s in _context.DoctorAvailabilities
-                on a.DoctorAvailabilityId equals s.Id
-             where a.Id == id &&
-                   a.PatientId == userId
+             join d in _context.Doctors on a.DoctorId equals d.Id
+             join s in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals s.Id
+
+             where a.Id == id && a.PatientId == userId
 
              select new
              {
-                 a.Id,
-                 a.Status,
-                 a.PaymentStatus,
-                 a.AdvanceAmount,
-                 a.IsReviewed,
-                 AppointmentDate = s.AvailableFrom,
-                 AppointmentTime = s.AvailableFrom,
-                 Place = s.Place,
-                 DoctorId = d.Id,
-                 d.HospitalName
+                a.Id,
+                a.Status,
+                a.PaymentStatus,
+                a.AdvanceAmount,
+                a.IsReviewed,
+                AppointmentDate = s.AvailableFrom,
+                AppointmentTime = s.AvailableFrom,
+                Place = s.Place,
+                DoctorId = d.Id,
+                d.HospitalName
              })
             .FirstOrDefault();
 
@@ -893,11 +899,7 @@ public class PatientController : ControllerBase
         return Ok(appointment);
     }
 
-    private static double DistanceKm(
-    double lat1,
-    double lon1,
-    double lat2,
-    double lon2)
+    private static double DistanceKm(double lat1, double lon1, double lat2, double lon2)
     {
         const double R = 6371;
         double dLat = (lat2 - lat1) * Math.PI / 180;
