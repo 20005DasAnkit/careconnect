@@ -109,16 +109,23 @@ export default function Products() {
                             Pharmacy
                         </p>
                         <h1
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                            style={{ 
+                                fontFamily: "'Fraunces', Georgia, serif", 
+                                fontWeight: 500 
+                            }}
                             className="leading-[1.05] tracking-tight"
                         >
-                            <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}>
+                            <span style={{ 
+                                      fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" 
+                                    }}>
                                 Medicine, delivered
                             </span>
                             <br />
                             <span
                                 className="italic text-[#B5562C]"
-                                style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}
+                                style={{ 
+                                    fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" 
+                                }}
                             >
                                 before you run out.
                             </span>

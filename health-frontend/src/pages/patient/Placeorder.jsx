@@ -45,7 +45,9 @@ function StepHeader({ step, productName }) {
                 {STEPS.map((s, i) => (
                     <div
                         key={s}
-                        className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? "bg-[#16332B]" : "bg-[#E7E2D6]"
+                        className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step 
+                            ? "bg-[#16332B]" 
+                            : "bg-[#E7E2D6]"
                             }`}
                     />
                 ))}
@@ -185,7 +187,10 @@ export default function PlaceOrder() {
 
                     {step < 2 && (
                         <button
-                            onClick={() => (step === 0 ? navigate(-1) : setStep((s) => s - 1))}
+                            onClick={() => (step === 0 
+                                ? navigate(-1) 
+                                : setStep((s) => s - 1)
+                            )}
                             className="flex items-center gap-1.5 text-sm text-[#6B6458] hover:text-[#16332B] mb-6 transition"
                         >
                             <FiArrowLeft size={15} />
