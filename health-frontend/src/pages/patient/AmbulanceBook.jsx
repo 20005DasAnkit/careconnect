@@ -57,7 +57,6 @@ export default function Ambulance() {
     const [pickupLabel, setPickupLabel] = useState("");
 
 
-
     function detectLocation() {
         if (!navigator.geolocation) {
             toast.error("Geolocation is not supported.");
@@ -65,16 +64,13 @@ export default function Ambulance() {
         }
 
         navigator.geolocation.getCurrentPosition(async (pos) => {
-
             const lat = pos.coords.latitude;
             const lng = pos.coords.longitude;
-
             const res = await fetch(
                 `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
             );
 
             const data = await res.json();
-
             const address = data.display_name;
 
             setPickup({
@@ -83,7 +79,6 @@ export default function Ambulance() {
             });
 
             setPickupLabel(address);
-
             setLocationSelected(true);
 
         });
@@ -164,7 +159,10 @@ export default function Ambulance() {
         <>
             <Toaster position="top-right" />
 
-            <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" 
+                 style={{ 
+                     fontFamily: "'Inter', system-ui, sans-serif" 
+                    }}>
                 <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-16">
 
                     {/* ───────────────────── HEADER ───────────────────── */}
@@ -173,20 +171,28 @@ export default function Ambulance() {
                             Emergency transport
                         </p>
                         <h1
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                            style={{ 
+                                fontFamily: "'Fraunces', Georgia, serif", 
+                                fontWeight: 500 
+                            }}
                             className="leading-[1.05] tracking-tight"
                         >
                             <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}>
                                 Help is closer
                             </span>
+
                             <br />
+
                             <span
                                 className="italic text-[#3E7C59]"
-                                style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}
+                                style={{ 
+                                    fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" 
+                                }}
                             >
                                 than it feels.
                             </span>
                         </h1>
+
                         <p className="mt-5 max-w-md text-[16px] leading-7 text-[#16332B]/60">
                             {availableCount} ambulance{availableCount === 1 ? "" : "s"} ready to dispatch
                             right now. Pick a driver below, or call the emergency line directly.
@@ -204,10 +210,21 @@ export default function Ambulance() {
                         <div className="w-11 h-11 rounded-full bg-white/15 flex items-center justify-center shrink-0">
                             <PhoneCall size={18} />
                         </div>
+
                         <div className="flex-1">
-                            <p className="font-semibold leading-tight text-[15px]">Life-threatening emergency?</p>
-                            <p className="text-white/75 text-[13px] mt-0.5">Call 108 directly — don't wait for booking</p>
+                            <p 
+                                className="font-semibold leading-tight text-[15px]"
+                            >
+                                Life-threatening emergency?
+                            </p>
+
+                            <p 
+                                className="text-white/75 text-[13px] mt-0.5"
+                            >
+                                Call 108 directly — don't wait for booking
+                            </p>
                         </div>
+
                         <span className="shrink-0 bg-white text-[#9E211A] font-semibold px-5 py-2.5 rounded-full text-sm group-hover:bg-white/90 transition">
                             Call 108
                         </span>
@@ -217,7 +234,10 @@ export default function Ambulance() {
                     <div className="mb-10">
                         <div className="flex items-baseline justify-between mb-4">
                             <h3
-                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                style={{ 
+                                    fontFamily: "'Fraunces', Georgia, serif", 
+                                    fontWeight: 500 
+                                }}
                                 className="text-[1.15rem]"
                             >
                                 Choose ambulance type
@@ -256,14 +276,22 @@ export default function Ambulance() {
                                             />
                                         </div>
                                         <h4
-                                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                                            className={`text-[15px] ${active ? "text-white" : "text-[#16332B]"}`}
+                                            style={{ 
+                                                fontFamily: "'Fraunces', Georgia, serif", 
+                                                fontWeight: 500 
+                                            }}
+                                            className={`text-[15px] ${active 
+                                                ? "text-white" 
+                                                : "text-[#16332B]"
+                                            }`}
                                         >
                                             {opt.title}
                                         </h4>
                                         <p
-                                            className={`text-[13px] mt-1 ${active ? "text-white/70" : "text-[#16332B]/50"
-                                                }`}
+                                            className={`text-[13px] mt-1 ${active 
+                                                ? "text-white/70" 
+                                                : "text-[#16332B]/50"
+                                            }`}
                                         >
                                             {opt.desc}
                                         </p>
@@ -461,7 +489,10 @@ export default function Ambulance() {
                                 <Truck size={22} className="text-[#16332B]/35" strokeWidth={1.5} />
                             </div>
                             <h2
-                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                style={{ 
+                                    fontFamily: "'Fraunces', Georgia, serif", 
+                                    fontWeight: 500 
+                                }}
                                 className="text-[1.3rem] mt-6"
                             >
                                 {"No ambulances nearby"}
