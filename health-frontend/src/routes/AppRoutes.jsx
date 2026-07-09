@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
+import { Outlet } from "react-router-dom";
 
 //Protectedroute
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -19,6 +20,9 @@ import HospitalSessions from "../pages/admin/HospitalSessions";
 import AdminSlotRequests from "../pages/admin/AdminSlotRequests";
 import AdminBlogs from "../pages/admin/Blogs";
 import AdminContactMessages from "../pages/admin/AdminContactMessages";
+import Reviews from "../pages/admin/Reviews";
+import AdminLayout from "../layouts/AdminLayout";
+
 
 // Doctor
 import DoctorDashboard from "../pages/doctor/Dashboard";
@@ -37,6 +41,7 @@ import AmbulanceBook from "../pages/patient/AmbulanceBook";
 import PatientDoctors from "../pages/patient/Doctors";
 import PatientOrders from "../pages/patient/Orders";
 import AboutUS from "../pages/patient/AboutUs";
+import Carts from "../pages/patient/Cart";
 import ContactUs from "../pages/patient/Contacts";
 import LocationPage from "../pages/patient/Locations";
 import EmergencyInfos from "../pages/patient/EmergencyInfo";
@@ -48,6 +53,7 @@ import Blog from "../pages/patient/Blog";
 import BlogDetails from "../pages/patient/BlogDetails";
 import DoctorDetails from "../pages/patient/DoctorDetails";
 import AppointmentDetail from "../pages/patient/Appointmentdetail";
+import ProductDetail from "../pages/patient/ProductDetails";
 
 
 // Ambulance Driver
@@ -66,19 +72,23 @@ export default function AppRoutes() {
         <Route path="/register" element={<Register />} />
 
         {/* ADMIN */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/doctors" element={<Doctors />} />
-        <Route path="/admin/doctors/add" element={<AddDoctor />} />
-        <Route path="/admin/products" element={<Products />} />
-        <Route path="/admin/appointments" element={<AppointmentPage />} />
-        <Route path="/admin/ambulances" element={<AmbulancePage />} />
-        <Route path="/admin/product-orders" element={<ProductOrders />} />
-        <Route path="/admin/ambulance-bookings" element={<AmbulanceBookings />} />
-        <Route path="/admin/hospitals" element={<Hospitals />} />
-        <Route path="/admin/hospital-sessions" element={<HospitalSessions />} />
-        <Route path="/admin/slot-requests" element={<AdminSlotRequests />} />
-        <Route path="/admin/blogs" element={<AdminBlogs />} />
-        <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
+
+        <Route element={<AdminLayout />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/admin/doctors" element={<Doctors />} />
+          <Route path="/admin/doctors/add" element={<AddDoctor />} />
+          <Route path="/admin/products" element={<Products />} />
+          <Route path="/admin/appointments" element={<AppointmentPage />} />
+          <Route path="/admin/ambulances" element={<AmbulancePage />} />
+          <Route path="/admin/product-orders" element={<ProductOrders />} />
+          <Route path="/admin/ambulance-bookings" element={<AmbulanceBookings />} />
+          <Route path="/admin/hospitals" element={<Hospitals />} />
+          <Route path="/admin/hospital-sessions" element={<HospitalSessions />} />
+          <Route path="/admin/slot-requests" element={<AdminSlotRequests />} />
+          <Route path="/admin/blogs" element={<AdminBlogs />} />
+          <Route path="/admin/contact-messages" element={<AdminContactMessages />} />
+          <Route path="/admin/reviews" element={<Reviews />} />
+        </Route>
 
 
         {/* DOCTOR */}
@@ -175,6 +185,25 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
+
+          <Route
+          path="/patient/products/:id"
+          element={
+            <ProtectedRoute>
+              <ProductDetail />
+            </ProtectedRoute>
+          }
+        />
+
+          <Route
+          path="/patient/Cart"
+          element={
+            <ProtectedRoute>
+              <Carts />
+            </ProtectedRoute>
+          }
+        />
+        
 
         {/* AMBULANCE DRIVER */}
         <Route path="/ambulance" element={<AmbulanceDashboard />} />

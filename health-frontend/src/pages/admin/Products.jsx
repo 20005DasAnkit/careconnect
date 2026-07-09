@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
 
 const CATEGORIES = ["Tablets", "Syrups", "Injections", "Vitamins", "Powder", "Skincare", "Devices"];
 
@@ -37,6 +35,21 @@ const inputStyle = {
   outline: "none",
 };
 
+const textareaStyle = {
+  ...inputStyle,
+  resize: "vertical",
+  minHeight: 90,
+  fontFamily: "'Inter', sans-serif",
+};
+
+const labelStyle = {
+  ...body,
+  fontSize: 12.5,
+  color: C.muted,
+  display: "block",
+  marginBottom: 6,
+};
+
 const primaryBtn = {
   ...body,
   background: C.forest,
@@ -47,6 +60,19 @@ const primaryBtn = {
   fontSize: 14,
   fontWeight: 600,
   cursor: "pointer",
+};
+
+const secondaryBtn = {
+  ...body,
+  flex: 1,
+  background: "transparent",
+  border: `1px solid ${C.border}`,
+  color: C.ink,
+  borderRadius: 10,
+  padding: "10px",
+  cursor: "pointer",
+  fontSize: 14,
+  fontWeight: 600,
 };
 
 const smallBtn = (bg, color) => ({
@@ -104,6 +130,7 @@ export default function Products() {
   const [imageProduct, setImageProduct] = useState(null);
   const [imageFile, setImageFile] = useState(null);
   const [editProduct, setEditProduct] = useState(null);
+  const [updatingProduct, setUpdatingProduct] = useState(false);
 
   const [editForm, setEditForm] = useState({
     name: "",
@@ -254,6 +281,8 @@ export default function Products() {
 
   const updateProduct = async () => {
 
+    setUpdatingProduct(true);
+
     try {
 
       await api.put(
@@ -271,18 +300,23 @@ export default function Products() {
 
       alert("Update failed");
 
+    } finally {
+
+      setUpdatingProduct(false);
+
     }
 
   };
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: C.cream }}>
-      <Sidebar />
-
-      <div style={{ marginLeft: 256, width: "100%" }}>
-        <Navbar />
-
-        <div style={{ padding: "32px 36px" }}>
+  <div
+    style={{
+      minHeight: "100vh",
+      background: C.cream,
+      padding: "32px 36px",
+      fontFamily: "'Inter', sans-serif",
+    }}
+  >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
             <div>
               <p style={{ ...body, color: C.terracotta, fontSize: 12, letterSpacing: 1.5, textTransform: "uppercase", margin: "0 0 4px" }}>
@@ -412,8 +446,7 @@ export default function Products() {
               </tbody>
             </table>
           </div>
-        </div>
-      </div>
+
 
       {editCatProduct && (
         <div style={modalOverlay}>
@@ -421,7 +454,7 @@ export default function Products() {
             <h3 style={{ ...heading, fontSize: 18, marginBottom: 4 }}>Set Category</h3>
             <p style={{ ...body, color: C.muted, fontSize: 13, marginBottom: 16 }}>{editCatProduct.name}</p>
 
-            <label style={{ ...body, fontSize: 12.5, color: C.muted, display: "block", marginBottom: 6 }}>Category</label>
+            <label style={labelStyle}>Category</label>
             <select value={editCatValue} onChange={(e) => setEditCatValue(e.target.value)} style={{ ...inputStyle, marginBottom: 18, cursor: "pointer" }}>
               <option value="">— None —</option>
               {CATEGORIES.map((c) => (
@@ -430,7 +463,7 @@ export default function Products() {
             </select>
 
             <div style={{ display: "flex", gap: 10 }}>
-              <button style={{ ...body, flex: 1, background: "transparent", border: `1px solid ${C.border}`, color: C.ink, borderRadius: 10, padding: "10px", cursor: "pointer" }} onClick={closeEditCat} disabled={updatingCat}>
+              <button style={secondaryBtn} onClick={closeEditCat} disabled={updatingCat}>
                 Cancel
               </button>
               <button style={{ ...primaryBtn, flex: 1, opacity: updatingCat ? 0.7 : 1 }} onClick={submitCategoryUpdate} disabled={updatingCat}>
@@ -449,7 +482,7 @@ export default function Products() {
               {stockModalProduct.name} — current stock: {stockModalProduct.stock}
             </p>
 
-            <label style={{ ...body, fontSize: 12.5, color: C.muted, display: "block", marginBottom: 6 }}>Quantity to add</label>
+            <label style={labelStyle}>Quantity to add</label>
             <input
               type="number"
               min="1"
@@ -467,7 +500,7 @@ export default function Products() {
             )}
 
             <div style={{ display: "flex", gap: 10, marginTop: 12 }}>
-              <button style={{ ...body, flex: 1, background: "transparent", border: `1px solid ${C.border}`, color: C.ink, borderRadius: 10, padding: "10px", cursor: "pointer" }} onClick={closeStockModal} disabled={updatingStock}>
+              <button style={secondaryBtn} onClick={closeStockModal} disabled={updatingStock}>
                 Cancel
               </button>
               <button style={{ ...primaryBtn, flex: 1, opacity: updatingStock ? 0.7 : 1 }} onClick={submitStockUpdate} disabled={updatingStock}>
@@ -509,19 +542,10 @@ export default function Products() {
             />
 
             <div style={{ display: "flex", gap: 10 }}>
-              <button
-                style={{
-                  flex: 1,
-                  padding: 10,
-                  border: "1px solid #ddd",
-                  borderRadius: 8,
-                  cursor: "pointer"
-                }}
-                onClick={() => {
+              <button style={secondaryBtn} onClick={() => {
                   setImageProduct(null);
                   setImageFile(null);
-                }}
-              >
+                }}>
                 Cancel
               </button>
 
@@ -545,9 +569,12 @@ export default function Products() {
 
           <div style={modalCard}>
 
-            <h2>Edit Product</h2>
+            <h3 style={{ ...heading, fontSize: 18, marginBottom: 4 }}>Edit Product</h3>
+            <p style={{ ...body, color: C.muted, fontSize: 13, marginBottom: 18 }}>{editProduct.name}</p>
 
+            <label style={labelStyle}>Name</label>
             <input
+              style={inputStyle}
               value={editForm.name}
               onChange={(e) =>
                 setEditForm({
@@ -557,7 +584,9 @@ export default function Products() {
               }
             />
 
+            <label style={labelStyle}>Description</label>
             <textarea
+              style={textareaStyle}
               value={editForm.description}
               onChange={(e) =>
                 setEditForm({
@@ -567,7 +596,9 @@ export default function Products() {
               }
             />
 
+            <label style={labelStyle}>Price</label>
             <input
+              style={inputStyle}
               type="number"
               value={editForm.price}
               onChange={(e) =>
@@ -578,7 +609,9 @@ export default function Products() {
               }
             />
 
+            <label style={labelStyle}>Category</label>
             <select
+              style={{ ...inputStyle, marginBottom: 18, cursor: "pointer" }}
               value={editForm.category}
               onChange={(e) =>
                 setEditForm({
@@ -587,27 +620,30 @@ export default function Products() {
                 })
               }
             >
-              <option>Tablets</option>
-              <option>Syrup</option>
-              <option>Injection</option>
-              <option>Capsule</option>
-              <option>Cream</option>
+              <option value="">— None —</option>
+              {CATEGORIES.map((c) => (
+                <option key={c} value={c}>{c}</option>
+              ))}
             </select>
 
             <div style={{ display: "flex", gap: 10 }}>
 
               <button
+                style={secondaryBtn}
                 onClick={() =>
                   setEditProduct(null)
                 }
+                disabled={updatingProduct}
               >
                 Cancel
               </button>
 
               <button
+                style={{ ...primaryBtn, flex: 1, opacity: updatingProduct ? 0.7 : 1 }}
                 onClick={updateProduct}
+                disabled={updatingProduct}
               >
-                Save
+                {updatingProduct ? "Saving..." : "Save"}
               </button>
 
             </div>

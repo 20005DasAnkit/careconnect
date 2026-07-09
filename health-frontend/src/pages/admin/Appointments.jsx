@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+
 import { ClipboardList, Calendar, XCircle } from "lucide-react";
 
 /* ─── Design tokens ───────────────────────────────── */
@@ -80,19 +79,22 @@ export default function Appointments() {
         overflow: "hidden",
     };
 
-    return (
-        <div className="flex" style={{ fontFamily: "Inter, sans-serif" }}>
-            <Sidebar />
+return (
+    <>
 
-            <div className="ml-64 w-full min-h-screen" style={{ background: T.cream }}>
-                <Navbar />
 
                 <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
                     * { box-sizing: border-box; }
                 `}</style>
 
-                <div style={{ padding: 28 }}>
+                <div
+  style={{
+    background: T.cream,
+    minHeight: "100vh",
+    padding: "32px 28px",
+  }}
+>
 
                     {/* Header */}
                     <div style={{ marginBottom: 28 }}>
@@ -199,7 +201,7 @@ export default function Appointments() {
                         </div>
                     )}
                 </div>
-            </div>
-        </div>
+            </>
+
     );
 }

@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
 import { Ambulance, MapPin, Navigation2, Users } from "lucide-react";
 
 /* ─── Design tokens ───────────────────────────────── */
@@ -86,11 +84,7 @@ export default function AmbulanceBookings() {
     const completedCount = bookings.filter((b) => b.status === "Completed").length;
 
     return (
-        <div className="flex" style={{ fontFamily: "Inter, sans-serif" }}>
-            <Sidebar />
-
-            <div className="ml-64 w-full min-h-screen" style={{ background: T.cream }}>
-                <Navbar />
+            <>
 
                 <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
@@ -189,7 +183,6 @@ export default function AmbulanceBookings() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+</>
     );
 }

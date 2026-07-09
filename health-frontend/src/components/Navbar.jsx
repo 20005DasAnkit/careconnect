@@ -17,19 +17,25 @@ export default function Navbar() {
   return (
     <div
       style={{
-        height: 68,
-        background: T.white,
-        borderBottom: `1px solid ${T.border}`,
-        boxShadow: "0 2px 10px rgba(0,0,0,.03)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 28px",
-        marginLeft: 268,
-        fontFamily: "'Inter', sans-serif",
-        position: "sticky",
+        position: "fixed",
         top: 0,
-        zIndex: 30,
+        left: 268,
+        right: 0,
+        height: 68,
+
+        background: T.white,
+
+        borderBottom: `1px solid ${T.border}`,
+
+        boxShadow: "0 2px 10px rgba(0,0,0,.03)",
+
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+
+        padding: "0 28px",
+
+        zIndex: 100,
       }}
     >
       {/* Left — page context */}

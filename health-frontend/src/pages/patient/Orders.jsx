@@ -61,6 +61,31 @@ export default function Orders() {
         }
     };
 
+    const downloadInvoice = async (orderId) => {
+        try {
+            const res = await api.get(
+                `/patient/orders/${orderId}/invoice`,
+                {
+                    responseType: "blob",
+                }
+            );
+
+            const url = window.URL.createObjectURL(
+                new Blob([res.data], { type: "application/pdf" })
+            );
+
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `MedicineInvoice-${orderId}.pdf`;
+            link.click();
+
+            window.URL.revokeObjectURL(url);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to download invoice.");
+        }
+    };
+
     const filteredOrders = useMemo(() => {
         let result = orders;
         if (search.trim()) {
@@ -202,6 +227,7 @@ export default function Orders() {
                                         <th className="px-5 py-3 font-medium">Payment</th>
                                         <th className="px-5 py-3 font-medium">Quantity</th>
                                         <th className="px-5 py-3 font-medium">Status</th>
+                                        <th className="px-5 py-3 font-medium">Invoice</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -265,9 +291,25 @@ export default function Orders() {
                                                     {o.status || "Pending"}
                                                 </span>
                                             </td>
+                                            <td className="px-5 py-4">
+                                                {o.status === "Delivered" ? (
+                                                    <button
+                                                        onClick={() => downloadInvoice(o.id)}
+                                                        className="px-4 py-2 rounded-lg bg-[#2D5016] text-white text-xs font-semibold hover:bg-[#214010] transition"
+                                                    >
+                                                        Download PDF
+                                                    </button>
+                                                ) : (
+                                                    <span className="text-xs text-gray-400">
+                                                        Available after delivery
+                                                    </span>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
+
+
                             </table>
 
                             {filteredOrders.length === 0 && (

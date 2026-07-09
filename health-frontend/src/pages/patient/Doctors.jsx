@@ -271,11 +271,11 @@ export default function Doctors() {
                                     <div className="flex items-center gap-4 mt-3.5 text-xs text-[#16332B]/55">
                                         <span className="flex items-center gap-1">
                                             <Stethoscope size={12} className="text-[#16332B]/35" />
-                                            {doc.experience ?? "10+"}y exp
+                                            {doc.experience}y exp
                                         </span>
                                         <span className="flex items-center gap-1">
                                             <Star size={12} className="fill-[#B5562C] text-[#B5562C]" />
-                                            <span className="font-semibold text-[#16332B]/75">{doc.rating ?? "4.9"}</span>
+                                            <span className="font-semibold text-[#16332B]/75">{doc.rating > 0 ? doc.rating.toFixed(1) : "New"}</span>
                                         </span>
                                     </div>
 

@@ -42,6 +42,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<TokenService>();
 builder.Services.AddScoped<PrescriptionPdfService>();
 builder.Services.AddScoped<BillingPdfService>();
+builder.Services.AddScoped<MedicineBillingPdfService>();
 
 // CORS (IMPORTANT)
 builder.Services.AddCors(options =>

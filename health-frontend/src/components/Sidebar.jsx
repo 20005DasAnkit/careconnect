@@ -12,6 +12,7 @@ import {
   Sparkles,
   Newspaper,
   Mail,
+  Star,
 } from "lucide-react";
 
 const T = {
@@ -60,6 +61,7 @@ const GROUPS = [
     label: "Content",
     links: [
       { to: "/admin/blogs", label: "Blogs", icon: Newspaper },
+      { to: "/admin/reviews", label: "Reviews", icon: Star },
       { to: "/admin/contact-messages", label: "Contact Messages", icon: Mail },
     ],
   },

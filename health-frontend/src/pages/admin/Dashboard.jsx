@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+
 import {
   Users,
   Stethoscope,
@@ -110,82 +109,79 @@ export default function Dashboard() {
         *{box-sizing:border-box;}
       `}</style>
 
-      <Sidebar />
-      <div style={{ 
-               marginLeft: 264, 
-               background: T.cream, 
-               minHeight: "100vh" 
-              }}
+      <div
+        style={{
+          background: T.cream,
+          minHeight: "100vh",
+          padding: "32px 28px",
+        }}
       >
-        <Navbar />
+        <div style={{ marginBottom: 24 }}>
+          <p style={{
+            fontSize: 11.5,
+            fontWeight: 700,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: T.terra,
+            margin: "0 0 6px"
+          }}>
+            Overview
+          </p>
 
-        <div style={{ padding: "32px 28px" }}>
-          <div style={{ marginBottom: 24 }}>
-            <p style={{ 
-                   fontSize: 11.5, 
-                   fontWeight: 700, 
-                   letterSpacing: "0.14em", 
-                   textTransform: "uppercase", 
-                   color: T.terra, 
-                   margin: "0 0 6px" 
-                  }}>
-              Overview
-            </p>
+          <h1 style={{
+            fontFamily: "'Fraunces', serif",
+            fontWeight: 700,
+            fontSize: 30,
+            color: T.ink,
+            margin: 0
+          }}>Dashboard
+          </h1>
 
-            <h1 style={{ 
-                    fontFamily: "'Fraunces', serif", 
-                    fontWeight: 700, 
-                    fontSize: 30, 
-                    color: T.ink, 
-                    margin: 0 
-                  }}>Dashboard
-            </h1>
-
-            <p style={{ 
-                   fontSize: 14, 
-                   color: T.muted, 
-                   margin: "6px 0 0" 
-                  }}>
-              A quick snapshot of everything happening across CareConnect.
-            </p>
-          </div>
-
-          {loading ? (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: 18,
-              }}
-            >
-              {[...Array(9)].map((_, i) => (
-                <div
-                  key={i}
-                  style={{
-                    height: 96,
-                    borderRadius: 20,
-                    background: "#EDE7D9",
-                    animation: "cc-pulse 1.4s ease-in-out infinite",
-                  }}
-                />
-              ))}
-              <style>{`@keyframes cc-pulse{0%,100%{opacity:1}50%{opacity:.55}}`}</style>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: 18,
-              }}
-            >
-              {STATS.map((s) => (
-                <StatCard key={s.key} label={s.label} value={data[s.key] || 0} accent={s.accent} icon={s.icon} />
-              ))}
-            </div>
-          )}
+          <p style={{
+            fontSize: 14,
+            color: T.muted,
+            margin: "6px 0 0"
+          }}>
+            A quick snapshot of everything happening across CareConnect.
+          </p>
         </div>
+
+        {loading ? (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: 18,
+            }}
+          >
+            {[...Array(9)].map((_, i) => (
+              <div
+                key={i}
+                style={{
+                  height: 96,
+                  borderRadius: 20,
+                  background: "#EDE7D9",
+                  animation: "cc-pulse 1.4s ease-in-out infinite",
+                }}
+              />
+            ))}
+            <style>{`@keyframes cc-pulse{0%,100%{opacity:1}50%{opacity:.55}}`}</style>
+          </div>
+        ) : (
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: 18,
+            }}
+          >
+            {STATS.map((s) => (
+              <StatCard key={s.key} label={s.label} value={data[s.key] || 0} accent={s.accent} icon={s.icon} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
+
   );
 }

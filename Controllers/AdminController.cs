@@ -793,4 +793,64 @@ public class AdminController : ControllerBase
 
         return Ok(msg);
     }
+
+    [HttpGet("reviews")]
+    public IActionResult GetReviews()
+    {
+        var data = (
+            from r in _context.Reviews
+            join d in _context.Doctors on r.DoctorId equals d.Id
+            join du in _context.Users on d.UserId equals du.Id
+            join p in _context.Users on r.PatientId equals p.Id
+            orderby r.CreatedAt descending
+            select new
+            {
+                r.Id,
+                DoctorName = du.FullName,
+                PatientName = p.FullName,
+                r.Rating,
+                r.Comment,
+                r.CreatedAt,
+                r.IsApproved
+            }
+        ).ToList();
+
+        return Ok(data);
+    }
+
+    [HttpPut("review/{id}/approve")]
+    public IActionResult ApproveReview(int id)
+    {
+        var review = _context.Reviews.FirstOrDefault(x => x.Id == id);
+
+        if (review == null)
+            return NotFound("Review not found");
+
+        review.IsApproved = true;
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Review approved successfully"
+        });
+    }
+
+    [HttpDelete("review/{id}")]
+    public IActionResult DeleteReview(int id)
+    {
+        var review = _context.Reviews.FirstOrDefault(x => x.Id == id);
+
+        if (review == null)
+            return NotFound("Review not found");
+
+        _context.Reviews.Remove(review);
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            Message = "Review deleted successfully"
+        });
+    }
 }

@@ -373,7 +373,7 @@ export default function Dashboard() {
                         </div>
 
                         <div className="absolute -left-6 top-8 bg-white rounded-2xl shadow-lg p-5 hidden sm:block">
-                            <h3 className="text-2xl font-semibold text-[#16332B]">250+</h3>
+                            <h3 className="text-2xl font-semibold text-[#16332B]">20+</h3>
                             <p className="text-sm text-[#16332B]/60 font-[system-ui,sans-serif] mt-1">
                                 Specialist Doctors
                             </p>
@@ -997,7 +997,8 @@ export default function Dashboard() {
                     <div className="max-w-7xl mx-auto px-6 lg:px-10 py-16 grid md:grid-cols-4 gap-10">
 
                         <div>
-                            <h2 className="text-2xl font-medium">CareConnect.</h2>
+                            
+                            <h2 className="text-2xl font-medium">✦  CareConnect.</h2>
                             <p className="text-white/60 mt-4 font-[system-ui,sans-serif] text-[15px] leading-6">
                                 Your trusted digital healthcare partner.
                             </p>

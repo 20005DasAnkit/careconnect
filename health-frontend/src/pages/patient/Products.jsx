@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Search, ShoppingCart, Minus, Plus, Pill } from "lucide-react";
+import { useNavigate, Link } from "react-router-dom";
+import { Search, ShoppingCart, Minus, Plus, Pill, Check } from "lucide-react";
 import api from "../../api/axios";
+import { useCart } from "../../context/Cartcontext";
 
 const CATEGORIES = ["All", "Tablets", "Syrups", "Injections", "Vitamins", "Skincare", "Devices", "Powder"];
 
@@ -20,12 +21,15 @@ function ProductCardSkeleton() {
 
 export default function Products() {
     const navigate = useNavigate();
+    const { addToCart } = useCart();
+
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [qty, setQty] = useState({});
     const [activeCategory, setActiveCategory] = useState("All");
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState("default");
+    const [justAdded, setJustAdded] = useState(null);
 
     useEffect(() => {
         loadProducts();
@@ -49,7 +53,6 @@ export default function Products() {
                 p.name?.toLowerCase().includes(search.toLowerCase()) ||
                 p.description?.toLowerCase().includes(search.toLowerCase());
 
-            // Case-insensitive category match + treat null/undefined as unassigned
             const matchCat =
                 activeCategory === "All" ||
                 (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
@@ -64,7 +67,6 @@ export default function Products() {
         return result;
     }, [products, search, activeCategory, sortBy]);
 
-    // How many products exist per category (for badge counts)
     const categoryCounts = useMemo(() => {
         const counts = { All: products.length };
         CATEGORIES.slice(1).forEach((cat) => {
@@ -95,6 +97,21 @@ export default function Products() {
         navigate(`/patient/place-order?${params.toString()}`);
     }
 
+    function handleAddToCart(product) {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        const quantity = qty[product.id] || 1;
+        addToCart(product, quantity);
+
+        setJustAdded(product.id);
+        setTimeout(() => setJustAdded(null), 1400);
+    }
+
     return (
         <div
             className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
@@ -109,22 +126,22 @@ export default function Products() {
                             Pharmacy
                         </p>
                         <h1
-                            style={{ 
-                                fontFamily: "'Fraunces', Georgia, serif", 
-                                fontWeight: 500 
+                            style={{
+                                fontFamily: "'Fraunces', Georgia, serif",
+                                fontWeight: 500
                             }}
                             className="leading-[1.05] tracking-tight"
                         >
-                            <span style={{ 
-                                      fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" 
-                                    }}>
+                            <span style={{
+                                fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)"
+                            }}>
                                 Medicine, delivered
                             </span>
                             <br />
                             <span
                                 className="italic text-[#B5562C]"
-                                style={{ 
-                                    fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" 
+                                style={{
+                                    fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)"
                                 }}
                             >
                                 before you run out.
@@ -132,17 +149,27 @@ export default function Products() {
                         </h1>
                     </div>
 
-                    <div className="relative w-full max-w-md">
-                        <Search
-                            size={15}
-                            className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35"
-                        />
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search medicines..."
-                            className="w-full h-12 pl-11 pr-4 rounded-full border border-[#E4DFD3] bg-white focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 text-sm placeholder:text-[#16332B]/35"
-                        />
+                    <div className="flex items-center gap-3 w-full max-w-md">
+                        <div className="relative flex-1">
+                            <Search
+                                size={15}
+                                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35"
+                            />
+                            <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search medicines..."
+                                className="w-full h-12 pl-11 pr-4 rounded-full border border-[#E4DFD3] bg-white focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 text-sm placeholder:text-[#16332B]/35"
+                            />
+                        </div>
+
+                        <Link
+                            to="/patient/cart"
+                            className="relative w-12 h-12 shrink-0 rounded-full bg-[#16332B] text-white flex items-center justify-center hover:bg-[#0F231D] transition"
+                            title="View cart"
+                        >
+                            <ShoppingCart size={18} />
+                        </Link>
                     </div>
                 </div>
 
@@ -162,7 +189,6 @@ export default function Products() {
                                         }`}
                                 >
                                     {cat}
-                                    {/* show count badge — grey when inactive, white when active */}
                                     {!loading && (
                                         <span
                                             className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${isActive
@@ -213,85 +239,91 @@ export default function Products() {
                                 key={p.id}
                                 className="group bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden hover:border-[#16332B]/25 hover:shadow-[0_20px_40px_-25px_rgba(22,51,43,0.25)] transition-all duration-300"
                             >
-                                <div className="relative aspect-square bg-gradient-to-br from-[#FAF8F3] to-[#EFEAE0] flex items-center justify-center">
-                                    {p.imageUrl ? (
-                                        <img
-                                            src={`http://localhost:5008${p.imageUrl}`}
-                                            alt={p.name}
-                                            className="w-full h-full object-contain p-4 group-hover:scale-105 transition duration-300"
-                                        />
-                                    ) : (
-                                        <Pill size={40} className="text-[#16332B]/20" strokeWidth={1.5} />
-                                    )}
+                                {/* Clickable area → product details */}
+                                <Link to={`/patient/products/${p.id}`} className="block">
+                                    <div className="relative aspect-square bg-gradient-to-br from-[#FAF8F3] to-[#EFEAE0] flex items-center justify-center">
+                                        {p.imageUrl ? (
+                                            <img
+                                                src={`http://localhost:5008${p.imageUrl}`}
+                                                alt={p.name}
+                                                className="w-full h-full object-contain p-4 group-hover:scale-105 transition duration-300"
+                                            />
+                                        ) : (
+                                            <Pill size={40} className="text-[#16332B]/20" strokeWidth={1.5} />
+                                        )}
 
-                                    {p.stock === 0 && (
-                                        <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                                            <span className="bg-[#16332B] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                                                Out of stock
-                                            </span>
-                                        </div>
-                                    )}
-
-                                    {p.category && (
-                                        <span className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-sm text-[#16332B]/65 text-[11px] px-2.5 py-1 rounded-full font-medium">
-                                            {p.category}
-                                        </span>
-                                    )}
-                                </div>
-
-                                <div className="p-4">
-                                    <p className="font-semibold text-[#16332B] text-sm leading-tight line-clamp-1">
-                                        {p.name}
-                                    </p>
-
-                                    {p.description && (
-                                        <p className="text-xs text-[#16332B]/40 mt-0.5 line-clamp-1">
-                                            {p.description}
-                                        </p>
-                                    )}
-
-                                    <div className="flex items-center justify-between mt-2.5">
-                                        <div>
-                                            <span
-                                                style={{
-                                                    fontFamily: "'Fraunces', Georgia, serif",
-                                                    fontWeight: 500,
-                                                }}
-                                                className="text-[1.2rem]"
-                                            >
-                                                ₹{p.price}
-                                            </span>
-                                            {p.mrp && p.mrp > p.price && (
-                                                <span className="text-xs text-[#16332B]/35 line-through ml-1.5">
-                                                    ₹{p.mrp}
+                                        {p.stock === 0 && (
+                                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                                                <span className="bg-[#16332B] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
+                                                    Out of stock
                                                 </span>
-                                            )}
-                                        </div>
-                                        {p.mrp && p.mrp > p.price && (
-                                            <span className="text-xs text-[#3E7C59] font-semibold">
-                                                {Math.round((1 - p.price / p.mrp) * 100)}% off
+                                            </div>
+                                        )}
+
+                                        {p.category && (
+                                            <span className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-sm text-[#16332B]/65 text-[11px] px-2.5 py-1 rounded-full font-medium">
+                                                {p.category}
                                             </span>
                                         )}
                                     </div>
 
-                                    <p className="text-xs text-[#16332B]/40 mt-1">
-                                        {p.stock > 0 ? (
-                                            <span
-                                                className={
-                                                    p.stock < 10 ? "text-[#B5562C] font-medium" : ""
-                                                }
-                                            >
-                                                {p.stock < 10
-                                                    ? `Only ${p.stock} left`
-                                                    : `${p.stock} in stock`}
-                                            </span>
-                                        ) : (
-                                            <span className="text-[#9E3A20]">Out of stock</span>
-                                        )}
-                                    </p>
+                                    <div className="px-4 pt-4">
+                                        <p className="font-semibold text-[#16332B] text-sm leading-tight line-clamp-1">
+                                            {p.name}
+                                        </p>
 
+                                        {p.description && (
+                                            <p className="text-xs text-[#16332B]/40 mt-0.5 line-clamp-1">
+                                                {p.description}
+                                            </p>
+                                        )}
+
+                                        <div className="flex items-center justify-between mt-2.5">
+                                            <div>
+                                                <span
+                                                    style={{
+                                                        fontFamily: "'Fraunces', Georgia, serif",
+                                                        fontWeight: 500,
+                                                    }}
+                                                    className="text-[1.2rem]"
+                                                >
+                                                    ₹{p.price}
+                                                </span>
+                                                {p.mrp && p.mrp > p.price && (
+                                                    <span className="text-xs text-[#16332B]/35 line-through ml-1.5">
+                                                        ₹{p.mrp}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {p.mrp && p.mrp > p.price && (
+                                                <span className="text-xs text-[#3E7C59] font-semibold">
+                                                    {Math.round((1 - p.price / p.mrp) * 100)}% off
+                                                </span>
+                                            )}
+                                        </div>
+
+                                        <p className="text-xs text-[#16332B]/40 mt-1">
+                                            {p.stock > 0 ? (
+                                                <span
+                                                    className={
+                                                        p.stock < 10 ? "text-[#B5562C] font-medium" : ""
+                                                    }
+                                                >
+                                                    {p.stock < 10
+                                                        ? `Only ${p.stock} left`
+                                                        : `${p.stock} in stock`}
+                                                </span>
+                                            ) : (
+                                                <span className="text-[#9E3A20]">Out of stock</span>
+                                            )}
+                                        </p>
+                                    </div>
+                                </Link>
+
+                                {/* Quantity + cart/order — outside the Link so clicks don't navigate */}
+                                <div className="px-4 pb-4">
                                     <div className="mt-3.5 flex items-center gap-2">
-                                        <div className="flex items-center border border-[#E4DFD3] rounded-full overflow-hidden">
+                                        <div className="flex items-center border border-[#E4DFD3] rounded-full overflow-hidden shrink-0">
                                             <button
                                                 onClick={() =>
                                                     setQty((q) => ({
@@ -323,6 +355,20 @@ export default function Products() {
                                         </div>
 
                                         <button
+                                            onClick={() => handleAddToCart(p)}
+                                            disabled={p.stock === 0}
+                                            title="Add to cart"
+                                            className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-xs font-semibold transition ${p.stock === 0
+                                                ? "bg-[#EFEAE0] text-[#16332B]/35 cursor-not-allowed"
+                                                : justAdded === p.id
+                                                    ? "bg-[#3E7C59] text-white"
+                                                    : "bg-white border border-[#E4DFD3] text-[#16332B]/70 hover:border-[#16332B]/30"
+                                                }`}
+                                        >
+                                            {justAdded === p.id ? <Check size={13} /> : <ShoppingCart size={13} />}
+                                        </button>
+
+                                        <button
                                             onClick={() => goToOrder(p)}
                                             disabled={p.stock === 0}
                                             className={`flex-1 h-8 flex items-center justify-center gap-1.5 rounded-full text-xs font-semibold transition ${p.stock === 0
@@ -330,7 +376,6 @@ export default function Products() {
                                                 : "bg-[#16332B] hover:bg-[#0F231D] text-white"
                                                 }`}
                                         >
-                                            <ShoppingCart size={12} />
                                             Order
                                         </button>
                                     </div>

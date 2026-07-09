@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
+
 
 const C = {
   cream: "#F6F1E7",
@@ -164,21 +163,15 @@ export default function Hospitals() {
     }
   }
 
-  return (
-    <div style={{ 
-             display: "flex", 
-             minHeight: "100vh", 
-             background: C.cream 
-            }}>
-      <Sidebar />
-
-      <div style={{ 
-               marginLeft: 256, 
-               width: "100%" 
-              }}>
-        <Navbar />
-
-        <div style={{ padding: "32px 36px" }}>
+return (
+  <div
+    style={{
+      background: C.cream,
+      minHeight: "100vh",
+      padding: "32px 36px",
+      fontFamily: "'Inter', sans-serif",
+    }}
+  >
           <div
             style={{
               display: "flex",
@@ -331,7 +324,5 @@ export default function Hospitals() {
             </div>
           )}
         </div>
-      </div>
-    </div>
   );
 }

@@ -6,6 +6,8 @@ import {
   Flame,
   ShieldAlert,
   Siren,
+  HeartPulse,
+  MapPin,
 } from "lucide-react";
 
 // ── Content data ────────────────────────────────────────────────
@@ -93,49 +95,164 @@ export default function EmergencyInfo() {
 
       {/* ───────────────────── HERO ─────────────────────
           Signature element: a literal countdown framed as the
-          most important sentence on the page, not a stat grid. */}
+          most important sentence on the page, paired with a
+          floating glassmorphism status dashboard on the right. */}
       <section className="relative bg-[#16332B] text-[#FAF8F3] overflow-hidden">
         <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 pt-28 pb-24">
+          <div className="grid lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-8 items-center">
 
-          <p className="text-[13px] uppercase tracking-[0.22em] text-[#E8A07A] font-medium mb-8">
-            Emergency care, CareConnect
-          </p>
+            {/* ── Left: copy ── */}
+            <div>
+              <p className="text-[13px] uppercase tracking-[0.22em] text-[#E8A07A] font-medium mb-8">
+                Emergency care, CareConnect
+              </p>
 
-          <h1
-            className="leading-[1.02] tracking-tight"
-            style={{
-              fontFamily: "'Fraunces', Georgia, serif",
-              fontWeight: 500,
-              fontSize: "clamp(2.75rem, 6vw, 5.5rem)",
-            }}
-          >
-            The first five
-            <br />
-            minutes decide
-            <br />
-            <span className="italic text-[#E8A07A]">everything.</span>
-          </h1>
+              <h1
+                className="leading-[1.02] tracking-tight"
+                style={{
+                  fontFamily: "'Fraunces', Georgia, serif",
+                  fontWeight: 500,
+                  fontSize: "clamp(2.75rem, 5.2vw, 4.75rem)",
+                }}
+              >
+                The first five
+                <br />
+                minutes decide
+                <br />
+                <span className="italic text-[#E8A07A]">everything.</span>
+              </h1>
 
-          <p className="mt-10 max-w-md text-[17px] leading-8 text-[#FAF8F3]/75">
-            What you do before help arrives matters more than almost
-            anything a hospital does after. This page is built to be
-            read in under a minute, in the middle of an emergency.
-          </p>
+              <p className="mt-10 max-w-md text-[17px] leading-8 text-[#FAF8F3]/75">
+                What you do before help arrives matters more than almost
+                anything a hospital does after. This page is built to be
+                read in under a minute, in the middle of an emergency.
+              </p>
 
-          <div className="flex flex-wrap items-center gap-4 mt-10">
-            <Link
-              to="/patient/ambulance"
-              className="inline-flex items-center gap-2 bg-[#FAF8F3] text-[#16332B] px-7 py-3.5 rounded-full font-semibold text-[15px] hover:bg-white transition"
-            >
-              <Siren size={16} />
-              Book an ambulance
-            </Link>
-            <a
-              href="tel:102"
-              className="inline-flex items-center gap-2 border border-[#FAF8F3]/35 px-7 py-3.5 rounded-full font-medium text-[15px] hover:bg-[#FAF8F3]/10 transition"
-            >
-              Call 102 now
-            </a>
+              <div className="flex flex-wrap items-center gap-4 mt-10">
+                <Link
+                  to="/patient/ambulance"
+                  className="inline-flex items-center gap-2 bg-[#FAF8F3] text-[#16332B] px-7 py-3.5 rounded-full font-semibold text-[15px] hover:bg-white transition"
+                >
+                  <Siren size={16} />
+                  Book an ambulance
+                </Link>
+                <a
+                  href="tel:102"
+                  className="inline-flex items-center gap-2 border border-[#FAF8F3]/35 px-7 py-3.5 rounded-full font-medium text-[15px] hover:bg-[#FAF8F3]/10 transition"
+                >
+                  Call 102 now
+                </a>
+              </div>
+            </div>
+
+            {/* ── Right: floating glassmorphism dashboard ── */}
+            <div className="relative hidden lg:block h-[520px]">
+
+              {/* Ambient glow behind the cards */}
+              <div
+                className="absolute left-1/2 top-1/2 w-[420px] h-[420px] rounded-full pointer-events-none"
+                style={{
+                  transform: "translate(-50%, -50%)",
+                  background: "radial-gradient(circle, rgba(181,86,44,0.28) 0%, transparent 70%)",
+                }}
+              />
+              {/* Slow pulse ring */}
+              <div
+                className="absolute left-1/2 top-1/2 w-[220px] h-[220px] rounded-full border border-[#E8A07A]/25 pointer-events-none"
+                style={{ transform: "translate(-50%, -50%)", animation: "pulseRing 3.2s ease-out infinite" }}
+              />
+
+              {/* Card 1 — Ambulance ETA */}
+              <div
+                className="absolute top-6 left-2 w-[230px] rounded-[20px] px-6 py-5 border border-white/15 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]"
+                style={{
+                  background: "rgba(250,248,243,0.10)",
+                  backdropFilter: "blur(18px)",
+                  WebkitBackdropFilter: "blur(18px)",
+                  animation: "floatY 5s ease-in-out infinite",
+                }}
+              >
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="w-9 h-9 rounded-full flex items-center justify-center bg-[#B5562C]/25">
+                    <Ambulance size={17} className="text-[#E8A07A]" strokeWidth={1.9} />
+                  </span>
+                  <p className="text-[13px] text-[#FAF8F3]/70">Ambulance</p>
+                </div>
+                <p
+                  style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                  className="text-[1.9rem] leading-none"
+                >
+                  4 min
+                </p>
+                <p className="text-[12px] text-[#FAF8F3]/50 mt-1.5">estimated arrival</p>
+              </div>
+
+              {/* Card 2 — Heart rate with mini ECG */}
+              <div
+                className="absolute top-[190px] right-0 w-[250px] rounded-[20px] px-6 py-5 border border-white/15 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]"
+                style={{
+                  background: "rgba(250,248,243,0.10)",
+                  backdropFilter: "blur(18px)",
+                  WebkitBackdropFilter: "blur(18px)",
+                  animation: "floatY 5.6s ease-in-out infinite 0.4s",
+                }}
+              >
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="w-9 h-9 rounded-full flex items-center justify-center bg-[#3E7C59]/25">
+                    <HeartPulse size={17} className="text-[#8FD6AD]" strokeWidth={1.9} />
+                  </span>
+                  <p className="text-[13px] text-[#FAF8F3]/70">Heart rate</p>
+                </div>
+                <div className="flex items-end justify-between">
+                  <p
+                    style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                    className="text-[1.9rem] leading-none"
+                  >
+                    Normal
+                  </p>
+                </div>
+                <svg viewBox="0 0 160 36" className="w-full h-9 mt-3" preserveAspectRatio="none">
+                  <path
+                    d="M0,18 L28,18 L36,4 L44,32 L52,18 L64,18 L70,10 L76,26 L82,18 L160,18"
+                    fill="none"
+                    stroke="#8FD6AD"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    style={{
+                      strokeDasharray: 220,
+                      strokeDashoffset: 220,
+                      animation: "drawEcg 2.6s ease-in-out infinite",
+                    }}
+                  />
+                </svg>
+              </div>
+
+              {/* Card 3 — Nearest hospital */}
+              <div
+                className="absolute bottom-4 left-10 w-[240px] rounded-[20px] px-6 py-5 border border-white/15 shadow-[0_20px_50px_-15px_rgba(0,0,0,0.55)]"
+                style={{
+                  background: "rgba(250,248,243,0.10)",
+                  backdropFilter: "blur(18px)",
+                  WebkitBackdropFilter: "blur(18px)",
+                  animation: "floatY 4.6s ease-in-out infinite 0.8s",
+                }}
+              >
+                <div className="flex items-center gap-2.5 mb-3">
+                  <span className="w-9 h-9 rounded-full flex items-center justify-center bg-[#E8A07A]/25">
+                    <MapPin size={17} className="text-[#E8A07A]" strokeWidth={1.9} />
+                  </span>
+                  <p className="text-[13px] text-[#FAF8F3]/70">Nearest hospital</p>
+                </div>
+                <p
+                  style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                  className="text-[1.9rem] leading-none"
+                >
+                  2.4 km
+                </p>
+                <p className="text-[12px] text-[#FAF8F3]/50 mt-1.5">St. Xavier General</p>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -151,6 +268,19 @@ export default function EmergencyInfo() {
           @keyframes drift {
             0%, 100% { transform: translate(0, 0) scale(1); }
             50% { transform: translate(-30px, 30px) scale(1.08); }
+          }
+          @keyframes floatY {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+          }
+          @keyframes pulseRing {
+            0% { transform: translate(-50%, -50%) scale(0.7); opacity: 0.7; }
+            100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0; }
+          }
+          @keyframes drawEcg {
+            0% { stroke-dashoffset: 220; }
+            55% { stroke-dashoffset: 0; }
+            100% { stroke-dashoffset: 0; }
           }
           @media (prefers-reduced-motion: reduce) {
             * { animation: none !important; transition: none !important; }

@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using HEALTHCARE.Data;
 using HEALTHCARE.DTOs;
 using HEALTHCARE.Models;
+using HEALTHCARE.Services;
 
 namespace HEALTHCARE.Controllers;
 
@@ -13,16 +14,21 @@ namespace HEALTHCARE.Controllers;
 public class PatientController : ControllerBase
 {
     private readonly AppDbContext _context;
-    public PatientController(AppDbContext context)
+    private readonly MedicineBillingPdfService _medicineBillingPdfService;
+
+    public PatientController(
+        AppDbContext context,
+        MedicineBillingPdfService medicineBillingPdfService)
     {
         _context = context;
+        _medicineBillingPdfService = medicineBillingPdfService;
     }
 
     [HttpGet("doctors")]
     public IActionResult GetDoctors()
     {
         var doctors = _context.Doctors
-            .Include(x => x.User)
+            .Include(d => d.User)
             .Select(d => new
             {
                 d.Id,
@@ -32,9 +38,16 @@ public class PatientController : ControllerBase
                 d.HospitalName,
                 d.Fee,
                 d.About,
-                ImageUrl = d.ImageUrl
+                d.ImageUrl,
+                d.Experience,
+
+                Rating = _context.Reviews
+                    .Where(r => r.DoctorId == d.Id && r.IsApproved)
+                    .Select(r => (double?)r.Rating)
+                    .Average() ?? 0
             })
             .ToList();
+
         return Ok(doctors);
     }
 
@@ -184,7 +197,8 @@ public class PatientController : ControllerBase
             join u in _context.Users on d.UserId equals u.Id
             join s in _context.DoctorAvailabilities on a.DoctorAvailabilityId equals s.Id
 
-            where a.PatientId == userId orderby a.BookedAt descending
+            where a.PatientId == userId
+            orderby a.BookedAt descending
 
             select new
             {
@@ -284,13 +298,14 @@ public class PatientController : ControllerBase
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
         var orders = (
-            from o in _context.Orders where o.UserId == userId
+            from o in _context.Orders
+            where o.UserId == userId
             join oi in _context.OrderItems on o.Id equals oi.OrderId into items
             from oi in items.DefaultIfEmpty()
 
             join p in _context.Products on oi.ProductId equals p.Id into products
             from p in products.DefaultIfEmpty()
-            
+
             orderby o.OrderDate descending
 
             select new
@@ -729,15 +744,15 @@ public class PatientController : ControllerBase
 
              select new
              {
-                r.Id,
-                r.Status,
-                r.Fare,
-                r.DistanceKm,
-                r.PickupLocation,
-                r.DestinationLocation,
-                DriverName = a.DriverName,
-                DriverPhone = a.DriverPhone,
-                VehicleNumber = a.VehicleNumber
+                 r.Id,
+                 r.Status,
+                 r.Fare,
+                 r.DistanceKm,
+                 r.PickupLocation,
+                 r.DestinationLocation,
+                 DriverName = a.DriverName,
+                 DriverPhone = a.DriverPhone,
+                 VehicleNumber = a.VehicleNumber
              }).FirstOrDefault();
 
         if (ride == null)
@@ -880,16 +895,16 @@ public class PatientController : ControllerBase
 
              select new
              {
-                a.Id,
-                a.Status,
-                a.PaymentStatus,
-                a.AdvanceAmount,
-                a.IsReviewed,
-                AppointmentDate = s.AvailableFrom,
-                AppointmentTime = s.AvailableFrom,
-                Place = s.Place,
-                DoctorId = d.Id,
-                d.HospitalName
+                 a.Id,
+                 a.Status,
+                 a.PaymentStatus,
+                 a.AdvanceAmount,
+                 a.IsReviewed,
+                 AppointmentDate = s.AvailableFrom,
+                 AppointmentTime = s.AvailableFrom,
+                 Place = s.Place,
+                 DoctorId = d.Id,
+                 d.HospitalName
              })
             .FirstOrDefault();
 
@@ -989,4 +1004,157 @@ public class PatientController : ControllerBase
 
         return Ok(result);
     }
+
+
+    [HttpGet("product/{id}")]
+    public IActionResult GetProductById(int id)
+    {
+        var product = _context.Products
+            .FirstOrDefault(x => x.Id == id);
+
+        if (product == null)
+            return NotFound("Product not found");
+
+        return Ok(product);
+    }
+
+    [Authorize(Roles = "Patient")]
+    [HttpPost("cart-order")]
+    public IActionResult PlaceCartOrder(CartOrderDto dto)
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        if (string.IsNullOrWhiteSpace(dto.DeliveryAddress))
+            return BadRequest("Delivery address is required");
+
+        if (dto.Items == null || !dto.Items.Any())
+            return BadRequest("Cart is empty");
+
+        var paymentMode = dto.PaymentMode == "Online" ? "Online" : "COD";
+
+        if (paymentMode == "Online" && string.IsNullOrWhiteSpace(dto.RazorpayPaymentId))
+            return BadRequest("Payment verification required for online payment");
+
+        // Validate every item and its stock before touching the database
+        var resolvedItems = new List<(Product Product, int Quantity)>();
+        decimal total = 0;
+
+        foreach (var item in dto.Items)
+        {
+            var product = _context.Products
+                .FirstOrDefault(x => x.Id == item.ProductId);
+
+            if (product == null)
+                return NotFound($"Product with id {item.ProductId} not found");
+
+            if (item.Quantity <= 0)
+                return BadRequest($"Invalid quantity for {product.Name}");
+
+            if (product.Stock < item.Quantity)
+                return BadRequest($"Insufficient stock for {product.Name}");
+
+            total += product.Price * item.Quantity;
+            resolvedItems.Add((product, item.Quantity));
+        }
+
+        var order = new Order
+        {
+            UserId = userId,
+            TotalAmount = total,
+            OrderDate = DateTime.UtcNow,
+            Status = "Pending",
+            DeliveryAddress = dto.DeliveryAddress,
+            PaymentMode = paymentMode,
+            PaymentStatus = paymentMode == "Online" ? "Paid" : "Pending",
+            RazorpayPaymentId = dto.RazorpayPaymentId
+        };
+
+        _context.Orders.Add(order);
+        _context.SaveChanges();
+
+        foreach (var (product, quantity) in resolvedItems)
+        {
+            _context.OrderItems.Add(new OrderItem
+            {
+                OrderId = order.Id,
+                ProductId = product.Id,
+                Quantity = quantity,
+                UnitPrice = product.Price
+            });
+
+            product.Stock -= quantity;
+        }
+
+        _context.SaveChanges();
+
+        return Ok(new
+        {
+            OrderId = order.Id,
+            TotalAmount = total,
+            PaymentMode = order.PaymentMode,
+            PaymentStatus = order.PaymentStatus,
+            ItemCount = resolvedItems.Count
+        });
+    }
+
+    [Authorize(Roles = "Patient")]
+    [HttpGet("orders/{id}/invoice")]
+    public IActionResult DownloadMedicineInvoice(int id)
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var order = _context.Orders
+            .Include(o => o.User)
+            .Include(o => o.Items)
+                .ThenInclude(i => i.Product)
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.UserId == userId);
+
+        if (order == null)
+            return NotFound("Order not found.");
+
+        var dto = new MedicineInvoiceDto
+        {
+            OrderId = order.Id,
+            InvoiceNumber = $"MED-{order.Id:D5}",
+            OrderDate = order.OrderDate,
+
+            CustomerName = order.User?.FullName ?? "",
+            CustomerPhone = order.User?.Phone ?? "",
+            CustomerEmail = order.User?.Email ?? "",
+            CustomerAddress = order.DeliveryAddress,
+
+            DeliveryStatus = order.Status,
+            DeliveryDate = order.Status == "Delivered"
+                ? order.OrderDate
+                : null,
+
+            PaymentMethod = order.PaymentMode,
+            PaymentStatus = order.PaymentStatus,
+            TransactionId = order.RazorpayPaymentId,
+
+            Items = order.Items.Select(i => new MedicineInvoiceItemDto
+            {
+                MedicineName = i.Product?.Name ?? "",
+                Quantity = i.Quantity,
+                UnitPrice = i.UnitPrice
+            }).ToList(),
+
+            SubTotal = order.Items.Sum(i => i.UnitPrice * i.Quantity),
+            DeliveryCharge = 0,
+            Discount = 0,
+            TotalAmount = order.TotalAmount
+        };
+
+        var pdf = _medicineBillingPdfService.Generate(dto);
+
+        return File(
+            pdf,
+            "application/pdf",
+            $"MedicineInvoice-{order.Id}.pdf");
+    }
+
 }

@@ -64,7 +64,7 @@ public class DoctorController : ControllerBase
         if (overlap)
             return BadRequest("You already have a slot in this time range for this session.");
 
-        var availableFrom = session.Date.ToDateTime(dto.FromTime);  
+        var availableFrom = session.Date.ToDateTime(dto.FromTime);
         var availableTo = session.Date.ToDateTime(dto.ToTime);
 
         var availability = new DoctorAvailability

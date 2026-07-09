@@ -69,10 +69,15 @@ export default function AdminContactMessages() {
         <>
             <Toaster position="top-right" />
             <div
-                className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                className="text-[#16332B]"
+                style={{
+                    fontFamily: "'Inter', system-ui, sans-serif",
+                    background: "#FAF8F3",
+                    minHeight: "100vh",
+                    padding: "32px 36px",
+                }}
             >
-                <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-16 max-w-[1500px] mx-auto">
+                <div className="max-w-[1500px] mx-auto">
 
                     {/* ── Header ── */}
                     <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 mb-10">

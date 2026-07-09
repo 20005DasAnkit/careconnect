@@ -1,7 +1,5 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
-import Sidebar from "../../components/Sidebar";
-import Navbar from "../../components/Navbar";
 import {
     Package, CheckCircle2, PackageCheck, Truck, PartyPopper,
     Wallet, Ban, ShoppingBag,
@@ -106,11 +104,7 @@ export default function ProductOrders() {
     };
 
     return (
-        <div className="flex" style={{ fontFamily: "Inter, sans-serif" }}>
-            <Sidebar />
-
-            <div className="ml-64 w-full min-h-screen" style={{ background: T.cream }}>
-                <Navbar />
+ <>
 
                 <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
@@ -258,7 +252,6 @@ export default function ProductOrders() {
                         </div>
                     </div>
                 </div>
-            </div>
-        </div>
+</>
     );
 }
