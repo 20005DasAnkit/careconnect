@@ -12,7 +12,6 @@ namespace HEALTHCARE.Controllers;
 public class AmbulanceController : ControllerBase
 {
     private readonly AppDbContext _context;
-
     public AmbulanceController(AppDbContext context)
     {
         _context = context;

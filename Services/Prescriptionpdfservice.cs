@@ -34,11 +34,19 @@ namespace HEALTHCARE.Services
                         {
                             row.RelativeItem().Column(c =>
                             {
-                                c.Item().Text("CareConnect").FontSize(24).Bold().FontColor(Colors.White);
-                                c.Item().PaddingTop(2).Text("Care You Can Trust, Anytime")
-                                    .FontSize(9).FontColor(Colors.White).FontColor("#D7E4C9");
-                            });
+                                c.Item()
+                                    .Text("CareConnect")
+                                    .FontSize(24)
+                                    .Bold()
+                                    .FontColor(Colors.White);
 
+                                c.Item()
+                                    .PaddingTop(2)
+                                    .Text("Care You Can Trust, Anytime")
+                                    .FontSize(10)
+                                    .FontColor("#E8F5E9")
+                                    .Italic();
+                            });
                             row.ConstantItem(150).Column(c =>
                             {
                                 c.Item().AlignRight().Text("PRESCRIPTION").FontSize(11).Bold().FontColor(Colors.White);

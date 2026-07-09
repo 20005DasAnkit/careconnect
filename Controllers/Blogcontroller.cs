@@ -14,7 +14,6 @@ namespace HEALTHCARE.Controllers
     public class BlogController : ControllerBase
     {
         private readonly AppDbContext _context;
-
         public BlogController(AppDbContext context)
         {
             _context = context;
@@ -202,7 +201,6 @@ namespace HEALTHCARE.Controllers
             }
 
             await _context.SaveChangesAsync();
-
             return Ok(blog);
         }
 

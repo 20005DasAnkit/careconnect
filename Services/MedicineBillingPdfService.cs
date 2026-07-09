@@ -41,15 +41,25 @@ public class MedicineBillingPdfService
                         .Padding(20)
                         .Row(row =>
                         {
-                            row.RelativeItem()
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item()
                                 .Text("CareConnect")
-                                .FontSize(20)
+                                .FontSize(24)
                                 .Bold()
                                 .FontColor(Colors.White);
 
+                                c.Item()
+                                    .PaddingTop(2)
+                                    .Text("Care You Can Trust, Anytime")
+                                    .FontSize(10)
+                                    .FontColor("#E8F5E9")
+                                    .Italic();
+                            });
+
                             row.ConstantItem(220)
                                 .AlignRight()
-                                .Text("MEDICINE INVOICE")
+                                .Text("INVOICE")
                                 .FontSize(13)
                                 .Bold()
                                 .FontColor(Colors.White)
@@ -190,7 +200,10 @@ public class MedicineBillingPdfService
                                 c.Item()
                                     .AlignRight()
                                     .Text(
-                                        $"Delivery : {(invoice.DeliveryDate.HasValue ? invoice.DeliveryDate.Value.ToString("dd MMM yyyy") : "-")}")
+                                    $"Delivery : {(invoice.DeliveryDate.HasValue
+                                                    ? invoice.DeliveryDate.Value.ToString("dd MMM yyyy")
+                                                    : "-")}"
+                                    )
                                     .FontSize(9)
                                     .FontColor(MutedText);
                             });
@@ -205,7 +218,7 @@ public class MedicineBillingPdfService
                         // NEXT:
                         // Medicine Table
                         // ===========================
-                                                body.Item()
+                        body.Item()
                             .Text("Medicines")
                             .FontSize(13)
                             .Bold()
@@ -214,77 +227,76 @@ public class MedicineBillingPdfService
                         body.Item()
                             .PaddingTop(10)
                             .Table(table =>
+                        {
+                            table.ColumnsDefinition(columns =>
                             {
-                                table.ColumnsDefinition(columns =>
-                                {
-                                    columns.RelativeColumn(5);
-                                    columns.RelativeColumn(1);
-                                    columns.RelativeColumn(2);
-                                    columns.RelativeColumn(2);
-                                });
-
-                                table.Header(header =>
-                                {
-                                    header.Cell().Background(Green).Padding(8)
-                                        .Text("MEDICINE")
-                                        .FontSize(8)
-                                        .Bold()
-                                        .FontColor(Colors.White);
-
-                                    header.Cell().Background(Green).Padding(8).AlignCenter()
-                                        .Text("QTY")
-                                        .FontSize(8)
-                                        .Bold()
-                                        .FontColor(Colors.White);
-
-                                    header.Cell().Background(Green).Padding(8).AlignRight()
-                                        .Text("PRICE")
-                                        .FontSize(8)
-                                        .Bold()
-                                        .FontColor(Colors.White);
-
-                                    header.Cell().Background(Green).Padding(8).AlignRight()
-                                        .Text("TOTAL")
-                                        .FontSize(8)
-                                        .Bold()
-                                        .FontColor(Colors.White);
-                                });
-
-                                int row = 0;
-
-                                foreach (var item in invoice.Items)
-                                {
-                                    var bg = row++ % 2 == 0 ? "#FFFFFF" : RowAlt;
-
-                                    table.Cell().Background(bg)
-                                        .BorderBottom(1)
-                                        .BorderColor(Border)
-                                        .Padding(8)
-                                        .Text(item.MedicineName);
-
-                                    table.Cell().Background(bg)
-                                        .BorderBottom(1)
-                                        .BorderColor(Border)
-                                        .Padding(8)
-                                        .AlignCenter()
-                                        .Text(item.Quantity.ToString());
-
-                                    table.Cell().Background(bg)
-                                        .BorderBottom(1)
-                                        .BorderColor(Border)
-                                        .Padding(8)
-                                        .AlignRight()
-                                        .Text($"₹{item.UnitPrice:0.00}");
-
-                                    table.Cell().Background(bg)
-                                        .BorderBottom(1)
-                                        .BorderColor(Border)
-                                        .Padding(8)
-                                        .AlignRight()
-                                        .Text($"₹{item.TotalPrice:0.00}")
-                                        .Bold();
-                                }
+                                columns.RelativeColumn(5);
+                                columns.RelativeColumn(1);
+                                columns.RelativeColumn(2);
+                                columns.RelativeColumn(2);
                             });
+
+                            table.Header(header =>
+                            {
+                                header.Cell().Background(Green).Padding(8)
+                                    .Text("MEDICINE")
+                                    .FontSize(8)
+                                    .Bold()
+                                    .FontColor(Colors.White);
+
+                                header.Cell().Background(Green).Padding(8).AlignCenter()
+                                    .Text("QTY")
+                                    .FontSize(8)
+                                    .Bold()
+                                    .FontColor(Colors.White);
+
+                                header.Cell().Background(Green).Padding(8).AlignRight()
+                                    .Text("PRICE")
+                                    .FontSize(8)
+                                    .Bold()
+                                    .FontColor(Colors.White);
+
+                                header.Cell().Background(Green).Padding(8).AlignRight()
+                                    .Text("TOTAL")
+                                    .FontSize(8)
+                                    .Bold()
+                                    .FontColor(Colors.White);
+                            });
+
+                            int row = 0;
+                            foreach (var item in invoice.Items)
+                            {
+                                var bg = row++ % 2 == 0 ? "#FFFFFF" : RowAlt;
+
+                                table.Cell().Background(bg)
+                                    .BorderBottom(1)
+                                    .BorderColor(Border)
+                                    .Padding(8)
+                                    .Text(item.MedicineName);
+
+                                table.Cell().Background(bg)
+                                    .BorderBottom(1)
+                                    .BorderColor(Border)
+                                    .Padding(8)
+                                    .AlignCenter()
+                                    .Text(item.Quantity.ToString());
+
+                                table.Cell().Background(bg)
+                                    .BorderBottom(1)
+                                    .BorderColor(Border)
+                                    .Padding(8)
+                                    .AlignRight()
+                                    .Text($"₹{item.UnitPrice:0.00}");
+
+                                table.Cell().Background(bg)
+                                    .BorderBottom(1)
+                                    .BorderColor(Border)
+                                    .Padding(8)
+                                    .AlignRight()
+                                    .Text($"₹{item.TotalPrice:0.00}")
+                                    .Bold();
+                            }
+                        });
 
                         body.Item()
                             .PaddingTop(18)
@@ -319,19 +331,19 @@ public class MedicineBillingPdfService
                                     .Background(GreenLight)
                                     .Padding(12)
                                     .Row(row =>
-                                    {
-                                        row.RelativeItem()
-                                            .Text("GRAND TOTAL")
-                                            .Bold()
-                                            .FontColor(Green);
+                                {
+                                    row.RelativeItem()
+                                        .Text("GRAND TOTAL")
+                                        .Bold()
+                                        .FontColor(Green);
 
-                                        row.ConstantItem(90)
-                                            .AlignRight()
-                                            .Text($"₹{invoice.TotalAmount:0.00}")
-                                            .Bold()
-                                            .FontSize(13)
-                                            .FontColor(Green);
-                                    });
+                                    row.ConstantItem(90)
+                                        .AlignRight()
+                                        .Text($"₹{invoice.TotalAmount:0.00}")
+                                        .Bold()
+                                        .FontSize(13)
+                                        .FontColor(Green);
+                                });
                             });
 
                         body.Item()
@@ -339,48 +351,48 @@ public class MedicineBillingPdfService
                             .Background(Cream)
                             .Padding(12)
                             .Column(c =>
-                            {
-                                c.Item()
-                                    .Text("NOTE")
-                                    .FontSize(8)
-                                    .Bold()
-                                    .FontColor(MutedText);
+                        {
+                            c.Item()
+                             .Text("NOTE")
+                             .FontSize(8)
+                             .Bold()
+                             .FontColor(MutedText);
 
-                                c.Item()
-                                    .PaddingTop(3)
-                                    .Text("Thank you for choosing CareConnect. This invoice is computer generated and does not require a signature.")
-                                    .FontSize(8.5f)
-                                    .FontColor(MutedText)
-                                    .LineHeight(1.4f);
-                            });
+                            c.Item()
+                             .PaddingTop(3)
+                             .Text("Thank you for choosing CareConnect. This invoice is computer generated and does not require a signature.")
+                             .FontSize(8.5f)
+                             .FontColor(MutedText)
+                             .LineHeight(1.4f);
+                        });
                     });
                 });
 
                 page.Footer()
                     .Column(column =>
+                {
+                    column.Item()
+                        .LineHorizontal(1)
+                        .LineColor(Border);
+
+                    column.Item()
+                        .Background(Cream)
+                        .PaddingVertical(12)
+                        .PaddingHorizontal(28)
+                        .Row(row =>
                     {
-                        column.Item()
-                            .LineHorizontal(1)
-                            .LineColor(Border);
+                        row.RelativeItem()
+                            .Text($"Generated by CareConnect · {DateTime.Now:dd MMM yyyy}")
+                            .FontSize(7.5f)
+                            .FontColor(MutedText);
 
-                        column.Item()
-                            .Background(Cream)
-                            .PaddingVertical(12)
-                            .PaddingHorizontal(28)
-                            .Row(row =>
-                            {
-                                row.RelativeItem()
-                                    .Text($"Generated by CareConnect · {DateTime.Now:dd MMM yyyy}")
-                                    .FontSize(7.5f)
-                                    .FontColor(MutedText);
-
-                                row.RelativeItem()
-                                    .AlignRight()
-                                    .Text("Invoice")
-                                    .FontSize(7.5f)
-                                    .FontColor(MutedText);
-                            });
+                        row.RelativeItem()
+                            .AlignRight()
+                            .Text("Invoice")
+                            .FontSize(7.5f)
+                            .FontColor(MutedText);
                     });
+                });
             });
         });
 

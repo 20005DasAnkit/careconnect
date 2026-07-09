@@ -9,8 +9,10 @@ import {
     ShieldCheck,
     Truck,
     RotateCcw,
+    Check,
 } from "lucide-react";
 import api from "../../api/axios";
+import { useCart } from "../../context/Cartcontext";
 
 function DetailSkeleton() {
     return (
@@ -31,11 +33,13 @@ function DetailSkeleton() {
 export default function ProductDetails() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { addToCart } = useCart();
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
     const [notFound, setNotFound] = useState(false);
     const [quantity, setQuantity] = useState(1);
+    const [added, setAdded] = useState(false);
 
     useEffect(() => {
         loadProduct();
@@ -76,6 +80,19 @@ export default function ProductDetails() {
         navigate(`/patient/place-order?${params.toString()}`);
     }
 
+    function handleAddToCart() {
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            navigate("/login");
+            return;
+        }
+
+        addToCart(product, quantity);
+        setAdded(true);
+        setTimeout(() => setAdded(false), 1600);
+    }
+
     const discountPct =
         product?.mrp && product.mrp > product.price
             ? Math.round((1 - product.price / product.mrp) * 100)
@@ -86,16 +103,26 @@ export default function ProductDetails() {
             className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
             style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
         >
-            <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-16">
+            <div className="w-full max-w-[1200px] mx-auto px-8 lg:px-16 py-10">
 
                 {/* ───────────────────── BACK LINK ───────────────────── */}
-                <button
-                    onClick={() => navigate(-1)}
-                    className="inline-flex items-center gap-2 text-sm text-[#16332B]/55 hover:text-[#16332B] transition mb-8"
-                >
-                    <ArrowLeft size={15} />
-                    Back to pharmacy
-                </button>
+                <div className="flex items-center justify-between mb-8">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="inline-flex items-center gap-2 text-sm text-[#16332B]/55 hover:text-[#16332B] transition"
+                    >
+                        <ArrowLeft size={15} />
+                        Back to pharmacy
+                    </button>
+
+                    <Link
+                        to="/patient/cart"
+                        className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center hover:bg-[#0F231D] transition"
+                        title="View cart"
+                    >
+                        <ShoppingCart size={16} />
+                    </Link>
+                </div>
 
                 {/* ───────────────────── LOADING ───────────────────── */}
                 {loading && <DetailSkeleton />}
@@ -207,7 +234,7 @@ export default function ProductDetails() {
                                 )}
                             </p>
 
-                            {/* Quantity + Order */}
+                            {/* Quantity */}
                             <div className="flex items-center gap-3 mt-8">
                                 <div className="flex items-center border border-[#E4DFD3] rounded-full overflow-hidden bg-white">
                                     <button
@@ -229,19 +256,44 @@ export default function ProductDetails() {
                                     </button>
                                 </div>
 
+                                <span className="text-sm text-[#16332B]/45">
+                                    ₹{(product.price * quantity).toFixed(2)} total
+                                </span>
+                            </div>
+
+                            {/* Actions — Add to cart (for multi-item orders) + Order now (single item, fast checkout) */}
+                            <div className="flex items-center gap-3 mt-4">
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={product.stock === 0}
+                                    className={`flex-1 h-12 flex items-center justify-center gap-2 rounded-full text-sm font-semibold border transition ${
+                                        product.stock === 0
+                                            ? "bg-[#EFEAE0] text-[#16332B]/35 border-[#EFEAE0] cursor-not-allowed"
+                                            : added
+                                            ? "bg-[#EAF3EC] text-[#3E7C59] border-[#3E7C59]/30"
+                                            : "bg-white text-[#16332B] border-[#E4DFD3] hover:border-[#16332B]/30"
+                                    }`}
+                                >
+                                    {added ? <Check size={16} /> : <ShoppingCart size={16} />}
+                                    {added ? "Added to cart" : "Add to cart"}
+                                </button>
+
                                 <button
                                     onClick={goToOrder}
                                     disabled={product.stock === 0}
-                                    className={`flex-1 h-11 flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition ${
+                                    className={`flex-1 h-12 flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition ${
                                         product.stock === 0
                                             ? "bg-[#EFEAE0] text-[#16332B]/35 cursor-not-allowed"
                                             : "bg-[#16332B] hover:bg-[#0F231D] text-white"
                                     }`}
                                 >
-                                    <ShoppingCart size={15} />
-                                    Order now — ₹{(product.price * quantity).toFixed(2)}
+                                    Order now
                                 </button>
                             </div>
+
+                            <p className="text-xs text-[#16332B]/40 mt-3">
+                                Ordering 2–3 medicines together? Use <span className="font-medium">Add to cart</span> for each, then checkout once from your cart.
+                            </p>
 
                             {/* Trust strip */}
                             <div className="grid grid-cols-3 gap-4 mt-9 pt-8 border-t border-[#E4DFD3]">

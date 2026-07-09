@@ -89,10 +89,11 @@ export default function Orders() {
     const filteredOrders = useMemo(() => {
         let result = orders;
         if (search.trim()) {
+            const q = search.trim().toLowerCase();
             result = result.filter(
                 (o) =>
                     String(o.id).includes(search.trim()) ||
-                    o.productName?.toLowerCase().includes(search.toLowerCase())
+                    (o.items || []).some((i) => i.productName?.toLowerCase().includes(q))
             );
         }
         if (activeTab !== "All") result = result.filter((o) => o.status === activeTab);
@@ -184,7 +185,7 @@ export default function Orders() {
                 {/* ───────────────────── LOADING ───────────────────── */}
                 {loading && <Skeleton />}
 
-                {/* ───────────────────── TABLE ───────────────────── */}
+                {/* ───────────────────── ORDER LIST ───────────────────── */}
                 {!loading && !errorMsg && orders.length > 0 && (
                     <div className="bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden">
                         {/* Tabs */}
@@ -216,101 +217,118 @@ export default function Orders() {
                             </div>
                         </div>
 
-                        {/* Table */}
-                        <div className="overflow-x-auto">
-                            <table className="w-full text-sm text-left">
-                                <thead>
-                                    <tr className="text-xs text-[#16332B]/50 border-b border-[#EFEAE0]">
-                                        <th className="px-5 py-3 font-medium">Order</th>
-                                        <th className="px-5 py-3 font-medium">Date</th>
-                                        <th className="px-5 py-3 font-medium">Total</th>
-                                        <th className="px-5 py-3 font-medium">Payment</th>
-                                        <th className="px-5 py-3 font-medium">Quantity</th>
-                                        <th className="px-5 py-3 font-medium">Status</th>
-                                        <th className="px-5 py-3 font-medium">Invoice</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredOrders.map((o) => (
-                                        <tr
-                                            key={o.id}
-                                            className="border-t border-[#EFEAE0] hover:bg-[#FAF8F3]/60 group"
-                                        >
-                                            <td className="px-5 py-4">
-                                                <div className="flex items-center gap-3">
-                                                    <div className="w-9 h-9 rounded-xl bg-[#FAF8F3] border border-[#E4DFD3] flex items-center justify-center shrink-0">
-                                                        <Package size={15} className="text-[#16332B]/40" />
-                                                    </div>
-                                                    <div>
-                                                        <p className="font-medium text-[#16332B]">
-                                                            {o.productName || "Medicine"}
-                                                        </p>
+                        {/* Orders — one block per order, each item priced on its own line */}
+                        <div>
+                            {filteredOrders.map((o) => {
+                                const items = o.items || [];
+                                return (
+                                    <div key={o.id} className="border-t border-[#EFEAE0] first:border-t-0">
+                                        <div className="flex flex-col lg:flex-row lg:items-start gap-4 px-5 py-4 hover:bg-[#FAF8F3]/60 transition">
 
-                                                        <p className="text-xs text-[#16332B]/40">
-                                                            Order #{o.id}
-                                                        </p>
-                                                    </div>
+                                            {/* Icon + order id + date */}
+                                            <div className="flex items-start gap-3 lg:w-[210px] shrink-0">
+                                                <div className="w-9 h-9 rounded-xl bg-[#FAF8F3] border border-[#E4DFD3] flex items-center justify-center shrink-0 mt-0.5">
+                                                    <Package size={15} className="text-[#16332B]/40" />
                                                 </div>
-                                            </td>
-                                            <td className="px-5 py-4 text-[#16332B]/55 text-xs">
-                                                {new Date(o.orderDate).toLocaleString("en-IN", {
-                                                    day: "2-digit",
-                                                    month: "short",
-                                                    year: "numeric",
-                                                    hour: "2-digit",
-                                                    minute: "2-digit",
-                                                })}
-                                            </td>
-                                            <td
-                                                className="px-5 py-4 font-semibold"
-                                                style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-                                            >
-                                                ₹{o.totalAmount}
-                                            </td>
-                                            <td className="px-5 py-4">
-                                                <span
-                                                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${PAYMENT_STYLES[o.paymentStatus] || "bg-[#EFEAE0] text-[#16332B]/55"
-                                                        }`}
-                                                >
-                                                    {o.paymentStatus || "—"}
-                                                </span>
-                                                <p className="text-[11px] text-[#16332B]/40 mt-1">
-                                                    {o.paymentMode === "Online" ? "Paid online" : "Cash on delivery"}
-                                                </p>
-                                            </td>
-                                            <td className="px-5 py-4 text-[#16332B]/65">
-                                                {/* "Quantity" rather than "items" — this is units of one
-                                                    product per order, not a count of distinct line items. */}
-                                                {o.quantity || 1} unit{o.quantity > 1 ? "s" : ""}
-                                            </td>
-                                            <td className="px-5 py-4">
+                                                <div>
+                                                    <p className="font-medium text-[#16332B] text-sm">Order #{o.id}</p>
+                                                    <p className="text-xs text-[#16332B]/40 mt-0.5">
+                                                        {new Date(o.orderDate).toLocaleString("en-IN", {
+                                                            day: "2-digit",
+                                                            month: "short",
+                                                            year: "numeric",
+                                                            hour: "2-digit",
+                                                            minute: "2-digit",
+                                                        })}
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            {/* Itemized list — each medicine with its OWN quantity and price */}
+                                            <div className="flex-1 min-w-0 space-y-1.5">
+                                                {items.length === 0 ? (
+                                                    <p className="text-sm text-[#16332B]/40">No items on record</p>
+                                                ) : (
+                                                    items.map((item, idx) => (
+                                                        <div
+                                                            key={idx}
+                                                            className="flex items-center justify-between gap-4 text-sm"
+                                                        >
+                                                            <span className="text-[#16332B] truncate">
+                                                                {item.productName}
+                                                                <span className="text-[#16332B]/40 font-normal">
+                                                                    {" "}× {item.quantity}
+                                                                </span>
+                                                            </span>
+                                                            <span className="text-[#16332B]/60 whitespace-nowrap">
+                                                                ₹{item.unitPrice} each — ₹{item.lineTotal}
+                                                            </span>
+                                                        </div>
+                                                    ))
+                                                )}
+
+                                                {items.length > 1 && (
+                                                    <div className="flex items-center justify-between gap-4 text-sm pt-1.5 mt-1.5 border-t border-[#EFEAE0]">
+                                                        <span className="font-semibold text-[#16332B]">
+                                                            Order total
+                                                        </span>
+                                                        <span
+                                                            className="font-semibold"
+                                                            style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+                                                        >
+                                                            ₹{o.totalAmount}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {/* Payment + status + invoice */}
+                                            <div className="flex flex-wrap items-center gap-3 lg:w-auto shrink-0">
+                                                {items.length <= 1 && (
+                                                    <span
+                                                        className="font-semibold text-sm whitespace-nowrap"
+                                                        style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+                                                    >
+                                                        ₹{o.totalAmount}
+                                                    </span>
+                                                )}
+
+                                                <div className="text-center">
+                                                    <span
+                                                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${PAYMENT_STYLES[o.paymentStatus] || "bg-[#EFEAE0] text-[#16332B]/55"
+                                                            }`}
+                                                    >
+                                                        {o.paymentStatus || "—"}
+                                                    </span>
+                                                    <p className="text-[11px] text-[#16332B]/40 mt-1">
+                                                        {o.paymentMode === "Online" ? "Paid online" : "Cash on delivery"}
+                                                    </p>
+                                                </div>
+
                                                 <span
                                                     className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[o.status] || "bg-[#EFEAE0] text-[#16332B]/55"
                                                         }`}
                                                 >
                                                     {o.status || "Pending"}
                                                 </span>
-                                            </td>
-                                            <td className="px-5 py-4">
+
                                                 {o.status === "Delivered" ? (
                                                     <button
                                                         onClick={() => downloadInvoice(o.id)}
-                                                        className="px-4 py-2 rounded-lg bg-[#2D5016] text-white text-xs font-semibold hover:bg-[#214010] transition"
+                                                        className="px-4 py-2 rounded-lg bg-[#2D5016] text-white text-xs font-semibold hover:bg-[#214010] transition whitespace-nowrap"
                                                     >
                                                         Download PDF
                                                     </button>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400">
-                                                        Available after delivery
+                                                    <span className="text-xs text-gray-400 whitespace-nowrap">
+                                                        Invoice after delivery
                                                     </span>
                                                 )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-
-
-                            </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
 
                             {filteredOrders.length === 0 && (
                                 <div className="py-14 text-center text-[#16332B]/40 text-sm">

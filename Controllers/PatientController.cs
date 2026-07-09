@@ -297,18 +297,48 @@ public class PatientController : ControllerBase
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        var orders = (
-            from o in _context.Orders
-            where o.UserId == userId
-            join oi in _context.OrderItems on o.Id equals oi.OrderId into items
-            from oi in items.DefaultIfEmpty()
+        var orders = _context.Orders
+            .Where(o => o.UserId == userId)
+            .OrderByDescending(o => o.OrderDate)
+            .ToList();
 
+        var orderIds = orders.Select(o => o.Id).ToList();
+
+        // Pull every line item for these orders in one query, then group in memory.
+        var itemRows = (
+            from oi in _context.OrderItems
             join p in _context.Products on oi.ProductId equals p.Id into products
             from p in products.DefaultIfEmpty()
-
-            orderby o.OrderDate descending
-
+            where orderIds.Contains(oi.OrderId)
             select new
+            {
+                oi.OrderId,
+                ProductName = p != null ? p.Name : "Product removed",
+                oi.Quantity,
+                oi.UnitPrice
+            }
+        ).ToList();
+
+        var itemsByOrder = itemRows
+    .GroupBy(x => x.OrderId)
+    .ToDictionary(
+        g => g.Key,
+        g => g.Select(i => new OrderItemSummaryDto
+        {
+            ProductName = i.ProductName,
+            Quantity = i.Quantity,
+            UnitPrice = i.UnitPrice,
+            LineTotal = i.Quantity * i.UnitPrice
+        }).ToList()
+    );
+
+        var result = orders.Select(o =>
+        {
+            var items = itemsByOrder.ContainsKey(o.Id)
+                ? itemsByOrder[o.Id]
+                : new List<OrderItemSummaryDto>();
+
+            return new
             {
                 o.Id,
                 o.TotalAmount,
@@ -317,12 +347,12 @@ public class PatientController : ControllerBase
                 o.DeliveryAddress,
                 o.PaymentMode,
                 o.PaymentStatus,
-                ProductName = p != null ? p.Name : null,
-                Quantity = oi != null ? oi.Quantity : 0
-            }
-        ).ToList();
+                Items = items,
+                ItemCount = items.Sum(i => i.Quantity)
+            };
+        }).ToList();
 
-        return Ok(orders);
+        return Ok(result);
     }
 
     [Authorize(Roles = "Patient")]
