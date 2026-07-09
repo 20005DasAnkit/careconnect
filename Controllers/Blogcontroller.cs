@@ -19,8 +19,6 @@ namespace HEALTHCARE.Controllers
             _context = context;
         }
 
-        // ───────────────────────── PATIENT (public read) ─────────────────────────
-
         // GET /api/patient/blogs
         [HttpGet("api/patient/blogs")]
         public async Task<IActionResult> GetBlogs([FromQuery] string? category, [FromQuery] string? search)
@@ -98,8 +96,6 @@ namespace HEALTHCARE.Controllers
                 Related = related,
             });
         }
-
-        // ───────────────────────── ADMIN (manage posts) ─────────────────────────
 
         // GET /api/admin/blogs  — includes unpublished/drafts
         [HttpGet("api/admin/blogs")]
