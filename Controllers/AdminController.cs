@@ -404,9 +404,7 @@ public class AdminController : ControllerBase
             join d in _context.Doctors on a.DoctorId equals d.Id
             join du in _context.Users on d.UserId equals du.Id
             join av in _context.DoctorAvailabilities
-                on a.DoctorAvailabilityId equals av.Id
-
-            orderby av.AvailableFrom descending
+                on a.DoctorAvailabilityId equals av.Id orderby av.AvailableFrom descending
 
             select new
             {
