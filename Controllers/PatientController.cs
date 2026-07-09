@@ -436,7 +436,7 @@ public class PatientController : ControllerBase
         ["Salt Lake"] = (22.56, 22.61, 88.40, 88.45),
         ["New Town"] = (22.57, 22.65, 88.45, 88.52),
     };
-    
+
     private static string MatchCityFromHospitalName(string hospitalName)
     {
         if (string.IsNullOrWhiteSpace(hospitalName))
