@@ -420,6 +420,7 @@ public class PatientController : ControllerBase
 
         return Ok(ambulances);
     }
+
     private static readonly Dictionary<string, string[]> CityKeywords = new()
     {
         ["Kolkata"] = new[] { "kolkata", "calcutta", "park street", "ballygunge", "alipore" },
@@ -427,6 +428,7 @@ public class PatientController : ControllerBase
         ["Salt Lake"] = new[] { "salt lake", "sector v", "bidhannagar" },
         ["New Town"] = new[] { "new town", "rajarhat" },
     };
+
     private static readonly Dictionary<string, (double MinLat, double MaxLat, double MinLng, double MaxLng)> CityBounds = new()
     {
         ["Kolkata"] = (22.45, 22.62, 88.30, 88.42),
@@ -434,6 +436,7 @@ public class PatientController : ControllerBase
         ["Salt Lake"] = (22.56, 22.61, 88.40, 88.45),
         ["New Town"] = (22.57, 22.65, 88.45, 88.52),
     };
+    
     private static string MatchCityFromHospitalName(string hospitalName)
     {
         if (string.IsNullOrWhiteSpace(hospitalName))
