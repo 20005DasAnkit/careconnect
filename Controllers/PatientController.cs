@@ -1005,7 +1005,6 @@ public class PatientController : ControllerBase
         return Ok(result);
     }
 
-
     [HttpGet("product/{id}")]
     public IActionResult GetProductById(int id)
     {

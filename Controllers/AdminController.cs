@@ -827,7 +827,6 @@ public class AdminController : ControllerBase
             return NotFound("Review not found");
 
         review.IsApproved = true;
-
         _context.SaveChanges();
 
         return Ok(new
@@ -845,7 +844,6 @@ public class AdminController : ControllerBase
             return NotFound("Review not found");
 
         _context.Reviews.Remove(review);
-
         _context.SaveChanges();
 
         return Ok(new

@@ -14,7 +14,6 @@ namespace HEALTHCARE.Controllers;
 public class DoctorSlotRequestController : ControllerBase
 {
     private readonly AppDbContext _context;
-
     public DoctorSlotRequestController(AppDbContext context)
     {
         _context = context;

@@ -1,5 +1,4 @@
 namespace HEALTHCARE.DTOs;
-
 public class MedicineInvoiceItemDto
 {
     public string MedicineName { get; set; } = string.Empty;

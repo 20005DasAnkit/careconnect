@@ -10,6 +10,5 @@ public class UpdateBlogDto
     public string AuthorName { get; set; } = "";
     public int ReadTimeMinutes { get; set; }
     public bool IsPublished { get; set; }
-
     public IFormFile? Image { get; set; }
 }
