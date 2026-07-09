@@ -1,20 +1,39 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { Search, ShoppingCart, Minus, Plus, Pill, Check } from "lucide-react";
+import { Search, ShoppingCart, Plus, Pill, Check } from "lucide-react";
 import api from "../../api/axios";
 import { useCart } from "../../context/Cartcontext";
 
+const C = {
+    cream: "#FAF8F3",
+    forest: "#16332B",
+    forestHover: "#0F231D",
+    terracotta: "#B5562C",
+    border: "#E4DFD3",
+    cardAlt: "#EFEAE0",
+    white: "#FFFFFF",
+    green: "#3E7C59",
+};
+
+const FRAUNCES = "'Fraunces', Georgia, serif";
+const INTER = "'Inter', system-ui, sans-serif";
+const IMG_BASE = "http://localhost:5008";
+
 const CATEGORIES = ["All", "Tablets", "Syrups", "Injections", "Vitamins", "Skincare", "Devices", "Powder"];
+const SORTS = [
+    { key: "default", label: "Recommended" },
+    { key: "price_asc", label: "Price: Low to high" },
+    { key: "price_desc", label: "Price: High to low" },
+    { key: "name", label: "Name: A–Z" },
+];
 
 function ProductCardSkeleton() {
     return (
-        <div className="bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden animate-pulse">
-            <div className="aspect-square bg-[#EFEAE0]" />
-            <div className="p-4 space-y-2">
-                <div className="h-3 bg-[#EFEAE0] rounded-full w-16" />
-                <div className="h-4 bg-[#EFEAE0] rounded-full w-32" />
-                <div className="h-10 bg-[#EFEAE0] rounded-full mt-3" />
-            </div>
+        <div style={{ animation: "prod-pulse 1.4s ease-in-out infinite" }}>
+            <style>{`@keyframes prod-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
+            <div style={{ aspectRatio: "1", backgroundColor: C.cardAlt, borderRadius: 16, marginBottom: 12 }} />
+            <div style={{ height: 10, width: "40%", backgroundColor: C.cardAlt, borderRadius: 999, marginBottom: 8 }} />
+            <div style={{ height: 13, width: "70%", backgroundColor: C.cardAlt, borderRadius: 999 }} />
         </div>
     );
 }
@@ -25,11 +44,11 @@ export default function Products() {
 
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [qty, setQty] = useState({});
     const [activeCategory, setActiveCategory] = useState("All");
     const [search, setSearch] = useState("");
     const [sortBy, setSortBy] = useState("default");
     const [justAdded, setJustAdded] = useState(null);
+    const [hoveredCard, setHoveredCard] = useState(null);
 
     useEffect(() => {
         loadProducts();
@@ -52,367 +71,259 @@ export default function Products() {
                 !search.trim() ||
                 p.name?.toLowerCase().includes(search.toLowerCase()) ||
                 p.description?.toLowerCase().includes(search.toLowerCase());
-
-            const matchCat =
-                activeCategory === "All" ||
-                (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
-
+            const matchCat = activeCategory === "All" || (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
             return matchSearch && matchCat;
         });
-
         if (sortBy === "price_asc") result = [...result].sort((a, b) => a.price - b.price);
         if (sortBy === "price_desc") result = [...result].sort((a, b) => b.price - a.price);
         if (sortBy === "name") result = [...result].sort((a, b) => a.name?.localeCompare(b.name));
-
         return result;
     }, [products, search, activeCategory, sortBy]);
 
     const categoryCounts = useMemo(() => {
         const counts = { All: products.length };
         CATEGORIES.slice(1).forEach((cat) => {
-            counts[cat] = products.filter(
-                (p) => p.category && p.category.toLowerCase() === cat.toLowerCase()
-            ).length;
+            counts[cat] = products.filter((p) => p.category && p.category.toLowerCase() === cat.toLowerCase()).length;
         });
         return counts;
     }, [products]);
 
-    function goToOrder(product) {
-        const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
-        const quantity = qty[product.id] || 1;
-
-        const params = new URLSearchParams({
-            productId: product.id,
-            quantity,
-            productName: product.name || "",
-            price: product.price,
-        });
-
-        navigate(`/patient/place-order?${params.toString()}`);
-    }
-
     function handleAddToCart(product) {
         const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
-        const quantity = qty[product.id] || 1;
-        addToCart(product, quantity);
-
+        if (!token) return navigate("/login");
+        addToCart(product, 1);
         setJustAdded(product.id);
         setTimeout(() => setJustAdded(null), 1400);
     }
 
     return (
-        <div
-            className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-        >
-            <div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
+        <div style={{ minHeight: "100vh", backgroundColor: C.cream, color: C.forest, fontFamily: INTER }}>
+            <div style={{ width: "100%", maxWidth: 1500, margin: "0 auto", padding: "36px 32px 96px" }}>
 
-                {/* ───────────────────── HEADER ───────────────────── */}
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
-                    <div>
-                        <p className="text-[13px] uppercase tracking-[0.22em] text-[#3E7C59] font-semibold mb-5">
-                            Pharmacy
-                        </p>
-                        <h1
+                {/* ── Search-first header ── */}
+                <div
+                    style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "space-between",
+                        gap: 24,
+                        marginBottom: 8,
+                        borderBottom: `1px solid ${C.border}`,
+                        paddingBottom: 20,
+                    }}
+                >
+                    <p style={{ margin: 0 }}>
+                        <span
                             style={{
-                                fontFamily: "'Fraunces', Georgia, serif",
-                                fontWeight: 500
+                                fontFamily: FRAUNCES,
+                                fontWeight: 600,
+                                fontSize: "1.6rem",
+                                letterSpacing: "0.06em",
+                                textTransform: "uppercase",
+                                color: C.green,          // 👈 Green Color
+                                display: "inline-block",
+                                paddingBottom: 12,
+                                borderBottom: `2px solid ${C.green}`,
                             }}
-                            className="leading-[1.05] tracking-tight"
                         >
-                            <span style={{
-                                fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)"
-                            }}>
-                                Medicine, delivered
-                            </span>
-                            <br />
-                            <span
-                                className="italic text-[#B5562C]"
-                                style={{
-                                    fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)"
-                                }}
-                            >
-                                before you run out.
-                            </span>
-                        </h1>
-                    </div>
-
-                    <div className="flex items-center gap-3 w-full max-w-md">
-                        <div className="relative flex-1">
-                            <Search
-                                size={15}
-                                className="absolute left-4 top-1/2 -translate-y-1/2 text-[#16332B]/35"
-                            />
-                            <input
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                placeholder="Search medicines..."
-                                className="w-full h-12 pl-11 pr-4 rounded-full border border-[#E4DFD3] bg-white focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 text-sm placeholder:text-[#16332B]/35"
-                            />
-                        </div>
-
-                        <Link
-                            to="/patient/cart"
-                            className="relative w-12 h-12 shrink-0 rounded-full bg-[#16332B] text-white flex items-center justify-center hover:bg-[#0F231D] transition"
-                            title="View cart"
-                        >
-                            <ShoppingCart size={18} />
-                        </Link>
-                    </div>
-                </div>
-
-                {/* ───────────────────── FILTER + SORT ───────────────────── */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-7">
-                    <div className="flex flex-wrap gap-2">
-                        {CATEGORIES.map((cat) => {
-                            const count = categoryCounts[cat] ?? 0;
-                            const isActive = activeCategory === cat;
-                            return (
-                                <button
-                                    key={cat}
-                                    onClick={() => setActiveCategory(cat)}
-                                    className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium transition ${isActive
-                                        ? "bg-[#16332B] text-white"
-                                        : "bg-white border border-[#E4DFD3] text-[#16332B]/60 hover:border-[#16332B]/30"
-                                        }`}
-                                >
-                                    {cat}
-                                    {!loading && (
-                                        <span
-                                            className={`text-[11px] font-semibold px-1.5 py-0.5 rounded-full ${isActive
-                                                ? "bg-white/20 text-white"
-                                                : "bg-[#EFEAE0] text-[#16332B]/50"
-                                                }`}
-                                        >
-                                            {count}
-                                        </span>
-                                    )}
-                                </button>
-                            );
-                        })}
-                    </div>
-
-                    <select
-                        value={sortBy}
-                        onChange={(e) => setSortBy(e.target.value)}
-                        className="h-11 px-4 rounded-full border border-[#E4DFD3] bg-white text-sm text-[#16332B]/75 focus:outline-none focus:ring-2 focus:ring-[#16332B]/20 cursor-pointer"
-                    >
-                        <option value="default">Sort: Recommended</option>
-                        <option value="price_asc">Price: Low to high</option>
-                        <option value="price_desc">Price: High to low</option>
-                        <option value="name">Name: A–Z</option>
-                    </select>
-                </div>
-
-                {!loading && (
-                    <p className="text-sm text-[#16332B]/50 mb-6">
-                        <span className="font-semibold text-[#16332B]">{filteredProducts.length}</span> products
+                            Pharmacy
+                        </span>
                     </p>
-                )}
 
-                {/* ───────────────────── LOADING ───────────────────── */}
-                {loading && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-5">
-                        {Array.from({ length: 10 }).map((_, i) => (
-                            <ProductCardSkeleton key={i} />
-                        ))}
-                    </div>
-                )}
+                    <Link
+                        to="/patient/cart"
+                        style={{
+                            width: 40, height: 40, borderRadius: 999, backgroundColor: C.forest, color: C.white,
+                            display: "flex", alignItems: "center", justifyContent: "center", textDecoration: "none",
+                            transition: "background-color 0.2s ease", flexShrink: 0,
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.forestHover)}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.forest)}
+                        title="View cart"
+                    >
+                        <ShoppingCart size={17} />
+                    </Link>
+                </div>
 
-                {/* ───────────────────── PRODUCT GRID ───────────────────── */}
-                {!loading && filteredProducts.length > 0 && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
-                        {filteredProducts.map((p) => (
-                            <div
-                                key={p.id}
-                                className="group bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden hover:border-[#16332B]/25 hover:shadow-[0_20px_40px_-25px_rgba(22,51,43,0.25)] transition-all duration-300"
-                            >
-                                {/* Clickable area → product details */}
-                                <Link to={`/patient/products/${p.id}`} className="block">
-                                    <div className="relative aspect-square bg-gradient-to-br from-[#FAF8F3] to-[#EFEAE0] flex items-center justify-center">
-                                        {p.imageUrl ? (
-                                            <img
-                                                src={`http://localhost:5008${p.imageUrl}`}
-                                                alt={p.name}
-                                                className="w-full h-full object-contain p-4 group-hover:scale-105 transition duration-300"
-                                            />
-                                        ) : (
-                                            <Pill size={40} className="text-[#16332B]/20" strokeWidth={1.5} />
-                                        )}
+                <div style={{ position: "relative", padding: "28px 0 36px" }}>
+                    <Search size={26} style={{ position: "absolute", left: 0, top: "50%", transform: "translateY(-50%)", color: `${C.forest}40` }} />
+                    <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        placeholder="Search…"
+                        style={{
+                            width: "100%", border: "none", outline: "none", background: "transparent",
+                            fontFamily: FRAUNCES, fontWeight: 500, fontSize: "clamp(1.8rem, 4vw, 2.6rem)",
+                            color: C.forest, paddingLeft: 40, boxSizing: "border-box",
+                        }}
+                    />
+                </div>
 
-                                        {p.stock === 0 && (
-                                            <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                                                <span className="bg-[#16332B] text-white text-xs font-semibold px-3 py-1.5 rounded-full">
-                                                    Out of stock
-                                                </span>
-                                            </div>
-                                        )}
+                <div style={{ display: "grid", gridTemplateColumns: "220px 1fr", gap: 40, alignItems: "start" }}>
 
-                                        {p.category && (
-                                            <span className="absolute top-2.5 left-2.5 bg-white/90 backdrop-blur-sm text-[#16332B]/65 text-[11px] px-2.5 py-1 rounded-full font-medium">
-                                                {p.category}
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    <div className="px-4 pt-4">
-                                        <p className="font-semibold text-[#16332B] text-sm leading-tight line-clamp-1">
-                                            {p.name}
-                                        </p>
-
-                                        {p.description && (
-                                            <p className="text-xs text-[#16332B]/40 mt-0.5 line-clamp-1">
-                                                {p.description}
-                                            </p>
-                                        )}
-
-                                        <div className="flex items-center justify-between mt-2.5">
-                                            <div>
-                                                <span
-                                                    style={{
-                                                        fontFamily: "'Fraunces', Georgia, serif",
-                                                        fontWeight: 500,
-                                                    }}
-                                                    className="text-[1.2rem]"
-                                                >
-                                                    ₹{p.price}
-                                                </span>
-                                                {p.mrp && p.mrp > p.price && (
-                                                    <span className="text-xs text-[#16332B]/35 line-through ml-1.5">
-                                                        ₹{p.mrp}
-                                                    </span>
-                                                )}
-                                            </div>
-                                            {p.mrp && p.mrp > p.price && (
-                                                <span className="text-xs text-[#3E7C59] font-semibold">
-                                                    {Math.round((1 - p.price / p.mrp) * 100)}% off
-                                                </span>
-                                            )}
-                                        </div>
-
-                                        <p className="text-xs text-[#16332B]/40 mt-1">
-                                            {p.stock > 0 ? (
-                                                <span
-                                                    className={
-                                                        p.stock < 10 ? "text-[#B5562C] font-medium" : ""
-                                                    }
-                                                >
-                                                    {p.stock < 10
-                                                        ? `Only ${p.stock} left`
-                                                        : `${p.stock} in stock`}
-                                                </span>
-                                            ) : (
-                                                <span className="text-[#9E3A20]">Out of stock</span>
-                                            )}
-                                        </p>
-                                    </div>
-                                </Link>
-
-                                {/* Quantity + cart/order — outside the Link so clicks don't navigate */}
-                                <div className="px-4 pb-4">
-                                    <div className="mt-3.5 flex items-center gap-2">
-                                        <div className="flex items-center border border-[#E4DFD3] rounded-full overflow-hidden shrink-0">
-                                            <button
-                                                onClick={() =>
-                                                    setQty((q) => ({
-                                                        ...q,
-                                                        [p.id]: Math.max(1, (q[p.id] || 1) - 1),
-                                                    }))
-                                                }
-                                                className="w-7 h-8 flex items-center justify-center text-[#16332B]/55 hover:bg-[#FAF8F3]"
-                                            >
-                                                <Minus size={12} />
-                                            </button>
-                                            <span className="w-6 text-center text-xs font-semibold text-[#16332B]">
-                                                {qty[p.id] || 1}
-                                            </span>
-                                            <button
-                                                onClick={() =>
-                                                    setQty((q) => ({
-                                                        ...q,
-                                                        [p.id]: Math.min(
-                                                            p.stock || 99,
-                                                            (q[p.id] || 1) + 1
-                                                        ),
-                                                    }))
-                                                }
-                                                className="w-7 h-8 flex items-center justify-center text-[#16332B]/55 hover:bg-[#FAF8F3]"
-                                            >
-                                                <Plus size={12} />
-                                            </button>
-                                        </div>
-
-                                        <button
-                                            onClick={() => handleAddToCart(p)}
-                                            disabled={p.stock === 0}
-                                            title="Add to cart"
-                                            className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-full text-xs font-semibold transition ${p.stock === 0
-                                                ? "bg-[#EFEAE0] text-[#16332B]/35 cursor-not-allowed"
-                                                : justAdded === p.id
-                                                    ? "bg-[#3E7C59] text-white"
-                                                    : "bg-white border border-[#E4DFD3] text-[#16332B]/70 hover:border-[#16332B]/30"
-                                                }`}
-                                        >
-                                            {justAdded === p.id ? <Check size={13} /> : <ShoppingCart size={13} />}
-                                        </button>
-
-                                        <button
-                                            onClick={() => goToOrder(p)}
-                                            disabled={p.stock === 0}
-                                            className={`flex-1 h-8 flex items-center justify-center gap-1.5 rounded-full text-xs font-semibold transition ${p.stock === 0
-                                                ? "bg-[#EFEAE0] text-[#16332B]/35 cursor-not-allowed"
-                                                : "bg-[#16332B] hover:bg-[#0F231D] text-white"
-                                                }`}
-                                        >
-                                            Order
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
-
-                {/* ───────────────────── EMPTY STATE ───────────────────── */}
-                {!loading && filteredProducts.length === 0 && (
-                    <div className="bg-white rounded-[24px] border border-[#E4DFD3] py-20 text-center">
-                        <div className="w-16 h-16 mx-auto rounded-2xl bg-[#FAF8F3] flex items-center justify-center mb-5">
-                            <Pill className="text-[#16332B]/35" size={26} strokeWidth={1.5} />
-                        </div>
-                        <h3
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                            className="text-[1.4rem]"
-                        >
-                            No products found
-                        </h3>
-                        <p className="text-[#16332B]/55 mt-2 text-sm">
-                            {activeCategory !== "All"
-                                ? `No products are assigned to "${activeCategory}" yet. Try another category.`
-                                : "Try a different search term."}
+                    {/* ── Sidebar: sort + filter ── */}
+                    <div style={{ position: "sticky", top: 24 }}>
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: `${C.forest}99`, margin: "0 0 12px" }}>
+                            Sort
                         </p>
-                        <button
-                            onClick={() => {
-                                setSearch("");
-                                setActiveCategory("All");
-                            }}
-                            className="mt-6 bg-[#16332B] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#0F231D] transition"
-                        >
-                            Reset filters
-                        </button>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 2, marginBottom: 32 }}>
+                            {SORTS.map((s) => (
+                                <button
+                                    key={s.key}
+                                    onClick={() => setSortBy(s.key)}
+                                    style={{
+                                        textAlign: "left", padding: "7px 0", fontSize: 13.5,
+                                        fontWeight: sortBy === s.key ? 700 : 400,
+                                        color: sortBy === s.key ? C.forest : `${C.forest}70`,
+                                        background: "none", border: "none", cursor: "pointer",
+                                    }}
+                                >
+                                    {s.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", color: `${C.forest}99`, margin: "0 0 12px" }}>
+                            Filter
+                        </p>
+                        <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
+                            {CATEGORIES.map((cat) => {
+                                const active = activeCategory === cat;
+                                const count = categoryCounts[cat] ?? 0;
+                                return (
+                                    <button
+                                        key={cat}
+                                        onClick={() => setActiveCategory(cat)}
+                                        style={{
+                                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                                            textAlign: "left", padding: "7px 0", fontSize: 13.5,
+                                            fontWeight: active ? 700 : 400,
+                                            color: active ? C.terracotta : `${C.forest}70`,
+                                            background: "none", border: "none", cursor: "pointer",
+                                        }}
+                                    >
+                                        <span>{cat}</span>
+                                        {!loading && <span style={{ fontSize: 11.5, color: `${C.forest}40` }}>{count}</span>}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                )}
+
+                    {/* ── Product grid ── */}
+                    <div>
+                        {!loading && (
+                            <p style={{ fontSize: 12.5, color: `${C.forest}59`, margin: "0 0 20px" }}>
+                                {filteredProducts.length} results
+                            </p>
+                        )}
+
+                        {loading && (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "36px 28px" }}>
+                                {Array.from({ length: 9 }).map((_, i) => <ProductCardSkeleton key={i} />)}
+                            </div>
+                        )}
+
+                        {!loading && filteredProducts.length > 0 && (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", gap: "40px 28px" }}>
+                                {filteredProducts.map((p) => {
+                                    const hovered = hoveredCard === p.id;
+                                    return (
+                                        <div
+                                            key={p.id}
+                                            onMouseEnter={() => setHoveredCard(p.id)}
+                                            onMouseLeave={() => setHoveredCard(null)}
+                                            style={{ position: "relative" }}
+                                        >
+                                            <Link to={`/patient/products/${p.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                                                <div style={{
+                                                    position: "relative", aspectRatio: "1", borderRadius: 16,
+                                                    backgroundColor: hovered ? C.cardAlt : C.cream,
+                                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                                    overflow: "hidden", marginBottom: 14, transition: "background-color 0.25s ease",
+                                                }}>
+                                                    {p.imageUrl ? (
+                                                        <img
+                                                            src={`${IMG_BASE}${p.imageUrl}`}
+                                                            alt={p.name}
+                                                            style={{
+                                                                width: "100%", height: "100%", objectFit: "contain", padding: 20,
+                                                                transform: hovered ? "scale(1.06)" : "scale(1)",
+                                                                transition: "transform 0.3s ease",
+                                                            }}
+                                                        />
+                                                    ) : (
+                                                        <Pill size={36} color={`${C.forest}25`} strokeWidth={1.5} />
+                                                    )}
+
+                                                    {p.stock === 0 && (
+                                                        <div style={{ position: "absolute", inset: 0, backgroundColor: `${C.white}CC`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                                            <span style={{ backgroundColor: C.forest, color: C.white, fontSize: 11, fontWeight: 600, padding: "6px 14px", borderRadius: 999 }}>
+                                                                Out of stock
+                                                            </span>
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                <p style={{ fontSize: 11.5, color: C.terracotta, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", margin: "0 0 3px" }}>
+                                                    {p.category || "Medicine"}
+                                                </p>
+                                                <p style={{ fontSize: 14, fontWeight: 500, color: C.forest, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                    {p.name}
+                                                </p>
+                                                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 5 }}>
+                                                    <span style={{ fontSize: 13.5, color: `${C.forest}80` }}>₹{p.price}</span>
+                                                    {p.mrp && p.mrp > p.price && (
+                                                        <span style={{ fontSize: 11.5, color: `${C.forest}35`, textDecoration: "line-through" }}>₹{p.mrp}</span>
+                                                    )}
+                                                </div>
+                                            </Link>
+
+                                            {/* Quick-add — appears on hover, top-right of image */}
+                                            <button
+                                                onClick={(e) => { e.preventDefault(); handleAddToCart(p); }}
+                                                disabled={p.stock === 0}
+                                                title="Add to cart"
+                                                style={{
+                                                    position: "absolute", top: 10, right: 10,
+                                                    width: 32, height: 32, borderRadius: 999,
+                                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                                    backgroundColor: justAdded === p.id ? C.green : C.white,
+                                                    color: justAdded === p.id ? C.white : C.forest,
+                                                    border: "none", cursor: p.stock === 0 ? "not-allowed" : "pointer",
+                                                    opacity: hovered || justAdded === p.id ? 1 : 0,
+                                                    transform: hovered || justAdded === p.id ? "scale(1)" : "scale(0.85)",
+                                                    transition: "opacity 0.2s ease, transform 0.2s ease, background-color 0.2s ease",
+                                                    boxShadow: "0 4px 12px rgba(22,51,43,0.18)",
+                                                }}
+                                            >
+                                                {justAdded === p.id ? <Check size={15} /> : <Plus size={15} />}
+                                            </button>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        {!loading && filteredProducts.length === 0 && (
+                            <div style={{ padding: "72px 20px", textAlign: "center" }}>
+                                <div style={{ width: 60, height: 60, margin: "0 auto", borderRadius: 16, backgroundColor: C.cardAlt, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18 }}>
+                                    <Pill color={`${C.forest}59`} size={24} strokeWidth={1.5} />
+                                </div>
+                                <h3 style={{ fontFamily: FRAUNCES, fontWeight: 500, fontSize: "1.3rem", margin: 0 }}>No products found</h3>
+                                <p style={{ color: `${C.forest}80`, marginTop: 8, fontSize: 13.5 }}>
+                                    {activeCategory !== "All" ? `No products in "${activeCategory}" yet.` : "Try a different search term."}
+                                </p>
+                                <button
+                                    onClick={() => { setSearch(""); setActiveCategory("All"); }}
+                                    style={{ marginTop: 20, backgroundColor: C.forest, color: C.white, padding: "10px 24px", borderRadius: 999, fontSize: 13.5, fontWeight: 600, border: "none", cursor: "pointer" }}
+                                >
+                                    Reset filters
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
         </div>
     );

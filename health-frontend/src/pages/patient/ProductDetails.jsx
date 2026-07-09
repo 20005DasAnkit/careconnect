@@ -1,30 +1,36 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import {
-    ArrowLeft,
-    Minus,
-    Plus,
-    ShoppingCart,
-    Pill,
-    ShieldCheck,
-    Truck,
-    RotateCcw,
-    Check,
-} from "lucide-react";
+import { ArrowLeft, ShoppingCart, Pill, ShieldCheck, Truck, RotateCcw, Check } from "lucide-react";
 import api from "../../api/axios";
 import { useCart } from "../../context/Cartcontext";
 
+const C = {
+    cream: "#FAF8F3",
+    forest: "#16332B",
+    forestHover: "#0F231D",
+    terracotta: "#B5562C",
+    border: "#E4DFD3",
+    cardAlt: "#EFEAE0",
+    white: "#FFFFFF",
+    green: "#3E7C59",
+};
+
+const FRAUNCES = "'Fraunces', Georgia, serif";
+const INTER = "'Inter', system-ui, sans-serif";
+const IMG_BASE = "http://localhost:5008";
+
+const QUICK_QTY = [1, 2, 3, 4, 5, 6];
+
 function DetailSkeleton() {
     return (
-        <div className="grid md:grid-cols-2 gap-12 animate-pulse">
-            <div className="aspect-square bg-[#EFEAE0] rounded-[24px]" />
-            <div className="space-y-4 pt-2">
-                <div className="h-4 bg-[#EFEAE0] rounded-full w-24" />
-                <div className="h-8 bg-[#EFEAE0] rounded-full w-2/3" />
-                <div className="h-4 bg-[#EFEAE0] rounded-full w-full" />
-                <div className="h-4 bg-[#EFEAE0] rounded-full w-5/6" />
-                <div className="h-10 bg-[#EFEAE0] rounded-full w-40 mt-6" />
-                <div className="h-12 bg-[#EFEAE0] rounded-full w-full mt-6" />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 0, animation: "pd-pulse 1.4s ease-in-out infinite" }}>
+            <style>{`@keyframes pd-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
+            <div style={{ aspectRatio: "1", backgroundColor: C.cardAlt }} />
+            <div style={{ padding: 40 }}>
+                <div style={{ height: 26, width: "70%", backgroundColor: C.cardAlt, borderRadius: 8, marginBottom: 16 }} />
+                <div style={{ height: 12, width: "100%", backgroundColor: C.cardAlt, borderRadius: 999, marginBottom: 8 }} />
+                <div style={{ height: 12, width: "80%", backgroundColor: C.cardAlt, borderRadius: 999, marginBottom: 24 }} />
+                <div style={{ height: 40, width: "100%", backgroundColor: C.cardAlt, borderRadius: 12 }} />
             </div>
         </div>
     );
@@ -40,6 +46,7 @@ export default function ProductDetails() {
     const [notFound, setNotFound] = useState(false);
     const [quantity, setQuantity] = useState(1);
     const [added, setAdded] = useState(false);
+    const [infoOpen, setInfoOpen] = useState(true);
 
     useEffect(() => {
         loadProduct();
@@ -49,7 +56,6 @@ export default function ProductDetails() {
     async function loadProduct() {
         setLoading(true);
         setNotFound(false);
-
         try {
             const res = await api.get(`/patient/product/${id}`);
             setProduct(res.data);
@@ -64,262 +70,282 @@ export default function ProductDetails() {
 
     function goToOrder() {
         const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
+        if (!token) return navigate("/login");
         const params = new URLSearchParams({
             productId: product.id,
             quantity,
             productName: product.name || "",
             price: product.price,
         });
-
         navigate(`/patient/place-order?${params.toString()}`);
     }
 
     function handleAddToCart() {
         const token = localStorage.getItem("token");
-
-        if (!token) {
-            navigate("/login");
-            return;
-        }
-
+        if (!token) return navigate("/login");
         addToCart(product, quantity);
         setAdded(true);
         setTimeout(() => setAdded(false), 1600);
     }
 
-    const discountPct =
-        product?.mrp && product.mrp > product.price
-            ? Math.round((1 - product.price / product.mrp) * 100)
-            : null;
+    const discountPct = product?.mrp && product.mrp > product.price ? Math.round((1 - product.price / product.mrp) * 100) : null;
+    const maxQty = Math.min(product?.stock || 99, 99);
 
     return (
-        <div
-            className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
-        >
-            <div className="w-full max-w-[1200px] mx-auto px-8 lg:px-16 py-10">
+        <div style={{ minHeight: "100vh", backgroundColor: C.cream, color: C.forest, fontFamily: INTER }}>
+            <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 32px 0" }}>
+                <button
+                    onClick={() => navigate(-1)}
+                    style={{
+                        display: "inline-flex", alignItems: "center", gap: 8, fontSize: 13.5,
+                        color: `${C.forest}80`, background: "none", border: "none", cursor: "pointer", padding: 0,
+                        transition: "color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => (e.currentTarget.style.color = C.forest)}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = `${C.forest}80`)}
+                >
+                    <ArrowLeft size={15} /> Back to pharmacy
+                </button>
+            </div>
 
-                {/* ───────────────────── BACK LINK ───────────────────── */}
-                <div className="flex items-center justify-between mb-8">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="inline-flex items-center gap-2 text-sm text-[#16332B]/55 hover:text-[#16332B] transition"
-                    >
-                        <ArrowLeft size={15} />
-                        Back to pharmacy
-                    </button>
+            {loading && (
+                <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 32px 96px" }}>
+                    <DetailSkeleton />
+                </div>
+            )}
 
+            {!loading && notFound && (
+                <div style={{ maxWidth: 700, margin: "60px auto", backgroundColor: C.white, borderRadius: 24, border: `1px solid ${C.border}`, padding: "72px 20px", textAlign: "center" }}>
+                    <div style={{ width: 64, height: 64, margin: "0 auto", borderRadius: 16, backgroundColor: C.cream, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                        <Pill color={`${C.forest}59`} size={26} strokeWidth={1.5} />
+                    </div>
+                    <h3 style={{ fontFamily: FRAUNCES, fontWeight: 500, fontSize: "1.4rem", margin: 0 }}>Product not found</h3>
+                    <p style={{ color: `${C.forest}8C`, marginTop: 8, fontSize: 14 }}>This item may have been removed or is no longer listed.</p>
                     <Link
-                        to="/patient/cart"
-                        className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center hover:bg-[#0F231D] transition"
-                        title="View cart"
+                        to="/patient/products"
+                        style={{ display: "inline-block", marginTop: 24, backgroundColor: C.forest, color: C.white, padding: "10px 26px", borderRadius: 999, fontSize: 14, fontWeight: 500, textDecoration: "none" }}
                     >
-                        <ShoppingCart size={16} />
+                        Browse pharmacy
                     </Link>
                 </div>
+            )}
 
-                {/* ───────────────────── LOADING ───────────────────── */}
-                {loading && <DetailSkeleton />}
+            {!loading && !notFound && product && (
+                <div style={{ maxWidth: 1400, margin: "0 auto", padding: "24px 32px 96px" }}>
+                    <div style={{
+                        display: "grid", gridTemplateColumns: "1fr 420px",
+                        backgroundColor: C.white, borderRadius: 28, border: `1px solid ${C.border}`,
+                        overflow: "hidden", boxShadow: "0 1px 2px rgba(22,51,43,0.04), 0 24px 48px -32px rgba(22,51,43,0.16)",
+                    }}>
+                        {/* ── Image panel ── */}
+                        <div style={{
+                            position: "relative", backgroundColor: C.cream,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            padding: 60, minHeight: 480,
+                        }}>
+                            {/* soft accent shape behind image */}
+                            <div style={{
+                                position: "absolute", width: 260, height: 260, borderRadius: "50%",
+                                background: `radial-gradient(circle, ${C.terracotta}18, transparent 70%)`,
+                            }} />
 
-                {/* ───────────────────── NOT FOUND ───────────────────── */}
-                {!loading && notFound && (
-                    <div className="bg-white rounded-[24px] border border-[#E4DFD3] py-20 text-center">
-                        <div className="w-16 h-16 mx-auto rounded-2xl bg-[#FAF8F3] flex items-center justify-center mb-5">
-                            <Pill className="text-[#16332B]/35" size={26} strokeWidth={1.5} />
-                        </div>
-                        <h3
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                            className="text-[1.4rem]"
-                        >
-                            Product not found
-                        </h3>
-                        <p className="text-[#16332B]/55 mt-2 text-sm">
-                            This item may have been removed or is no longer listed.
-                        </p>
-                        <Link
-                            to="/patient/products"
-                            className="inline-block mt-6 bg-[#16332B] text-white px-6 py-2.5 rounded-full text-sm font-medium hover:bg-[#0F231D] transition"
-                        >
-                            Browse pharmacy
-                        </Link>
-                    </div>
-                )}
-
-                {/* ───────────────────── PRODUCT DETAIL ───────────────────── */}
-                {!loading && !notFound && product && (
-                    <div className="grid md:grid-cols-2 gap-12">
-
-                        {/* ── Image ── */}
-                        <div className="relative aspect-square bg-gradient-to-br from-[#FAF8F3] to-[#EFEAE0] rounded-[24px] border border-[#E4DFD3] flex items-center justify-center overflow-hidden">
                             {product.imageUrl ? (
                                 <img
-                                    src={`http://localhost:5008${product.imageUrl}`}
+                                    src={`${IMG_BASE}${product.imageUrl}`}
                                     alt={product.name}
-                                    className="w-full h-full object-contain p-10"
+                                    style={{ position: "relative", maxWidth: "100%", maxHeight: 360, objectFit: "contain" }}
                                 />
                             ) : (
-                                <Pill size={64} className="text-[#16332B]/20" strokeWidth={1.5} />
+                                <Pill size={72} color={`${C.forest}22`} strokeWidth={1.5} style={{ position: "relative" }} />
                             )}
 
                             {product.stock === 0 && (
-                                <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
-                                    <span className="bg-[#16332B] text-white text-sm font-semibold px-4 py-2 rounded-full">
+                                <div style={{ position: "absolute", inset: 0, backgroundColor: `${C.white}CC`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                                    <span style={{ backgroundColor: C.forest, color: C.white, fontSize: 13, fontWeight: 600, padding: "8px 18px", borderRadius: 999 }}>
                                         Out of stock
                                     </span>
                                 </div>
                             )}
 
                             {product.category && (
-                                <span className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm text-[#16332B]/65 text-xs px-3 py-1.5 rounded-full font-medium">
+                                <span style={{
+                                    position: "absolute", top: 20, left: 20, backgroundColor: `${C.white}E6`,
+                                    color: `${C.forest}A6`, fontSize: 11.5, padding: "6px 12px", borderRadius: 999, fontWeight: 500,
+                                }}>
                                     {product.category}
                                 </span>
                             )}
+
+                            {/* carousel-style dots (single image, decorative anchor point) */}
+                            <div style={{ position: "absolute", bottom: 22, left: "50%", transform: "translateX(-50%)", display: "flex", gap: 6 }}>
+                                {[0, 1, 2].map((i) => (
+                                    <span key={i} style={{
+                                        width: i === 0 ? 16 : 6, height: 6, borderRadius: 999,
+                                        backgroundColor: i === 0 ? C.forest : `${C.forest}30`,
+                                        transition: "all 0.2s ease",
+                                    }} />
+                                ))}
+                            </div>
                         </div>
 
-                        {/* ── Info ── */}
-                        <div className="pt-1">
-                            <p className="text-[13px] uppercase tracking-[0.2em] text-[#3E7C59] font-semibold mb-3">
-                                {product.category || "Medicine"}
-                            </p>
-
-                            <h1
-                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                                className="text-[2.1rem] leading-[1.1]"
-                            >
+                        {/* ── Info panel ── */}
+                        <div style={{ padding: "40px 36px", display: "flex", flexDirection: "column" }}>
+                            <h1 style={{ fontFamily: FRAUNCES, fontWeight: 500, fontSize: "1.7rem", lineHeight: 1.15, margin: 0 }}>
                                 {product.name}
                             </h1>
 
-                            {product.description && (
-                                <p className="text-[15px] leading-7 text-[#16332B]/65 mt-4">
+                            <button
+                                onClick={() => setInfoOpen((v) => !v)}
+                                style={{
+                                    display: "flex", alignItems: "center", gap: 6, marginTop: 8, marginBottom: 0,
+                                    fontSize: 12.5, fontWeight: 600, color: C.terracotta, background: "none", border: "none",
+                                    cursor: "pointer", padding: 0, alignSelf: "flex-start",
+                                }}
+                            >
+                                {infoOpen ? "Hide details" : "More info"}
+                            </button>
+
+                            {infoOpen && product.description && (
+                                <p style={{ fontSize: 13.5, lineHeight: 1.7, color: `${C.forest}80`, margin: "12px 0 0" }}>
                                     {product.description}
                                 </p>
                             )}
 
-                            {/* Price */}
-                            <div className="flex items-end gap-3 mt-6">
-                                <span
-                                    style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                                    className="text-[2rem] leading-none"
-                                >
-                                    ₹{product.price}
-                                </span>
-                                {product.mrp && product.mrp > product.price && (
-                                    <span className="text-base text-[#16332B]/35 line-through">
-                                        ₹{product.mrp}
-                                    </span>
-                                )}
-                                {discountPct && (
-                                    <span className="text-sm text-[#3E7C59] font-semibold">
-                                        {discountPct}% off
-                                    </span>
-                                )}
-                            </div>
-
-                            {/* Stock */}
-                            <p className="text-sm mt-2 text-[#16332B]/50">
-                                {product.stock > 0 ? (
-                                    <span className={product.stock < 10 ? "text-[#B5562C] font-medium" : ""}>
-                                        {product.stock < 10
-                                            ? `Only ${product.stock} left in stock`
-                                            : `${product.stock} in stock`}
-                                    </span>
-                                ) : (
-                                    <span className="text-[#9E3A20]">Currently out of stock</span>
-                                )}
-                            </p>
-
-                            {/* Quantity */}
-                            <div className="flex items-center gap-3 mt-8">
-                                <div className="flex items-center border border-[#E4DFD3] rounded-full overflow-hidden bg-white">
-                                    <button
-                                        onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                                        className="w-11 h-11 flex items-center justify-center text-[#16332B]/55 hover:bg-[#FAF8F3]"
-                                    >
-                                        <Minus size={15} />
-                                    </button>
-                                    <span className="w-10 text-center text-sm font-semibold text-[#16332B]">
-                                        {quantity}
-                                    </span>
-                                    <button
-                                        onClick={() =>
-                                            setQuantity((q) => Math.min(product.stock || 99, q + 1))
-                                        }
-                                        className="w-11 h-11 flex items-center justify-center text-[#16332B]/55 hover:bg-[#FAF8F3]"
-                                    >
-                                        <Plus size={15} />
-                                    </button>
-                                </div>
-
-                                <span className="text-sm text-[#16332B]/45">
-                                    ₹{(product.price * quantity).toFixed(2)} total
+                            <div style={{ borderTop: `1px solid ${C.border}`, marginTop: 22, paddingTop: 20 }}>
+                                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: `${C.forest}80`, margin: "0 0 10px" }}>
+                                    Category
+                                </p>
+                                <span style={{
+                                    display: "inline-block", padding: "6px 14px", borderRadius: 999,
+                                    backgroundColor: C.cream, border: `1px solid ${C.border}`, fontSize: 12.5, color: C.forest, fontWeight: 500,
+                                }}>
+                                    {product.category || "General"}
                                 </span>
                             </div>
 
-                            {/* Actions — Add to cart (for multi-item orders) + Order now (single item, fast checkout) */}
-                            <div className="flex items-center gap-3 mt-4">
-                                <button
-                                    onClick={handleAddToCart}
-                                    disabled={product.stock === 0}
-                                    className={`flex-1 h-12 flex items-center justify-center gap-2 rounded-full text-sm font-semibold border transition ${
-                                        product.stock === 0
-                                            ? "bg-[#EFEAE0] text-[#16332B]/35 border-[#EFEAE0] cursor-not-allowed"
-                                            : added
-                                            ? "bg-[#EAF3EC] text-[#3E7C59] border-[#3E7C59]/30"
-                                            : "bg-white text-[#16332B] border-[#E4DFD3] hover:border-[#16332B]/30"
-                                    }`}
-                                >
-                                    {added ? <Check size={16} /> : <ShoppingCart size={16} />}
-                                    {added ? "Added to cart" : "Add to cart"}
-                                </button>
-
-                                <button
-                                    onClick={goToOrder}
-                                    disabled={product.stock === 0}
-                                    className={`flex-1 h-12 flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition ${
-                                        product.stock === 0
-                                            ? "bg-[#EFEAE0] text-[#16332B]/35 cursor-not-allowed"
-                                            : "bg-[#16332B] hover:bg-[#0F231D] text-white"
-                                    }`}
-                                >
-                                    Order now
-                                </button>
+                            {/* quantity as size-grid pills */}
+                            <div style={{ marginTop: 22 }}>
+                                <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: `${C.forest}80`, margin: "0 0 10px" }}>
+                                    Quantity
+                                </p>
+                                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                                    {QUICK_QTY.map((n) => {
+                                        const disabled = n > maxQty;
+                                        const active = quantity === n;
+                                        return (
+                                            <button
+                                                key={n}
+                                                disabled={disabled}
+                                                onClick={() => setQuantity(n)}
+                                                style={{
+                                                    width: 40, height: 40, borderRadius: 10,
+                                                    border: `1px solid ${active ? C.forest : C.border}`,
+                                                    backgroundColor: active ? C.forest : disabled ? C.cardAlt : C.white,
+                                                    color: active ? C.white : disabled ? `${C.forest}30` : C.forest,
+                                                    fontSize: 13.5, fontWeight: 600,
+                                                    cursor: disabled ? "not-allowed" : "pointer",
+                                                    transition: "all 0.15s ease",
+                                                }}
+                                            >
+                                                {n}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <p style={{ fontSize: 12, color: `${C.forest}59`, margin: "10px 0 0" }}>
+                                    {product.stock > 0 ? (
+                                        product.stock < 10 ? (
+                                            <span style={{ color: C.terracotta, fontWeight: 500 }}>Only {product.stock} left in stock</span>
+                                        ) : (
+                                            `${product.stock} in stock`
+                                        )
+                                    ) : (
+                                        <span style={{ color: "#9E3A20" }}>Currently out of stock</span>
+                                    )}
+                                </p>
                             </div>
 
-                            <p className="text-xs text-[#16332B]/40 mt-3">
-                                Ordering 2–3 medicines together? Use <span className="font-medium">Add to cart</span> for each, then checkout once from your cart.
-                            </p>
+                            {/* trust strip */}
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 12, marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+                                {[
+                                    { icon: <ShieldCheck size={16} />, label: "Verified stock" },
+                                    { icon: <Truck size={16} />, label: "Fast delivery" },
+                                    { icon: <RotateCcw size={16} />, label: "Easy replace" },
+                                ].map((t) => (
+                                    <div key={t.label} style={{ display: "flex", flexDirection: "column", alignItems: "center", textAlign: "center", gap: 6 }}>
+                                        <span style={{ color: C.green }}>{t.icon}</span>
+                                        <p style={{ fontSize: 11, color: `${C.forest}66`, margin: 0, lineHeight: 1.3 }}>{t.label}</p>
+                                    </div>
+                                ))}
+                            </div>
 
-                            {/* Trust strip */}
-                            <div className="grid grid-cols-3 gap-4 mt-9 pt-8 border-t border-[#E4DFD3]">
-                                <div className="flex flex-col items-center text-center gap-2">
-                                    <ShieldCheck size={18} className="text-[#3E7C59]" strokeWidth={1.75} />
-                                    <p className="text-[12px] text-[#16332B]/55 leading-tight">
-                                        Verified pharmacy stock
-                                    </p>
+                            <div style={{ flex: 1 }} />
+
+                            {/* sticky-feel buy bar */}
+                            <div style={{ marginTop: 28, paddingTop: 20, borderTop: `1px solid ${C.border}` }}>
+                                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
+                                    <div>
+                                        <p style={{ fontSize: 11, color: `${C.forest}59`, margin: 0 }}>Total for {quantity}</p>
+                                        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+                                            <span style={{ fontFamily: FRAUNCES, fontWeight: 500, fontSize: "1.6rem" }}>
+                                                ₹{(product.price * quantity).toFixed(2)}
+                                            </span>
+                                            {product.mrp && product.mrp > product.price && (
+                                                <span style={{ fontSize: 13, color: `${C.forest}35`, textDecoration: "line-through" }}>
+                                                    ₹{(product.mrp * quantity).toFixed(2)}
+                                                </span>
+                                            )}
+                                        </div>
+                                    </div>
+                                    {discountPct && (
+                                        <span style={{ fontSize: 12.5, color: C.green, fontWeight: 600 }}>{discountPct}% off</span>
+                                    )}
                                 </div>
-                                <div className="flex flex-col items-center text-center gap-2">
-                                    <Truck size={18} className="text-[#3E7C59]" strokeWidth={1.75} />
-                                    <p className="text-[12px] text-[#16332B]/55 leading-tight">
-                                        Fast doorstep delivery
-                                    </p>
+
+                                <div style={{ display: "flex", gap: 10 }}>
+                                    <button
+                                        onClick={handleAddToCart}
+                                        disabled={product.stock === 0}
+                                        style={{
+                                            width: 52, height: 52, borderRadius: 14, flexShrink: 0,
+                                            display: "flex", alignItems: "center", justifyContent: "center",
+                                            border: `1px solid ${added ? C.green : C.border}`,
+                                            backgroundColor: product.stock === 0 ? C.cardAlt : added ? "#EAF3EC" : C.white,
+                                            color: product.stock === 0 ? `${C.forest}30` : added ? C.green : C.forest,
+                                            cursor: product.stock === 0 ? "not-allowed" : "pointer",
+                                            transition: "all 0.2s ease",
+                                        }}
+                                        title="Add to cart"
+                                    >
+                                        {added ? <Check size={18} /> : <ShoppingCart size={18} />}
+                                    </button>
+
+                                    <button
+                                        onClick={goToOrder}
+                                        disabled={product.stock === 0}
+                                        style={{
+                                            flex: 1, height: 52, borderRadius: 14, fontSize: 14.5, fontWeight: 700,
+                                            letterSpacing: "0.01em",
+                                            backgroundColor: product.stock === 0 ? C.cardAlt : C.terracotta,
+                                            color: product.stock === 0 ? `${C.forest}30` : C.white,
+                                            border: "none", cursor: product.stock === 0 ? "not-allowed" : "pointer",
+                                            transition: "background-color 0.2s ease",
+                                        }}
+                                        onMouseEnter={(e) => { if (product.stock !== 0) e.currentTarget.style.backgroundColor = "#9C4A25"; }}
+                                        onMouseLeave={(e) => { if (product.stock !== 0) e.currentTarget.style.backgroundColor = C.terracotta; }}
+                                    >
+                                        Buy now
+                                    </button>
                                 </div>
-                                <div className="flex flex-col items-center text-center gap-2">
-                                    <RotateCcw size={18} className="text-[#3E7C59]" strokeWidth={1.75} />
-                                    <p className="text-[12px] text-[#16332B]/55 leading-tight">
-                                        Easy replacement
-                                    </p>
-                                </div>
+
+                                <p style={{ fontSize: 11, color: `${C.forest}55`, textAlign: "center", marginTop: 12 }}>
+                                    Ordering multiple medicines? Add each to cart, then checkout once.
+                                </p>
                             </div>
                         </div>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
         </div>
     );
 }

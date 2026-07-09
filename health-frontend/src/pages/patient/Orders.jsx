@@ -1,35 +1,62 @@
 import { useEffect, useMemo, useState } from "react";
-import { Search, Package, Plus } from "lucide-react";
+import { Search, Package, Plus, ChevronRight } from "lucide-react";
 import api from "../../api/axios";
 
+const C = {
+    cream: "#FAF8F3",
+    forest: "#16332B",
+    forestHover: "#0F231D",
+    terracotta: "#B5562C",
+    border: "#E4DFD3",
+    cardAlt: "#EFEAE0",
+    white: "#FFFFFF",
+};
+
+const FRAUNCES = "'Fraunces', Georgia, serif";
+const INTER = "'Inter', system-ui, sans-serif";
+const IMG_BASE = "http://localhost:5008";
+
 const PAYMENT_STYLES = {
-    Paid: "bg-[#E9F2EC] text-[#2F6B47]",
-    Pending: "bg-[#FFF4E0] text-[#B3791E]",
-    Failed: "bg-[#FBEAE5] text-[#9E3A20]",
+    Paid: { bg: "#E9F2EC", text: "#2F6B47" },
+    Pending: { bg: "#FFF4E0", text: "#B3791E" },
+    Failed: { bg: "#FBEAE5", text: "#9E3A20" },
 };
 
 const STATUS_STYLES = {
-    Pending: "bg-[#FFF4E0] text-[#B3791E]",
-    Confirmed: "bg-[#E9F1FB] text-[#2A5C9E]",
-    Delivered: "bg-[#E9F2EC] text-[#2F6B47]",
-    Cancelled: "bg-[#FBEAE5] text-[#9E3A20]",
+    Pending: { bg: "#FFF4E0", text: "#B3791E" },
+    Confirmed: { bg: "#E9F1FB", text: "#2A5C9E" },
+    Delivered: { bg: "#E9F2EC", text: "#2F6B47" },
+    Cancelled: { bg: "#FBEAE5", text: "#9E3A20" },
 };
 
 const TABS = ["All", "Pending", "Confirmed", "Delivered", "Cancelled"];
 
-function Skeleton() {
+function Pill({ label, tone }) {
+    const s = tone || { bg: C.cardAlt, text: `${C.forest}8C` };
     return (
-        <div className="bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden animate-pulse">
-            <div className="h-14 bg-[#FAF8F3] border-b border-[#E4DFD3]" />
-            {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex items-center gap-4 px-5 py-4 border-b border-[#EFEAE0]">
-                    <div className="w-10 h-10 bg-[#EFEAE0] rounded-xl" />
-                    <div className="flex-1 space-y-2">
-                        <div className="h-3 bg-[#EFEAE0] rounded-full w-40" />
-                        <div className="h-2.5 bg-[#EFEAE0] rounded-full w-24" />
-                    </div>
-                    <div className="h-3 bg-[#EFEAE0] rounded-full w-16" />
-                    <div className="h-5 bg-[#EFEAE0] rounded-full w-16" />
+        <span style={{
+            display: "inline-block", padding: "4px 10px", borderRadius: 999,
+            fontSize: 11, fontWeight: 600, backgroundColor: s.bg, color: s.text,
+            whiteSpace: "nowrap",
+        }}>
+            {label}
+        </span>
+    );
+}
+
+function SkeletonGrid() {
+    return (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+            {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} style={{
+                    backgroundColor: C.white, borderRadius: 18, border: `1px solid ${C.border}`,
+                    padding: 18, animation: "orders-pulse 1.4s ease-in-out infinite",
+                }}>
+                    <style>{`@keyframes orders-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
+                    <div style={{ height: 12, width: 100, backgroundColor: C.cardAlt, borderRadius: 999, marginBottom: 14 }} />
+                    <div style={{ height: 72, width: 72, backgroundColor: C.cardAlt, borderRadius: 14, marginBottom: 14 }} />
+                    <div style={{ height: 12, width: 150, backgroundColor: C.cardAlt, borderRadius: 999, marginBottom: 8 }} />
+                    <div style={{ height: 10, width: 90, backgroundColor: C.cardAlt, borderRadius: 999 }} />
                 </div>
             ))}
         </div>
@@ -42,6 +69,7 @@ export default function Orders() {
     const [errorMsg, setErrorMsg] = useState("");
     const [search, setSearch] = useState("");
     const [activeTab, setActiveTab] = useState("All");
+    const [hoveredCard, setHoveredCard] = useState(null);
 
     useEffect(() => {
         loadOrders();
@@ -63,22 +91,12 @@ export default function Orders() {
 
     const downloadInvoice = async (orderId) => {
         try {
-            const res = await api.get(
-                `/patient/orders/${orderId}/invoice`,
-                {
-                    responseType: "blob",
-                }
-            );
-
-            const url = window.URL.createObjectURL(
-                new Blob([res.data], { type: "application/pdf" })
-            );
-
+            const res = await api.get(`/patient/orders/${orderId}/invoice`, { responseType: "blob" });
+            const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
             const link = document.createElement("a");
             link.href = url;
             link.download = `MedicineInvoice-${orderId}.pdf`;
             link.click();
-
             window.URL.revokeObjectURL(url);
         } catch (err) {
             console.error(err);
@@ -102,9 +120,7 @@ export default function Orders() {
 
     const stats = useMemo(
         () => ({
-            today: orders.filter(
-                (o) => new Date(o.orderDate).toDateString() === new Date().toDateString()
-            ).length,
+            today: orders.filter((o) => new Date(o.orderDate).toDateString() === new Date().toDateString()).length,
             total: orders.length,
             cancelled: orders.filter((o) => o.status === "Cancelled").length,
             failed: orders.filter((o) => o.paymentStatus === "Failed").length,
@@ -114,27 +130,19 @@ export default function Orders() {
     );
 
     return (
-        <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
-            <div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
+        <div style={{ minHeight: "100vh", backgroundColor: C.cream, color: C.forest, fontFamily: INTER }}>
+            <div style={{ width: "100%", maxWidth: 1440, margin: "0 auto", padding: "40px 32px 96px" }}>
 
-                {/* ───────────────────── HEADER ───────────────────── */}
-                <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-10">
+                {/* ── Header ── */}
+                <div style={{ display: "flex", flexWrap: "wrap", alignItems: "flex-end", justifyContent: "space-between", gap: 24, marginBottom: 40 }}>
                     <div>
-                        <p className="text-[13px] uppercase tracking-[0.22em] text-[#3E7C59] font-semibold mb-5">
+                        <p style={{ fontSize: 13, textTransform: "uppercase", letterSpacing: "0.22em", color: "#3E7C59", fontWeight: 600, margin: "0 0 20px" }}>
                             Order history
                         </p>
-                        <h1
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                            className="leading-[1.05] tracking-tight"
-                        >
-                            <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}>
-                                Everything you've
-                            </span>
+                        <h1 style={{ fontFamily: FRAUNCES, fontWeight: 500, lineHeight: 1.05, letterSpacing: "-0.01em", margin: 0 }}>
+                            <span style={{ fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>Everything you've</span>
                             <br />
-                            <span
-                                className="italic text-[#B5562C]"
-                                style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}
-                            >
+                            <span style={{ fontStyle: "italic", color: C.terracotta, fontSize: "clamp(2rem, 4.5vw, 3.2rem)" }}>
                                 ordered, in one place.
                             </span>
                         </h1>
@@ -142,17 +150,23 @@ export default function Orders() {
 
                     <a
                         href="/patient/products"
-                        className="shrink-0 flex items-center gap-2 bg-[#16332B] text-white px-6 py-3.5 rounded-full text-sm font-semibold hover:bg-[#0F231D] transition"
+                        style={{
+                            flexShrink: 0, display: "flex", alignItems: "center", gap: 8,
+                            backgroundColor: C.forest, color: C.white, padding: "14px 24px", borderRadius: 999,
+                            fontSize: 14, fontWeight: 600, textDecoration: "none", transition: "background-color 0.2s ease",
+                        }}
+                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.forestHover)}
+                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.forest)}
                     >
                         <Plus size={15} />
                         Order medicine
                     </a>
                 </div>
 
-                {/* ───────────────────── STATS STRIP ───────────────────── */}
+                {/* ── Stats strip ── */}
                 {!loading && !errorMsg && orders.length > 0 && (
-                    <div className="border border-[#E4DFD3] bg-white rounded-[20px] mb-10 overflow-hidden">
-                        <div className="grid grid-cols-2 md:grid-cols-5">
+                    <div style={{ border: `1px solid ${C.border}`, backgroundColor: C.white, borderRadius: 20, marginBottom: 32, overflow: "hidden" }}>
+                        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))" }}>
                             {[
                                 { label: "Today", value: stats.today },
                                 { label: "Total orders", value: stats.total },
@@ -160,12 +174,9 @@ export default function Orders() {
                                 { label: "Failed payments", value: stats.failed, tone: stats.failed > 0 ? "#B3791E" : undefined },
                                 { label: "Total spent", value: `₹${stats.totalSpent}` },
                             ].map((s, i) => (
-                                <div key={s.label} className={`p-5 ${i !== 0 ? "border-l border-[#E4DFD3]" : ""}`}>
-                                    <p className="text-[12px] text-[#16332B]/50">{s.label}</p>
-                                    <p
-                                        style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500, color: s.tone }}
-                                        className="text-[1.6rem] leading-none mt-2"
-                                    >
+                                <div key={s.label} style={{ padding: 20, borderLeft: i !== 0 ? `1px solid ${C.border}` : "none" }}>
+                                    <p style={{ fontSize: 12, color: `${C.forest}80`, margin: 0 }}>{s.label}</p>
+                                    <p style={{ fontFamily: FRAUNCES, fontWeight: 500, color: s.tone || C.forest, fontSize: "1.6rem", lineHeight: 1, margin: "8px 0 0" }}>
                                         {s.value}
                                     </p>
                                 </div>
@@ -174,193 +185,212 @@ export default function Orders() {
                     </div>
                 )}
 
-                {/* ───────────────────── ERROR ───────────────────── */}
+                {/* ── Error ── */}
                 {errorMsg && (
-                    <div className="mb-8 bg-[#FBEAE5] border border-[#E8B8AA] rounded-2xl p-4 flex items-center justify-between">
-                        <p className="text-[#9E3A20] text-sm">{errorMsg}</p>
-                        <button onClick={loadOrders} className="text-[#9E3A20] text-xs font-semibold underline">Retry</button>
+                    <div style={{ marginBottom: 28, backgroundColor: "#FBEAE5", border: "1px solid #E8B8AA", borderRadius: 16, padding: 16, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <p style={{ color: "#9E3A20", fontSize: 14, margin: 0 }}>{errorMsg}</p>
+                        <button onClick={loadOrders} style={{ color: "#9E3A20", fontSize: 12, fontWeight: 600, textDecoration: "underline", background: "none", border: "none", cursor: "pointer" }}>
+                            Retry
+                        </button>
                     </div>
                 )}
 
-                {/* ───────────────────── LOADING ───────────────────── */}
-                {loading && <Skeleton />}
+                {/* ── Loading ── */}
+                {loading && <SkeletonGrid />}
 
-                {/* ───────────────────── ORDER LIST ───────────────────── */}
+                {/* ── Toolbar: tabs + search ── */}
                 {!loading && !errorMsg && orders.length > 0 && (
-                    <div className="bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden">
-                        {/* Tabs */}
-                        <div className="flex gap-0 border-b border-[#E4DFD3] overflow-x-auto">
-                            {TABS.map((tab) => (
-                                <button
-                                    key={tab}
-                                    onClick={() => setActiveTab(tab)}
-                                    className={`px-5 py-3.5 text-sm font-medium whitespace-nowrap transition border-b-2 ${activeTab === tab
-                                        ? "border-[#16332B] text-[#16332B]"
-                                        : "border-transparent text-[#16332B]/50 hover:text-[#16332B]/75"
-                                        }`}
-                                >
-                                    {tab}
-                                </button>
-                            ))}
-                        </div>
+                    <>
+                        <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 24 }}>
+                            <div style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                                {TABS.map((tab) => {
+                                    const active = activeTab === tab;
+                                    return (
+                                        <button
+                                            key={tab}
+                                            onClick={() => setActiveTab(tab)}
+                                            style={{
+                                                padding: "8px 16px", borderRadius: 999, fontSize: 13.5, fontWeight: 500,
+                                                border: `1px solid ${active ? C.forest : C.border}`,
+                                                backgroundColor: active ? C.forest : C.white,
+                                                color: active ? C.white : `${C.forest}80`,
+                                                cursor: "pointer", transition: "all 0.15s ease", whiteSpace: "nowrap",
+                                            }}
+                                        >
+                                            {tab}
+                                        </button>
+                                    );
+                                })}
+                            </div>
 
-                        {/* Toolbar */}
-                        <div className="flex items-center justify-between gap-3 px-5 py-3.5 border-b border-[#EFEAE0]">
-                            <div className="relative">
-                                <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-[#16332B]/35" />
+                            <div style={{ position: "relative" }}>
+                                <Search size={14} style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", color: `${C.forest}59` }} />
                                 <input
                                     value={search}
                                     onChange={(e) => setSearch(e.target.value)}
                                     placeholder="Search by order ID or medicine"
-                                    className="h-9 pl-8 pr-4 rounded-lg border border-[#E4DFD3] text-sm focus:outline-none focus:ring-2 focus:ring-[#16332B]/15 bg-[#FAF8F3] w-64"
+                                    style={{
+                                        height: 40, paddingLeft: 34, paddingRight: 16, borderRadius: 12,
+                                        border: `1px solid ${C.border}`, fontSize: 13.5, outline: "none",
+                                        backgroundColor: C.white, width: 260, fontFamily: INTER, color: C.forest,
+                                        boxSizing: "border-box",
+                                    }}
                                 />
                             </div>
                         </div>
 
-                        {/* Orders — one block per order, each item priced on its own line */}
-                        <div>
-                            {filteredOrders.map((o) => {
-                                const items = o.items || [];
-                                return (
-                                    <div key={o.id} className="border-t border-[#EFEAE0] first:border-t-0">
-                                        <div className="flex flex-col lg:flex-row lg:items-start gap-4 px-5 py-4 hover:bg-[#FAF8F3]/60 transition">
+                        {/* ── Card grid ── */}
+                        {filteredOrders.length === 0 ? (
+                            <div style={{ padding: "56px 20px", textAlign: "center", color: `${C.forest}66`, fontSize: 14, backgroundColor: C.white, borderRadius: 18, border: `1px solid ${C.border}` }}>
+                                No orders match your search.
+                            </div>
+                        ) : (
+                            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 16 }}>
+                                {filteredOrders.map((o) => {
+                                    const items = o.items || [];
+                                    const first = items[0];
+                                    const extraCount = items.length - 1;
+                                    const hovered = hoveredCard === o.id;
 
-                                            {/* Icon + order id + date */}
-                                            <div className="flex items-start gap-3 lg:w-[210px] shrink-0">
-                                                <div className="w-9 h-9 rounded-xl bg-[#FAF8F3] border border-[#E4DFD3] flex items-center justify-center shrink-0 mt-0.5">
-                                                    <Package size={15} className="text-[#16332B]/40" />
-                                                </div>
+                                    return (
+                                        <div
+                                            key={o.id}
+                                            onMouseEnter={() => setHoveredCard(o.id)}
+                                            onMouseLeave={() => setHoveredCard(null)}
+                                            style={{
+                                                backgroundColor: C.white, borderRadius: 18,
+                                                border: `1px solid ${hovered ? C.forest + "55" : C.border}`,
+                                                padding: 18, display: "flex", flexDirection: "column",
+                                                boxShadow: hovered ? "0 8px 24px -12px rgba(22,51,43,0.18)" : "none",
+                                                transition: "border-color 0.2s ease, box-shadow 0.2s ease",
+                                            }}
+                                        >
+                                            {/* top row: order id/date + status */}
+                                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
                                                 <div>
-                                                    <p className="font-medium text-[#16332B] text-sm">Order #{o.id}</p>
-                                                    <p className="text-xs text-[#16332B]/40 mt-0.5">
-                                                        {new Date(o.orderDate).toLocaleString("en-IN", {
-                                                            day: "2-digit",
-                                                            month: "short",
-                                                            year: "numeric",
-                                                            hour: "2-digit",
-                                                            minute: "2-digit",
-                                                        })}
+                                                    <p style={{ fontSize: 13, fontWeight: 700, color: C.forest, margin: 0 }}>#{o.id}</p>
+                                                    <p style={{ fontSize: 11, color: `${C.forest}59`, margin: "3px 0 0" }}>
+                                                        {new Date(o.orderDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                                                     </p>
+                                                </div>
+                                                <Pill label={o.status || "Pending"} tone={STATUS_STYLES[o.status]} />
+                                            </div>
+
+                                            {/* product preview */}
+                                            <div style={{ display: "flex", gap: 12, marginBottom: 14 }}>
+                                                <div style={{
+                                                    width: 60, height: 60, borderRadius: 12, flexShrink: 0,
+                                                    background: `linear-gradient(160deg, ${C.cream}, ${C.cardAlt})`,
+                                                    border: `1px solid ${C.border}`,
+                                                    display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden",
+                                                }}>
+                                                    {first?.imageUrl ? (
+                                                        <img src={`${IMG_BASE}${first.imageUrl}`} alt={first.productName} style={{ width: "100%", height: "100%", objectFit: "contain", padding: 5 }} />
+                                                    ) : (
+                                                        <Package size={18} color={`${C.forest}40`} />
+                                                    )}
+                                                </div>
+                                                <div style={{ minWidth: 0, flex: 1 }}>
+                                                    <p style={{ fontSize: 13.5, fontWeight: 600, color: C.forest, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                        {first?.productName || "No items on record"}
+                                                    </p>
+                                                    {first && (
+                                                        <p style={{ fontSize: 12, color: `${C.forest}66`, margin: "4px 0 0" }}>
+                                                            Qty {first.quantity} · ₹{first.unitPrice} each
+                                                        </p>
+                                                    )}
+                                                    {extraCount > 0 && (
+                                                        <p style={{ fontSize: 11.5, color: C.terracotta, margin: "4px 0 0", fontWeight: 500 }}>
+                                                            +{extraCount} more {extraCount === 1 ? "item" : "items"}
+                                                        </p>
+                                                    )}
                                                 </div>
                                             </div>
 
-                                            {/* Itemized list — each medicine with its OWN quantity and price */}
-                                            <div className="flex-1 min-w-0 space-y-1.5">
-                                                {items.length === 0 ? (
-                                                    <p className="text-sm text-[#16332B]/40">No items on record</p>
-                                                ) : (
-                                                    items.map((item, idx) => (
-                                                        <div
-                                                            key={idx}
-                                                            className="flex items-center justify-between gap-4 text-sm"
-                                                        >
-                                                            <span className="text-[#16332B] truncate">
-                                                                {item.productName}
-                                                                <span className="text-[#16332B]/40 font-normal">
-                                                                    {" "}× {item.quantity}
-                                                                </span>
-                                                            </span>
-                                                            <span className="text-[#16332B]/60 whitespace-nowrap">
-                                                                ₹{item.unitPrice} each — ₹{item.lineTotal}
-                                                            </span>
-                                                        </div>
-                                                    ))
-                                                )}
-
-                                                {items.length > 1 && (
-                                                    <div className="flex items-center justify-between gap-4 text-sm pt-1.5 mt-1.5 border-t border-[#EFEAE0]">
-                                                        <span className="font-semibold text-[#16332B]">
-                                                            Order total
-                                                        </span>
-                                                        <span
-                                                            className="font-semibold"
-                                                            style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-                                                        >
-                                                            ₹{o.totalAmount}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* Payment + status + invoice */}
-                                            <div className="flex flex-wrap items-center gap-3 lg:w-auto shrink-0">
-                                                {items.length <= 1 && (
-                                                    <span
-                                                        className="font-semibold text-sm whitespace-nowrap"
-                                                        style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-                                                    >
-                                                        ₹{o.totalAmount}
-                                                    </span>
-                                                )}
-
-                                                <div className="text-center">
-                                                    <span
-                                                        className={`px-2.5 py-1 rounded-full text-xs font-medium ${PAYMENT_STYLES[o.paymentStatus] || "bg-[#EFEAE0] text-[#16332B]/55"
-                                                            }`}
-                                                    >
-                                                        {o.paymentStatus || "—"}
-                                                    </span>
-                                                    <p className="text-[11px] text-[#16332B]/40 mt-1">
-                                                        {o.paymentMode === "Online" ? "Paid online" : "Cash on delivery"}
-                                                    </p>
-                                                </div>
-
-                                                <span
-                                                    className={`px-2.5 py-1 rounded-full text-xs font-medium ${STATUS_STYLES[o.status] || "bg-[#EFEAE0] text-[#16332B]/55"
-                                                        }`}
-                                                >
-                                                    {o.status || "Pending"}
+                                            {/* payment pill */}
+                                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                                                <Pill label={o.paymentStatus || "—"} tone={PAYMENT_STYLES[o.paymentStatus]} />
+                                                <span style={{ fontSize: 11, color: `${C.forest}59` }}>
+                                                    {o.paymentMode === "Online" ? "Paid online" : "Cash on delivery"}
                                                 </span>
+                                            </div>
+
+                                            {/* footer: item count, total, details */}
+                                            <div style={{
+                                                marginTop: "auto", display: "flex", alignItems: "center", justifyContent: "space-between",
+                                                paddingTop: 14, borderTop: `1px solid ${C.cardAlt}`,
+                                            }}>
+                                                <div>
+                                                    <p style={{ fontSize: 11, color: `${C.forest}59`, margin: 0 }}>
+                                                        {items.length} {items.length === 1 ? "item" : "items"}
+                                                    </p>
+                                                    <p style={{ fontFamily: FRAUNCES, fontWeight: 500, fontSize: "1.1rem", margin: "2px 0 0" }}>
+                                                        ₹{o.totalAmount}
+                                                    </p>
+                                                </div>
 
                                                 {o.status === "Delivered" ? (
                                                     <button
                                                         onClick={() => downloadInvoice(o.id)}
-                                                        className="px-4 py-2 rounded-lg bg-[#2D5016] text-white text-xs font-semibold hover:bg-[#214010] transition whitespace-nowrap"
+                                                        style={{
+                                                            display: "flex", alignItems: "center", gap: 5,
+                                                            padding: "8px 14px", borderRadius: 999,
+                                                            backgroundColor: C.forest, color: C.white,
+                                                            fontSize: 12, fontWeight: 600, border: "none", cursor: "pointer",
+                                                            transition: "background-color 0.15s ease", whiteSpace: "nowrap",
+                                                        }}
+                                                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.forestHover)}
+                                                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.forest)}
                                                     >
-                                                        Download PDF
+                                                        Invoice
                                                     </button>
                                                 ) : (
-                                                    <span className="text-xs text-gray-400 whitespace-nowrap">
-                                                        Invoice after delivery
-                                                    </span>
+                                                    <button
+                                                        style={{
+                                                            display: "flex", alignItems: "center", gap: 3,
+                                                            padding: "8px 12px", borderRadius: 999,
+                                                            backgroundColor: "transparent", color: C.forest,
+                                                            fontSize: 12, fontWeight: 600, border: `1px solid ${C.border}`, cursor: "pointer",
+                                                            transition: "background-color 0.15s ease", whiteSpace: "nowrap",
+                                                        }}
+                                                        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.cream)}
+                                                        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                                                    >
+                                                        Details
+                                                        <ChevronRight size={13} />
+                                                    </button>
                                                 )}
                                             </div>
                                         </div>
-                                    </div>
-                                );
-                            })}
-
-                            {filteredOrders.length === 0 && (
-                                <div className="py-14 text-center text-[#16332B]/40 text-sm">
-                                    No orders match your search.
-                                </div>
-                            )}
-                        </div>
-                    </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+                    </>
                 )}
 
-                {/* ───────────────────── EMPTY STATE ───────────────────── */}
+                {/* ── Empty state ── */}
                 {!loading && !errorMsg && orders.length === 0 && (
-                    <div className="bg-white rounded-[24px] border border-[#E4DFD3] py-24 text-center">
-                        <div className="w-16 h-16 mx-auto rounded-2xl bg-[#FAF8F3] flex items-center justify-center mb-5">
-                            <Package className="text-[#16332B]/35" size={26} strokeWidth={1.5} />
+                    <div style={{ backgroundColor: C.white, borderRadius: 24, border: `1px solid ${C.border}`, padding: "96px 20px", textAlign: "center" }}>
+                        <div style={{ width: 64, height: 64, margin: "0 auto", borderRadius: 16, backgroundColor: C.cream, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                            <Package color={`${C.forest}59`} size={26} strokeWidth={1.5} />
                         </div>
-                        <h3
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                            className="text-[1.4rem]"
-                        >
-                            No orders yet
-                        </h3>
-                        <p className="text-[#16332B]/55 mt-2 text-sm">Your medicine orders will show up here once you place one.</p>
+                        <h3 style={{ fontFamily: FRAUNCES, fontWeight: 500, fontSize: "1.4rem", margin: 0 }}>No orders yet</h3>
+                        <p style={{ color: `${C.forest}8C`, marginTop: 8, fontSize: 14 }}>Your medicine orders will show up here once you place one.</p>
                         <a
                             href="/patient/products"
-                            className="inline-block mt-7 bg-[#16332B] text-white px-7 py-3 rounded-full font-semibold text-sm hover:bg-[#0F231D] transition"
+                            style={{
+                                display: "inline-block", marginTop: 28, backgroundColor: C.forest, color: C.white,
+                                padding: "12px 28px", borderRadius: 999, fontWeight: 600, fontSize: 14, textDecoration: "none",
+                                transition: "background-color 0.2s ease",
+                            }}
+                            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.forestHover)}
+                            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.forest)}
                         >
                             Browse pharmacy →
                         </a>
                     </div>
                 )}
-
             </div>
         </div>
     );
