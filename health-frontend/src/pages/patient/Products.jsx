@@ -19,7 +19,17 @@ const FRAUNCES = "'Fraunces', Georgia, serif";
 const INTER = "'Inter', system-ui, sans-serif";
 const IMG_BASE = "http://localhost:5008";
 
-const CATEGORIES = ["All", "Tablets", "Syrups", "Injections", "Vitamins", "Skincare", "Devices", "Powder"];
+const CATEGORIES = [
+    "All", 
+    "Tablets", 
+    "Syrups", 
+    "Injections", 
+    "Vitamins", 
+    "Skincare", 
+    "Devices", 
+    "Powder"
+];
+
 const SORTS = [
     { key: "default", label: "Recommended" },
     { key: "price_asc", label: "Price: Low to high" },
@@ -92,10 +102,12 @@ export default function Products() {
                 !search.trim() ||
                 p.name?.toLowerCase().includes(search.toLowerCase()) ||
                 p.description?.toLowerCase().includes(search.toLowerCase());
+                
             const matchCat = activeCategory === "All" ||
                 (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
             return matchSearch && matchCat;
         });
+
         if (sortBy === "price_asc")
             result = [...result].sort((a, b) => a.price - b.price);
 
