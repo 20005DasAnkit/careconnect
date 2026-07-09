@@ -31,29 +31,29 @@ function ProductCardSkeleton() {
     return (
         <div style={{ animation: "prod-pulse 1.4s ease-in-out infinite" }}>
             <style>{`@keyframes prod-pulse { 0%,100%{opacity:1} 50%{opacity:.5} }`}</style>
-            <div 
-                style={{ 
-                    aspectRatio: "1", 
-                    backgroundColor: C.cardAlt, 
-                    borderRadius: 16, 
-                    marginBottom: 12 
-                }} />
-
-            <div 
-                style={{ 
-                    height: 10, 
-                    width: "40%", 
-                    backgroundColor: C.cardAlt, 
-                    borderRadius: 999, 
-                    marginBottom: 8 
-                }} />
-
-            <div 
-                style={{ 
-                    height: 13, 
-                    width: "70%", 
+            <div
+                style={{
+                    aspectRatio: "1",
                     backgroundColor: C.cardAlt,
-                    borderRadius: 999 
+                    borderRadius: 16,
+                    marginBottom: 12
+                }} />
+
+            <div
+                style={{
+                    height: 10,
+                    width: "40%",
+                    backgroundColor: C.cardAlt,
+                    borderRadius: 999,
+                    marginBottom: 8
+                }} />
+
+            <div
+                style={{
+                    height: 13,
+                    width: "70%",
+                    backgroundColor: C.cardAlt,
+                    borderRadius: 999
                 }} />
         </div>
     );
@@ -92,17 +92,17 @@ export default function Products() {
                 !search.trim() ||
                 p.name?.toLowerCase().includes(search.toLowerCase()) ||
                 p.description?.toLowerCase().includes(search.toLowerCase());
-            const matchCat = activeCategory === "All" || 
+            const matchCat = activeCategory === "All" ||
                 (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
             return matchSearch && matchCat;
         });
-        if (sortBy === "price_asc") 
+        if (sortBy === "price_asc")
             result = [...result].sort((a, b) => a.price - b.price);
 
-        if (sortBy === "price_desc") 
+        if (sortBy === "price_desc")
             result = [...result].sort((a, b) => b.price - a.price);
 
-        if (sortBy === "name") 
+        if (sortBy === "name")
             result = [...result].sort((a, b) => a.name?.localeCompare(b.name));
         return result;
     }, [products, search, activeCategory, sortBy]);
@@ -110,9 +110,9 @@ export default function Products() {
     const categoryCounts = useMemo(() => {
         const counts = { All: products.length };
         CATEGORIES.slice(1).forEach((cat) => {
-            counts[cat] = products.filter((p) => p.category 
-            && 
-            p.category.toLowerCase() === cat.toLowerCase()).length;
+            counts[cat] = products.filter((p) => p.category
+                &&
+                p.category.toLowerCase() === cat.toLowerCase()).length;
         });
         return counts;
     }, [products]);
@@ -126,20 +126,20 @@ export default function Products() {
     }
 
     return (
-        <div 
-            style={{ 
-                minHeight: "100vh", 
-                backgroundColor: C.cream, 
-                color: C.forest, 
-                fontFamily: INTER 
+        <div
+            style={{
+                minHeight: "100vh",
+                backgroundColor: C.cream,
+                color: C.forest,
+                fontFamily: INTER
             }}>
 
-            <div 
-                style={{ 
-                    width: "100%", 
-                    maxWidth: 1500, 
-                    margin: "0 auto", 
-                    padding: "36px 32px 96px" 
+            <div
+                style={{
+                    width: "100%",
+                    maxWidth: 1500,
+                    margin: "0 auto",
+                    padding: "36px 32px 96px"
                 }}>
 
                 {/* ── Search-first header ── */}
@@ -162,7 +162,7 @@ export default function Products() {
                                 fontSize: "1.6rem",
                                 letterSpacing: "0.06em",
                                 textTransform: "uppercase",
-                                color: C.green,      
+                                color: C.green,
                                 display: "inline-block",
                                 paddingBottom: 12,
                                 borderBottom: `2px solid ${C.green}`,
@@ -175,16 +175,16 @@ export default function Products() {
                     <Link
                         to="/patient/cart"
                         style={{
-                            width: 40, 
-                            height: 40, 
-                            borderRadius: 999, 
-                            backgroundColor: C.forest, 
+                            width: 40,
+                            height: 40,
+                            borderRadius: 999,
+                            backgroundColor: C.forest,
                             color: C.white,
-                            display: "flex", 
-                            alignItems: "center", 
-                            justifyContent: "center", 
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
                             textDecoration: "none",
-                            transition: "background-color 0.2s ease", 
+                            transition: "background-color 0.2s ease",
                             flexShrink: 0,
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.forestHover)}
@@ -195,79 +195,79 @@ export default function Products() {
                     </Link>
                 </div>
 
-                <div 
-                    style={{ 
-                        position: "relative", 
-                        padding: "28px 0 36px" 
+                <div
+                    style={{
+                        position: "relative",
+                        padding: "28px 0 36px"
                     }}>
-                    <Search 
-                        size={26} 
-                        style={{ 
-                            position: "absolute", 
-                            left: 0, 
-                            top: "50%", 
-                            transform: "translateY(-50%)", 
-                            color: `${C.forest}40` 
+                    <Search
+                        size={26}
+                        style={{
+                            position: "absolute",
+                            left: 0,
+                            top: "50%",
+                            transform: "translateY(-50%)",
+                            color: `${C.forest}40`
                         }} />
                     <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         placeholder="Search…"
                         style={{
-                            width: "100%", 
-                            border: "none", 
-                            outline: "none", 
+                            width: "100%",
+                            border: "none",
+                            outline: "none",
                             background: "transparent",
-                            fontFamily: FRAUNCES, 
-                            fontWeight: 500, 
+                            fontFamily: FRAUNCES,
+                            fontWeight: 500,
                             fontSize: "clamp(1.8rem, 4vw, 2.6rem)",
-                            color: C.forest, 
-                            paddingLeft: 40, 
+                            color: C.forest,
+                            paddingLeft: 40,
                             boxSizing: "border-box",
                         }}
                     />
                 </div>
 
-                <div 
-                    style={{ 
-                        display: "grid", 
-                        gridTemplateColumns: "220px 1fr", 
-                        gap: 40, 
-                        alignItems: "start" 
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "220px 1fr",
+                        gap: 40,
+                        alignItems: "start"
                     }}>
 
                     {/* ── Sidebar: sort + filter ── */}
-                    <div 
+                    <div
                         style={{ position: "sticky", top: 24 }}>
-                        <p 
-                            style={{ 
-                                fontSize: 11, 
-                                fontWeight: 700, 
-                                letterSpacing: "0.12em", 
+                        <p
+                            style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                letterSpacing: "0.12em",
                                 textTransform: "uppercase",
-                                color: `${C.forest}99`, margin: "0 0 12px" 
+                                color: `${C.forest}99`, margin: "0 0 12px"
                             }}>
                             Sort
                         </p>
-                        <div 
-                            style={{ 
-                                display: "flex", 
-                                flexDirection: "column", 
-                                gap: 2, 
-                                marginBottom: 32 
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 2,
+                                marginBottom: 32
                             }}>
                             {SORTS.map((s) => (
                                 <button
                                     key={s.key}
                                     onClick={() => setSortBy(s.key)}
                                     style={{
-                                        textAlign: "left", 
-                                        padding: "7px 0", 
+                                        textAlign: "left",
+                                        padding: "7px 0",
                                         fontSize: 13.5,
                                         fontWeight: sortBy === s.key ? 700 : 400,
                                         color: sortBy === s.key ? C.forest : `${C.forest}70`,
-                                        background: "none", 
-                                        border: "none", 
+                                        background: "none",
+                                        border: "none",
                                         cursor: "pointer",
                                     }}
                                 >
@@ -276,21 +276,21 @@ export default function Products() {
                             ))}
                         </div>
 
-                        <p 
-                            style={{ 
-                                fontSize: 11, 
-                                fontWeight: 700, 
-                                letterSpacing: "0.12em", 
-                                textTransform: "uppercase", 
-                                color: `${C.forest}99`, margin: "0 0 12px" 
+                        <p
+                            style={{
+                                fontSize: 11,
+                                fontWeight: 700,
+                                letterSpacing: "0.12em",
+                                textTransform: "uppercase",
+                                color: `${C.forest}99`, margin: "0 0 12px"
                             }}>
                             Filter
                         </p>
-                        <div 
-                            style={{ 
-                                display: "flex", 
-                                flexDirection: "column", 
-                                gap: 2 
+                        <div
+                            style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                gap: 2
                             }}>
                             {CATEGORIES.map((cat) => {
                                 const active = activeCategory === cat;
@@ -300,16 +300,16 @@ export default function Products() {
                                         key={cat}
                                         onClick={() => setActiveCategory(cat)}
                                         style={{
-                                            display: "flex", 
-                                            alignItems: "center", 
+                                            display: "flex",
+                                            alignItems: "center",
                                             justifyContent: "space-between",
-                                            textAlign: "left", 
-                                            padding: "7px 0", 
+                                            textAlign: "left",
+                                            padding: "7px 0",
                                             fontSize: 13.5,
                                             fontWeight: active ? 700 : 400,
                                             color: active ? C.terracotta : `${C.forest}70`,
-                                            background: "none", 
-                                            border: "none", 
+                                            background: "none",
+                                            border: "none",
                                             cursor: "pointer",
                                         }}
                                     >
@@ -317,13 +317,14 @@ export default function Products() {
                                             {cat}
                                         </span>
 
-                                        {!loading && 
-                                            <span 
-                                                style={{ 
-                                                    fontSize: 11.5, 
-                                                    color: `${C.forest}40` }}
-                                                    >{count}
-                                                </span>}
+                                        {!loading &&
+                                            <span
+                                                style={{
+                                                    fontSize: 11.5,
+                                                    color: `${C.forest}40`
+                                                }}
+                                            >{count}
+                                            </span>}
                                     </button>
                                 );
                             })}
@@ -333,33 +334,33 @@ export default function Products() {
                     {/* ── Product grid ── */}
                     <div>
                         {!loading && (
-                            <p 
-                                style={{ 
-                                    fontSize: 12.5, 
-                                    color: `${C.forest}59`, 
-                                    margin: "0 0 20px" 
+                            <p
+                                style={{
+                                    fontSize: 12.5,
+                                    color: `${C.forest}59`,
+                                    margin: "0 0 20px"
                                 }}>
                                 {filteredProducts.length} results
                             </p>
                         )}
 
                         {loading && (
-                            <div 
-                                style={{ 
-                                    display: "grid", 
-                                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-                                    gap: "36px 28px" 
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                                    gap: "36px 28px"
                                 }}>
                                 {Array.from({ length: 9 }).map((_, i) => <ProductCardSkeleton key={i} />)}
                             </div>
                         )}
 
                         {!loading && filteredProducts.length > 0 && (
-                            <div 
-                                style={{ 
-                                    display: "grid", 
-                                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))", 
-                                    gap: "40px 28px" 
+                            <div
+                                style={{
+                                    display: "grid",
+                                    gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+                                    gap: "40px 28px"
                                 }}>
                                 {filteredProducts.map((p) => {
                                     const hovered = hoveredCard === p.id;
@@ -370,59 +371,117 @@ export default function Products() {
                                             onMouseLeave={() => setHoveredCard(null)}
                                             style={{ position: "relative" }}
                                         >
-                                            <Link to={`/patient/products/${p.id}`} style={{ textDecoration: "none", color: "inherit" }}>
+                                            <Link to={`/patient/products/${p.id}`} 
+                                            style={{ 
+                                                textDecoration: "none", 
+                                                color: "inherit" 
+                                            }}>
+
                                                 <div style={{
-                                                         position: "relative", 
-                                                         aspectRatio: "1", 
-                                                         borderRadius: 16,
-                                                         backgroundColor: hovered ? C.cardAlt : C.cream,
-                                                         display: "flex", 
-                                                         alignItems: "center", 
-                                                         justifyContent: "center",
-                                                         overflow: "hidden", 
-                                                         marginBottom: 14, 
-                                                         transition: "background-color 0.25s ease",
+                                                    position: "relative",
+                                                    aspectRatio: "1",
+                                                    borderRadius: 16,
+                                                    backgroundColor: hovered ? C.cardAlt : C.cream,
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    overflow: "hidden",
+                                                    marginBottom: 14,
+                                                    transition: "background-color 0.25s ease",
                                                 }}>
                                                     {p.imageUrl ? (
                                                         <img
                                                             src={`${IMG_BASE}${p.imageUrl}`}
                                                             alt={p.name}
                                                             style={{
-                                                                width: "100%", 
-                                                                height: "100%", 
-                                                                objectFit: "contain", 
+                                                                width: "100%",
+                                                                height: "100%",
+                                                                objectFit: "contain",
                                                                 padding: 20,
                                                                 transform: hovered ? "scale(1.06)" : "scale(1)",
                                                                 transition: "transform 0.3s ease",
                                                             }}
                                                         />
                                                     ) : (
-                                                        <Pill 
-                                                            size={36} 
-                                                            color={`${C.forest}25`} 
-                                                            strokeWidth={1.5} 
+                                                        <Pill
+                                                            size={36}
+                                                            color={`${C.forest}25`}
+                                                            strokeWidth={1.5}
                                                         />
                                                     )}
 
                                                     {p.stock === 0 && (
-                                                        <div style={{ position: "absolute", inset: 0, backgroundColor: `${C.white}CC`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                                                            <span style={{ backgroundColor: C.forest, color: C.white, fontSize: 11, fontWeight: 600, padding: "6px 14px", borderRadius: 999 }}>
+                                                        <div 
+                                                            style={{ 
+                                                                position: "absolute", 
+                                                                inset: 0, 
+                                                                backgroundColor: `${C.white}CC`, 
+                                                                display: "flex", 
+                                                                alignItems: "center", 
+                                                                justifyContent: "center" 
+                                                            }}>
+                                                            <span 
+                                                                style={{ 
+                                                                    backgroundColor: C.forest, 
+                                                                    color: C.white, 
+                                                                    fontSize: 11, 
+                                                                    fontWeight: 600, 
+                                                                    padding: "6px 14px", 
+                                                                    borderRadius: 999 
+                                                                }}>
                                                                 Out of stock
                                                             </span>
                                                         </div>
                                                     )}
                                                 </div>
 
-                                                <p style={{ fontSize: 11.5, color: C.terracotta, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.04em", margin: "0 0 3px" }}>
+                                                <p 
+                                                    style={{ 
+                                                        fontSize: 11.5, 
+                                                        color: C.terracotta, 
+                                                        fontWeight: 600, 
+                                                        textTransform: "uppercase", 
+                                                        letterSpacing: "0.04em", 
+                                                        margin: "0 0 3px" 
+                                                    }}>
                                                     {p.category || "Medicine"}
                                                 </p>
-                                                <p style={{ fontSize: 14, fontWeight: 500, color: C.forest, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+                                                <p 
+                                                    style={{ 
+                                                        fontSize: 14, 
+                                                        fontWeight: 500, 
+                                                        color: C.forest, 
+                                                        margin: 0, 
+                                                        whiteSpace: "nowrap", 
+                                                        overflow: "hidden", 
+                                                        textOverflow: "ellipsis" 
+                                                    }}>
                                                     {p.name}
                                                 </p>
-                                                <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginTop: 5 }}>
-                                                    <span style={{ fontSize: 13.5, color: `${C.forest}80` }}>₹{p.price}</span>
+                                                <div 
+                                                    style={{ 
+                                                        display: "flex", 
+                                                        alignItems: "baseline", 
+                                                        gap: 6, 
+                                                        marginTop: 5 
+                                                    }}>
+
+                                                    <span 
+                                                        style={{ 
+                                                            fontSize: 13.5, 
+                                                            color: `${C.forest}80` }}
+                                                            >
+                                                                ₹{p.price}
+                                                    </span>
+
                                                     {p.mrp && p.mrp > p.price && (
-                                                        <span style={{ fontSize: 11.5, color: `${C.forest}35`, textDecoration: "line-through" }}>₹{p.mrp}</span>
+                                                        <span 
+                                                            style={{ 
+                                                                fontSize: 11.5, 
+                                                                color: `${C.forest}35`, 
+                                                                textDecoration: "line-through" }}>
+                                                                    ₹{p.mrp}
+                                                        </span>
                                                     )}
                                                 </div>
                                             </Link>
@@ -433,9 +492,15 @@ export default function Products() {
                                                 disabled={p.stock === 0}
                                                 title="Add to cart"
                                                 style={{
-                                                    position: "absolute", top: 10, right: 10,
-                                                    width: 32, height: 32, borderRadius: 999,
-                                                    display: "flex", alignItems: "center", justifyContent: "center",
+                                                    position: "absolute", 
+                                                    top: 10, 
+                                                    right: 10,
+                                                    width: 32, 
+                                                    height: 32, 
+                                                    borderRadius: 999,
+                                                    display: "flex", 
+                                                    alignItems: "center", 
+                                                    justifyContent: "center",
                                                     backgroundColor: justAdded === p.id ? C.green : C.white,
                                                     color: justAdded === p.id ? C.white : C.forest,
                                                     border: "none", cursor: p.stock === 0 ? "not-allowed" : "pointer",
@@ -454,17 +519,65 @@ export default function Products() {
                         )}
 
                         {!loading && filteredProducts.length === 0 && (
-                            <div style={{ padding: "72px 20px", textAlign: "center" }}>
-                                <div style={{ width: 60, height: 60, margin: "0 auto", borderRadius: 16, backgroundColor: C.cardAlt, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 18 }}>
-                                    <Pill color={`${C.forest}59`} size={24} strokeWidth={1.5} />
+                            <div 
+                                style={{ 
+                                    padding: "72px 20px", 
+                                    textAlign: "center" 
+                                }}>
+
+                                <div 
+                                    style={{ 
+                                        width: 60, 
+                                        height: 60, 
+                                        margin: "0 auto", 
+                                        borderRadius: 16, 
+                                        backgroundColor: C.cardAlt, 
+                                        display: "flex", 
+                                        alignItems: "center", 
+                                        justifyContent: "center", 
+                                        marginBottom: 18 
+                                    }}>
+                                    <Pill 
+                                        color={`${C.forest}59`} 
+                                        size={24} 
+                                        strokeWidth={1.5} 
+                                    />
                                 </div>
-                                <h3 style={{ fontFamily: FRAUNCES, fontWeight: 500, fontSize: "1.3rem", margin: 0 }}>No products found</h3>
-                                <p style={{ color: `${C.forest}80`, marginTop: 8, fontSize: 13.5 }}>
-                                    {activeCategory !== "All" ? `No products in "${activeCategory}" yet.` : "Try a different search term."}
+
+                                <h3 
+                                    style={{ 
+                                        fontFamily: FRAUNCES, 
+                                        fontWeight: 500, 
+                                        fontSize: "1.3rem", 
+                                        margin: 0 }}>
+                                            No products found
+                                </h3>
+
+                                <p 
+                                    style={{ 
+                                        color: `${C.forest}80`, 
+                                        marginTop: 8, 
+                                        fontSize: 13.5 
+                                    }}>
+                                    {activeCategory !== "All" 
+                                        ? `No products in "${activeCategory}" yet.` 
+                                        : "Try a different search term."
+                                    }
                                 </p>
+
                                 <button
                                     onClick={() => { setSearch(""); setActiveCategory("All"); }}
-                                    style={{ marginTop: 20, backgroundColor: C.forest, color: C.white, padding: "10px 24px", borderRadius: 999, fontSize: 13.5, fontWeight: 600, border: "none", cursor: "pointer" }}
+                                    style={{ 
+                                        marginTop: 20, 
+                                        backgroundColor: C.forest, 
+                                        color: C.white, 
+                                        padding: "10px 24px", 
+                                        borderRadius: 999, 
+                                        fontSize: 13.5, 
+                                        fontWeight: 600, 
+                                        border: "none", 
+                                        cursor: "pointer" 
+                                    }}
                                 >
                                     Reset filters
                                 </button>
