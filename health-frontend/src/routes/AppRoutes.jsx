@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Login from "../pages/auth/Login";
 import Register from "../pages/auth/Register";
 import { Outlet } from "react-router-dom";
+import Home from "../pages/Home";
 
 //Protectedroute
 import ProtectedRoute from "../components/ProtectedRoute";
@@ -67,7 +68,10 @@ export default function AppRoutes() {
       <Routes>
 
         {/* AUTH */}
-        <Route path="/" element={<PatientDashboard />} />
+        <Route
+          path="/"
+          element={<Home />}
+        />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
 
@@ -186,7 +190,7 @@ export default function AppRoutes() {
           }
         />
 
-          <Route
+        <Route
           path="/patient/products/:id"
           element={
             <ProtectedRoute>
@@ -195,7 +199,7 @@ export default function AppRoutes() {
           }
         />
 
-          <Route
+        <Route
           path="/patient/Cart"
           element={
             <ProtectedRoute>
@@ -203,7 +207,7 @@ export default function AppRoutes() {
             </ProtectedRoute>
           }
         />
-        
+
 
         {/* AMBULANCE DRIVER */}
         <Route path="/ambulance" element={<AmbulanceDashboard />} />

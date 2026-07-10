@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import api from "../../api/axios";
+import api from "../api/axios";
 import { User, ChevronDown, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { useNavigate, Link } from "react-router-dom";
-import Chatbot from "./Chatbot";
+import Chatbot from "./patient/Chatbot";
 import { Stethoscope, Pill, Ambulance, CalendarCheck } from "lucide-react";
 import { HeartPulse, Brain, Bone, Eye, Baby } from "lucide-react";
 
@@ -25,16 +25,13 @@ function displayDoctorName(name) {
     return /^dr\.?\s/i.test(name) ? name : `Dr. ${name}`;
 }
 
-export default function Dashboard() {
+export default function Home() {
     const [doctors, setDoctors] = useState([]);
-    const [appointments, setAppointments] = useState([]);
-    const [orders, setOrders] = useState([]);
     const [search, setSearch] = useState("");
     const [specialization, setSpecialization] = useState("");
     const [menuOpen, setMenuOpen] = useState(false);
     const navigate = useNavigate();
     const token = localStorage.getItem("token");
-    const userName = localStorage.getItem("name") || "My Account";
 
     const [aboutOpen, setAboutOpen] = useState(false);
     const [reviews, setReviews] = useState([]);
@@ -44,26 +41,31 @@ export default function Dashboard() {
     const [testimonialPaused, setTestimonialPaused] = useState(false);
     const [activeTestimonial, setActiveTestimonial] = useState(0);
 
-    useEffect(() => {
-        // This page sits behind auth, but guard anyway in case someone
-        // lands here directly without a token (expired session etc.)
-        if (!token) {
+    // ── "Please sign in" toast shown before redirecting guests to /login ──
+    const [authToast, setAuthToast] = useState(null);
+
+    function requireAuth(message = "Please sign in to continue") {
+        setAuthToast(message);
+        setTimeout(() => {
+            setAuthToast(null);
             navigate("/login");
-            return;
-        }
+        }, 1400);
+    }
+
+    useEffect(() => {
         loadData();
-    }, [token]);
+    }, []);
 
     const loadData = async () => {
         try {
             const docRes = await api.get("/patient/doctors");
-            const appRes = await api.get("/patient/appointments");
-            const orderRes = await api.get("/patient/orders");
-            const reviewRes = await api.get("/patient/home-reviews");
-
             setDoctors(docRes.data || []);
-            setAppointments(appRes.data || []);
-            setOrders(orderRes.data || []);
+
+            // Public reviews for the landing testimonial carousel.
+            // If your backend only has the authenticated
+            // /patient/home-reviews route, reuse it here — it still
+            // works fine as long as it doesn't require a token.
+            const reviewRes = await api.get("/patient/home-reviews");
             setReviews(reviewRes.data || []);
         } catch (err) {
             console.log(err);
@@ -82,22 +84,6 @@ export default function Dashboard() {
         }
         navigate(`/patient/doctors?${params.toString()}`);
     };
-
-    const upcomingAppointments = appointments
-        .filter((a) => {
-            const status = (a.status || "").toLowerCase();
-
-            return (
-                new Date(a.appointmentTime) > new Date() &&
-                status !== "completed" &&
-                status !== "cancelled" &&
-                status !== "rejected"
-            );
-        })
-        .sort(
-            (a, b) =>
-                new Date(a.appointmentTime) - new Date(b.appointmentTime)
-        );
 
     // ── Testimonial carousel helpers (single slide, index based) ──
     function goToTestimonial(direction) {
@@ -122,14 +108,11 @@ export default function Dashboard() {
         <>
             <div className="min-h-screen bg-[#FAF8F3] text-[#16332B] font-[Georgia,serif]">
 
-                {/* NAVBAR — logged in: profile pill */}
+                {/* NAVBAR — public: only Sign In / Sign Up */}
                 <header className="sticky top-0 z-50 bg-[#FAF8F3]/95 backdrop-blur-sm border-b border-[#E4DFD3]">
                     <div className="max-w-7xl mx-auto px-6 lg:px-10 h-20 flex items-center justify-between">
 
-                        <div
-                            className="flex items-center gap-2 cursor-pointer"
-                            onClick={() => navigate("/patient")}
-                        >
+                        <div className="flex items-center gap-2">
                             <span className="text-2xl">✦</span>
                             <span className="text-2xl font-semibold tracking-tight">CareConnect.</span>
                         </div>
@@ -138,12 +121,12 @@ export default function Dashboard() {
                             <a href="/patient/products" className="hover:text-[#16332B] transition">
                                 Medicines
                             </a>
-                            <a href="/patient/appointments" className="hover:text-[#16332B] transition">
+                            <button
+                                onClick={() => requireAuth("Please sign in to view your appointments")}
+                                className="hover:text-[#16332B] transition"
+                            >
                                 Appointments
-                            </a>
-                            <a href="/patient/orders" className="hover:text-[#16332B] transition">
-                                Orders
-                            </a>
+                            </button>
                             <a href="/patient/EmergencyInfo" className="hover:text-[#16332B] transition">
                                 Emergency Info
                             </a>
@@ -179,17 +162,17 @@ export default function Dashboard() {
 
                         <div className="hidden lg:flex items-center gap-4">
                             <button
-                                onClick={() => navigate("/patient/profile")}
-                                className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition"
+                                onClick={() => navigate("/login")}
+                                className="text-[#16332B] font-medium hover:underline"
                             >
-                                <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
-                                    <User size={18} />
-                                </div>
+                                Sign In
+                            </button>
 
-                                <div className="text-left">
-                                    <p className="text-sm font-semibold">{userName}</p>
-                                    <p className="text-xs text-gray-500">My Profile</p>
-                                </div>
+                            <button
+                                onClick={() => navigate("/register")}
+                                className="bg-[#16332B] text-white px-5 py-2 rounded-full hover:bg-[#0F231D]"
+                            >
+                                Sign Up
                             </button>
                         </div>
 
@@ -206,24 +189,23 @@ export default function Dashboard() {
                         <div className="lg:hidden border-t border-[#E4DFD3] px-6 py-6 flex flex-col gap-4 font-[system-ui,sans-serif] text-[15px]">
                             <a href="/patient/ambulance">Ambulance</a>
                             <a href="/patient/doctors">Doctors</a>
-                            <a href="/patient/orders">Orders</a>
                             <a href="/patient/products">Products</a>
-                            <a href="/patient/appointments">Appoinments</a>
                             <a href="/patient/AboutUs">About Us</a>
-                            <a href="/patient/profile" className="font-medium">Profile</a>
 
-                            <button
-                                onClick={() => navigate("/patient/profile")}
-                                className="flex items-center gap-3 bg-white border border-[#E4DFD3] rounded-full px-3 py-2 shadow-sm hover:shadow-lg transition w-fit"
-                            >
-                                <div className="w-10 h-10 rounded-full bg-[#16332B] text-white flex items-center justify-center">
-                                    <User size={18} />
-                                </div>
-                                <div className="text-left">
-                                    <p className="text-sm font-semibold">{userName}</p>
-                                    <p className="text-xs text-gray-500">My Profile</p>
-                                </div>
-                            </button>
+                            <div className="flex items-center gap-4 pt-2">
+                                <button
+                                    onClick={() => navigate("/login")}
+                                    className="text-[#16332B] font-medium hover:underline"
+                                >
+                                    Sign In
+                                </button>
+                                <button
+                                    onClick={() => navigate("/register")}
+                                    className="bg-[#16332B] text-white px-5 py-2 rounded-full hover:bg-[#0F231D]"
+                                >
+                                    Sign Up
+                                </button>
+                            </div>
                         </div>
                     )}
                 </header>
@@ -246,14 +228,14 @@ export default function Dashboard() {
 
                         <div className="flex flex-wrap items-center gap-6 mt-9 font-[system-ui,sans-serif]">
                             <button
-                                onClick={() => navigate("/patient/doctors")}
+                                onClick={() => requireAuth("Please sign in to book an appointment")}
                                 className="bg-[#16332B] text-white px-7 py-4 rounded-full"
                             >
                                 Book Appointment
                             </button>
 
                             <button
-                                onClick={() => navigate("/patient/products")}
+                                onClick={() => requireAuth("Please sign in to buy medicines")}
                                 className="border border-[#16332B] px-7 py-4 rounded-full font-medium hover:bg-[#16332B] hover:text-white transition"
                             >
                                 Buy Medicines
@@ -262,7 +244,7 @@ export default function Dashboard() {
 
                         <p className="mt-5 text-sm font-[system-ui,sans-serif] text-[#16332B]/60">
                             <button
-                                onClick={() => navigate("/patient/ambulance")}
+                                onClick={() => requireAuth("Please sign in to book an ambulance")}
                                 className="underline hover:text-[#16332B]"
                             >
                                 Need urgent help? Book an ambulance →
@@ -335,20 +317,13 @@ export default function Dashboard() {
 
                 {/* STATS */}
                 <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-20">
-                    <div className="grid md:grid-cols-4 gap-6 font-[system-ui,sans-serif]">
+                    <div className="grid md:grid-cols-3 gap-6 font-[system-ui,sans-serif]">
 
                         <div className="bg-white rounded-2xl p-7 border border-[#E4DFD3]">
                             <h2 className="text-3xl font-semibold font-[Georgia,serif] text-[#16332B]">
                                 {doctors.length}+
                             </h2>
                             <p className="text-[#16332B]/60 mt-2 text-sm">Specialist Doctors</p>
-                        </div>
-
-                        <div className="bg-white rounded-2xl p-7 border border-[#E4DFD3]">
-                            <h2 className="text-3xl font-semibold font-[Georgia,serif] text-[#3E7C59]">
-                                {appointments.length}
-                            </h2>
-                            <p className="text-[#16332B]/60 mt-2 text-sm">Your Appointments</p>
                         </div>
 
                         <div className="bg-white rounded-2xl p-7 border border-[#E4DFD3]">
@@ -360,9 +335,9 @@ export default function Dashboard() {
 
                         <div className="bg-white rounded-2xl p-7 border border-[#E4DFD3]">
                             <h2 className="text-3xl font-semibold font-[Georgia,serif] text-[#8B6BAE]">
-                                {orders.length}
+                                1000+
                             </h2>
-                            <p className="text-[#16332B]/60 mt-2 text-sm">Medicine Orders</p>
+                            <p className="text-[#16332B]/60 mt-2 text-sm">Happy Patients</p>
                         </div>
 
                     </div>
@@ -396,38 +371,61 @@ export default function Dashboard() {
                                 accent: "#3E7C59",
                             },
                             {
-                                href: "/patient/ambulance",
+                                href: null,
                                 Icon: Ambulance,
                                 title: "Ambulance",
                                 desc: "Emergency ambulance booking, anytime.",
                                 accent: "#B5562C",
+                                
                             },
                             {
-                                href: "/patient/appointments",
+                                href: null,
                                 Icon: CalendarCheck,
                                 title: "My Appointments",
                                 desc: "View and manage all your visits.",
                                 accent: "#8B6BAE",
+                                message: "Please sign in to view your appointments",
                             },
                         ].map((s) => (
-                            <a
-                                key={s.title}
-                                href={s.href}
-                                className="bg-white rounded-2xl p-8 border border-[#E4DFD3] hover:border-[#16332B]/30 hover:shadow-md transition"
-                            >
-                                <div
-                                    className="w-14 h-14 rounded-xl flex items-center justify-center"
-                                    style={{ backgroundColor: `${s.accent}14` }}
+                            s.href ? (
+                                <a
+                                    key={s.title}
+                                    href={s.href}
+                                    className="bg-white rounded-2xl p-8 border border-[#E4DFD3] hover:border-[#16332B]/30 hover:shadow-md transition"
                                 >
-                                    <s.Icon size={28} color={s.accent} />
-                                </div>
+                                    <div
+                                        className="w-14 h-14 rounded-xl flex items-center justify-center"
+                                        style={{ backgroundColor: `${s.accent}14` }}
+                                    >
+                                        <s.Icon size={28} color={s.accent} />
+                                    </div>
 
-                                <h3 className="text-xl font-medium mt-6">{s.title}</h3>
+                                    <h3 className="text-xl font-medium mt-6">{s.title}</h3>
 
-                                <p className="text-[#16332B]/60 mt-2 font-[system-ui,sans-serif] text-[15px] leading-6">
-                                    {s.desc}
-                                </p>
-                            </a>
+                                    <p className="text-[#16332B]/60 mt-2 font-[system-ui,sans-serif] text-[15px] leading-6">
+                                        {s.desc}
+                                    </p>
+                                </a>
+                            ) : (
+                                <button
+                                    key={s.title}
+                                    onClick={() => requireAuth(s.message)}
+                                    className="text-left bg-white rounded-2xl p-8 border border-[#E4DFD3] hover:border-[#16332B]/30 hover:shadow-md transition"
+                                >
+                                    <div
+                                        className="w-14 h-14 rounded-xl flex items-center justify-center"
+                                        style={{ backgroundColor: `${s.accent}14` }}
+                                    >
+                                        <s.Icon size={28} color={s.accent} />
+                                    </div>
+
+                                    <h3 className="text-xl font-medium mt-6">{s.title}</h3>
+
+                                    <p className="text-[#16332B]/60 mt-2 font-[system-ui,sans-serif] text-[15px] leading-6">
+                                        {s.desc}
+                                    </p>
+                                </button>
+                            )
                         ))}
                     </div>
                 </section>
@@ -514,7 +512,7 @@ export default function Dashboard() {
                                         </div>
 
                                         <button
-                                            onClick={() => navigate(`/patient/bookdoctor?doctorId=${doctor.id}`)}
+                                            onClick={() => requireAuth("Please sign in to book an appointment")}
                                             className="block w-full mt-5 bg-[#16332B] text-white text-center py-3 rounded-full font-medium hover:bg-[#0F231D] transition"
                                         >
                                             Book Appointment
@@ -524,55 +522,6 @@ export default function Dashboard() {
                             ))}
                         </div>
                     )}
-                </section>
-
-                {/* UPCOMING APPOINTMENT */}
-                <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
-                    <div className="bg-white rounded-2xl border border-[#E4DFD3] p-8 lg:p-10">
-
-                        <div className="flex justify-between items-center mb-7">
-                            <h2 className="text-2xl font-medium">Upcoming appointment</h2>
-                            <a
-                                href="/patient/appointments"
-                                className="text-[#16332B] font-medium font-[system-ui,sans-serif] hover:underline"
-                            >
-                                View all
-                            </a>
-                        </div>
-
-                        {upcomingAppointments.length === 0 ? (
-                            <div className="text-center py-12 font-[system-ui,sans-serif]">
-                                <h3 className="text-lg font-medium">No upcoming appointment</h3>
-                                <p className="text-[#16332B]/60 mt-2">
-                                    Book your first consultation today.
-                                </p>
-                            </div>
-                        ) : (
-                            <div className="grid md:grid-cols-2 gap-6 font-[system-ui,sans-serif]">
-                                {upcomingAppointments.slice(0, 2).map((a) => (
-                                    <div
-                                        key={a.id}
-                                        className="border border-[#E4DFD3] rounded-2xl p-6 hover:border-[#16332B]/40 transition"
-                                    >
-                                        <h3 className="text-lg font-semibold font-[Georgia,serif]">
-                                            {displayDoctorName(a.doctorName) || a.doctorId}
-                                        </h3>
-
-                                        <p className="text-[#16332B]/60 mt-2 text-sm">
-                                            {new Date(a.appointmentTime).toLocaleString("en-IN", {
-                                                dateStyle: "medium",
-                                                timeStyle: "short",
-                                            })}
-                                        </p>
-
-                                        <span className="inline-block mt-4 bg-[#3E7C59]/10 text-[#3E7C59] px-4 py-1.5 rounded-full text-sm font-medium">
-                                            {a.status}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        )}
-                    </div>
                 </section>
 
                 {/* HEALTH TIP */}
@@ -603,60 +552,11 @@ export default function Dashboard() {
                         </div>
 
                         <button
-                            onClick={() => navigate("/patient/ambulance")}
+                            onClick={() => requireAuth("Please sign in to book an ambulance")}
                             className="bg-white text-[#991B1B] px-8 py-4 rounded-full font-medium hover:scale-[1.03] transition"
                         >
                             Book Ambulance
                         </button>
-                    </div>
-                </section>
-
-                {/* RECENT ORDERS */}
-                <section className="max-w-7xl mx-auto px-6 lg:px-10 mt-24">
-                    <div className="flex justify-between items-end mb-8">
-                        <h2 className="text-4xl font-normal">Recent orders</h2>
-                        <a
-                            href="/patient/orders"
-                            className="text-[#16332B] font-medium font-[system-ui,sans-serif] hover:underline"
-                        >
-                            View all →
-                        </a>
-                    </div>
-
-                    <div className="bg-white rounded-2xl border border-[#E4DFD3] overflow-hidden font-[system-ui,sans-serif]">
-                        {orders.length === 0 ? (
-                            <div className="py-14 text-center text-[#16332B]/60">
-                                No medicine orders found.
-                            </div>
-                        ) : (
-                            <table className="w-full text-[15px]">
-                                <thead className="bg-[#FAF8F3]">
-                                    <tr>
-                                        <th className="text-left p-5 font-medium">Medicine</th>
-                                        <th className="text-left p-5 font-medium">Date</th>
-                                        <th className="text-left p-5 font-medium">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {orders.slice(0, 5).map((order) => (
-                                        <tr
-                                            key={order.id}
-                                            className="border-t border-[#E4DFD3] hover:bg-[#FAF8F3]/60"
-                                        >
-                                            <td className="p-5">{order.productName}</td>
-                                            <td className="p-5">
-                                                {new Date(order.orderDate).toLocaleDateString("en-IN")}
-                                            </td>
-                                            <td className="p-5">
-                                                <span className="bg-[#3E7C59]/10 text-[#3E7C59] px-3 py-1 rounded-full">
-                                                    {order.status}
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        )}
                     </div>
                 </section>
 
@@ -870,7 +770,12 @@ export default function Dashboard() {
                                     <Link to="/patient/ambulance">Ambulance</Link>
                                 </li>
                                 <li>
-                                    <Link to="/patient/appointments">Appointments</Link>
+                                    <button
+                                        onClick={() => requireAuth("Please sign in to view your appointments")}
+                                        className="hover:underline"
+                                    >
+                                        Appointments
+                                    </button>
                                 </li>
                             </ul>
                         </div>
@@ -905,6 +810,15 @@ export default function Dashboard() {
                 </footer>
 
             </div>
+
+            {/* Sign-in toast — appears briefly before redirecting guests to /login */}
+            {authToast && (
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[100] bg-[#16332B] text-white px-6 py-4 rounded-full shadow-xl font-[system-ui,sans-serif] text-[15px] flex items-center gap-3 animate-[fadeIn_0.2s_ease-out]">
+                    <User size={16} />
+                    {authToast}
+                </div>
+            )}
+
             <Chatbot />
         </>
     );
