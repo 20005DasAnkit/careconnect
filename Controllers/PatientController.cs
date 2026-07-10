@@ -119,11 +119,11 @@ public class PatientController : ControllerBase
 
         if (user == null)
             return NotFound("User not found.");
-        // Original advance (50% of consultation fee)
+
         decimal originalAdvance = Math.Round(doctor.Fee * 0.5m, 2);
-        // Amount patient actually needs to pay
+
         decimal payableAdvance = originalAdvance;
-        // Wallet / Refund balance used
+
         decimal walletUsed = 0;
 
         if (dto.UseRefundBalance && user.RefundBalance > 0)
@@ -364,9 +364,6 @@ public class PatientController : ControllerBase
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        // Same fix as /ambulances/nearby — don't filter by IsAvailable at
-        // the query level, or the patient's own booked ambulance vanishes
-        // from the list the moment it's locked.
         var ambulanceQuery = _context.Ambulances.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(type))
@@ -617,7 +614,6 @@ public class PatientController : ControllerBase
             request.DistanceKm,
             request.VehicleType,
             request.RequestTime,
-
             DriverName = ambulance?.DriverName,
             DriverPhone = ambulance?.DriverPhone,
             VehicleNumber = ambulance?.VehicleNumber,
@@ -769,20 +765,18 @@ public class PatientController : ControllerBase
              where r.Id == id && r.UserId == userId
              select new
              {
-                 r.Id,
-                 r.Status,
-                 r.Fare,
-                 r.DistanceKm,
-                 r.PickupLocation,
-                 r.DestinationLocation,
-                 // r.PaymentStatus — uncomment this line once you confirm
-                 // AmbulanceRequest has a PaymentStatus column (see step 2).
-                 DriverName = a.DriverName,
-                 DriverPhone = a.DriverPhone,
-                 VehicleNumber = a.VehicleNumber,
-                 LicenseNumber = a.LicenseNumber,   // ← was missing, this is the actual bug
-                 Rating = a.Rating,
-                 Verified = a.Verified,
+                r.Id,
+                r.Status,
+                r.Fare,
+                r.DistanceKm,
+                r.PickupLocation,
+                r.DestinationLocation,
+                DriverName = a.DriverName,
+                DriverPhone = a.DriverPhone,
+                VehicleNumber = a.VehicleNumber,
+                LicenseNumber = a.LicenseNumber,
+                Rating = a.Rating,
+                Verified = a.Verified,
              }).FirstOrDefault();
 
         if (ride == null)
@@ -791,9 +785,6 @@ public class PatientController : ControllerBase
         return Ok(ride);
     }
 
-    // NEW — persists the "Pay Now" click. Without this, RideStatus.jsx calls
-    // PUT /patient/ambulance-request/{id}/pay on every successful payment,
-    // but that route didn't exist, so the payment never actually saved.
     [Authorize(Roles = "Patient")]
     [HttpPut("ambulance-request/{id}/pay")]
     public IActionResult MarkAmbulancePaid(int id)
@@ -949,16 +940,16 @@ public class PatientController : ControllerBase
 
              select new
              {
-                 a.Id,
-                 a.Status,
-                 a.PaymentStatus,
-                 a.AdvanceAmount,
-                 a.IsReviewed,
-                 AppointmentDate = s.AvailableFrom,
-                 AppointmentTime = s.AvailableFrom,
-                 Place = s.Place,
-                 DoctorId = d.Id,
-                 d.HospitalName
+                a.Id,
+                a.Status,
+                a.PaymentStatus,
+                a.AdvanceAmount,
+                a.IsReviewed,
+                AppointmentDate = s.AvailableFrom,
+                AppointmentTime = s.AvailableFrom,
+                Place = s.Place,
+                DoctorId = d.Id,
+                d.HospitalName
              })
             .FirstOrDefault();
 
@@ -992,10 +983,6 @@ public class PatientController : ControllerBase
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        // NOTE: no longer filtering by IsAvailable here — an ambulance the
-        // current user just booked has IsAvailable = false, and filtering
-        // it out at the query level meant it silently disappeared from the
-        // list instead of showing "Driver is on the way".
         var ambulanceQuery = _context.Ambulances.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(type))
@@ -1042,10 +1029,7 @@ public class PatientController : ControllerBase
                     RideStatus = myRide ? activeRequest!.Status : null,
                 };
             })
-            // Keep: ambulances still free to book, PLUS the one the current
-            // user has an active request on (even though it's now locked).
-            // Drop: other ambulances someone else has locked — those should
-            // stay invisible, exactly like before.
+
             .Where(x => x.IsAvailable || x.MyRide)
             .OrderBy(x => x.DistanceKm)
             .Take(10)
@@ -1205,11 +1189,6 @@ public class PatientController : ControllerBase
             $"MedicineInvoice-{order.Id}.pdf");
     }
 
-    // NEW — lets the frontend show "your ambulance is on the way" immediately
-    // on page load, without requiring the patient to pick a location first.
-    // This is location-independent by design: an active booking should be
-    // visible the instant the page opens, on any device.
-    [Authorize(Roles = "Patient")]
     [HttpGet("ambulance/active")]
     public IActionResult GetActiveAmbulanceRequest()
     {

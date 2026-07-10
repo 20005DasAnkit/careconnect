@@ -40,8 +40,7 @@ namespace HEALTHCARE.Controllers
             return doctor?.Id;
         }
 
-        // ───────────────────────── DOCTOR: create or update ─────────────────────────
-
+        // ───────────────────────── DOCTOR: create or update ───────────────────────── 
         [HttpPost("doctor/prescriptions")]
         [Authorize(Roles = "Doctor")]
         public async Task<IActionResult> CreateOrUpdate([FromBody] CreatePrescriptionDto dto)
