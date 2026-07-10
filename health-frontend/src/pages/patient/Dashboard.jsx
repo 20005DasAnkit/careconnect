@@ -632,12 +632,21 @@ export default function Dashboard() {
                             <table className="w-full text-[15px]">
                                 <thead className="bg-[#FAF8F3]">
                                     <tr>
-                                        <th className="text-left p-5 font-medium">Medicine</th>
-                                        <th className="text-left p-5 font-medium">Date</th>
-                                        <th className="text-left p-5 font-medium">Payment</th>
-                                        <th className="text-left p-5 font-medium">Status</th>
+                                        <th className="text-left p-5 font-medium">
+                                            Medicine
+                                        </th>
+                                        <th className="text-left p-5 font-medium">
+                                            Date
+                                        </th>
+                                        <th className="text-left p-5 font-medium">
+                                            Payment
+                                        </th>
+                                        <th className="text-left p-5 font-medium">
+                                            Status
+                                        </th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     {orders.slice(0, 1).map((order) => (
                                         <tr
