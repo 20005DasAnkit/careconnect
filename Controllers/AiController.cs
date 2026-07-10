@@ -152,10 +152,6 @@ public class AiController : ControllerBase
         });
     }
 
-    /// <summary>
-    /// Pulls the trailing "ACTION: xxx" line out of the AI's raw reply and
-    /// returns the cleaned, user-facing text plus the validated action string.
-    /// </summary>
     private static (string reply, string action) ExtractAction(string rawReply)
     {
         var match = Regex.Match(
