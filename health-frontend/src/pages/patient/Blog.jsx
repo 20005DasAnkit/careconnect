@@ -179,113 +179,66 @@ export default function Blog() {
                 {/* ── Featured + Grid ── */}
                 {!loading && filtered.length > 0 && (
                     <>
-                        {/* Featured post */}
-                        <button
-                            onClick={() => navigate(`/patient/blog/${featured.id}`)}
-                            className="w-full text-left bg-white rounded-[24px] border border-[#E4DFD3] overflow-hidden mb-8 grid md:grid-cols-2 hover:border-[#16332B]/25 hover:shadow-[0_15px_35px_-22px_rgba(22,51,43,0.25)] transition-all"
-                        >
-                            <div className="h-56 md:h-full bg-[#EFEAE0] overflow-hidden">
-                                {featured.image ? (
-                                    <img
-                                        src={`http://localhost:5008${featured.image}`}
-                                        alt={featured.title}
-                                        className="w-full h-full object-cover"
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center">
-                                        {(() => {
-                                            const { icon: Icon, color } = getCategoryMeta(featured.category);
-                                            return <Icon size={40} strokeWidth={1.5} style={{ color }} />;
-                                        })()}
-                                    </div>
-                                )}
-                            </div>
-                            <div className="p-8 flex flex-col justify-center">
-                                <span className="text-[12px] font-semibold uppercase tracking-wide text-[#B5562C] mb-3">
-                                    {featured.category || "Wellness"}
-                                </span>
-                                <h2
-                                    style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                                    className="text-[1.5rem] leading-tight mb-3"
+                        <div className="space-y-8">
+                            {filtered.map((post) => (
+                                <button
+                                    key={post.id}
+                                    onClick={() => navigate(`/patient/blog/${post.id}`)}
+                                    className="w-full text-left bg-white rounded-[24px] border border-[#E4DFD3] overflow-hidden grid md:grid-cols-2 hover:border-[#16332B]/25 hover:shadow-[0_15px_35px_-22px_rgba(22,51,43,0.25)] transition-all"
                                 >
-                                    {featured.title}
-                                </h2>
-                                <p className="text-[14px] text-[#16332B]/55 leading-6 mb-5 line-clamp-3">
-                                    {featured.excerpt}
-                                </p>
-                                <div className="flex items-center gap-4 text-[12px] text-[#16332B]/45 mb-5">
-                                    <span className="flex items-center gap-1.5">
-                                        <Calendar size={13} />
-                                        {featured.publishedAt
-                                            ? new Date(featured.publishedAt).toLocaleDateString()
-                                            : "—"}
-                                    </span>
-                                    <span className="flex items-center gap-1.5">
-                                        <Clock size={13} />
-                                        {featured.readTimeMinutes || 5} min read
-                                    </span>
-                                </div>
-                                <span className="inline-flex items-center gap-2 text-[#16332B] font-semibold text-sm">
-                                    Read article <ArrowRight size={14} />
-                                </span>
-                            </div>
-                        </button>
-
-                        {/* Rest of the posts */}
-                        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                            {rest.map((post) => {
-                                const { icon: Icon, color } = getCategoryMeta(post.category);
-                                return (
-                                    <button
-                                        key={post.id}
-                                        onClick={() => navigate(`/patient/blog/${post.id}`)}
-                                        className="text-left bg-white rounded-[20px] border border-[#E4DFD3] overflow-hidden hover:border-[#16332B]/25 hover:shadow-[0_15px_35px_-22px_rgba(22,51,43,0.25)] transition-all"
-                                    >
-                                        <div className="h-40 bg-[#EFEAE0] overflow-hidden">
-                                            {post.image ? (
-                                                <img
-                                                    src={`http://localhost:5008${post.image}`}
-                                                    alt={post.title}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center">
-                                                    <Icon size={30} strokeWidth={1.5} style={{ color }} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="p-5">
-                                            <span
-                                                className="text-[11px] font-semibold uppercase tracking-wide mb-2 inline-block"
-                                                style={{ color }}
-                                            >
-                                                {post.category || "Wellness"}
-                                            </span>
-                                            <h3
-                                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
-                                                className="text-[15px] leading-snug mb-2 line-clamp-2"
-                                            >
-                                                {post.title}
-                                            </h3>
-                                            <p className="text-[13px] text-[#16332B]/50 leading-5 mb-4 line-clamp-2">
-                                                {post.excerpt}
-                                            </p>
-                                            <div className="flex items-center gap-3 text-[11px] text-[#16332B]/40">
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar size={12} />
-                                                    {post.publishedAt
-                                                        ? new Date(post.publishedAt).toLocaleDateString()
-                                                        : "—"}
-                                                </span>
-                                                <span className="flex items-center gap-1">
-                                                    <Clock size={12} />
-                                                    {post.readTimeMinutes || 5} min
-                                                </span>
+                                    <div className="h-56 md:h-full bg-[#EFEAE0] overflow-hidden">
+                                        {post.image ? (
+                                            <img
+                                                src={`http://localhost:5008${post.image}`}
+                                                alt={post.title}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center">
+                                                {(() => {
+                                                    const { icon: Icon, color } = getCategoryMeta(post.category);
+                                                    return <Icon size={40} strokeWidth={1.5} style={{ color }} />;
+                                                })()}
                                             </div>
+                                        )}
+                                    </div>
+
+                                    <div className="p-8 flex flex-col justify-center">
+                                        <span className="text-[12px] font-semibold uppercase tracking-wide text-[#B5562C] mb-3">
+                                            {post.category || "Wellness"}
+                                        </span>
+
+                                        <h2
+                                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                            className="text-[1.5rem] leading-tight mb-3"
+                                        >
+                                            {post.title}
+                                        </h2>
+
+                                        <p className="text-[14px] text-[#16332B]/55 leading-6 mb-5 line-clamp-3">
+                                            {post.excerpt}
+                                        </p>
+
+                                        <div className="flex items-center gap-4 text-[12px] text-[#16332B]/45 mb-5">
+                                            <span className="flex items-center gap-1.5">
+                                                <Calendar size={13} />
+                                                {post.publishedAt
+                                                    ? new Date(post.publishedAt).toLocaleDateString()
+                                                    : "—"}
+                                            </span>
+
+                                            <span className="flex items-center gap-1.5">
+                                                <Clock size={13} />
+                                                {post.readTimeMinutes || 5} min read
+                                            </span>
                                         </div>
-                                    </button>
-                                );
-                            })}
+
+                                        <span className="inline-flex items-center gap-2 text-[#16332B] font-semibold text-sm">
+                                            Read article <ArrowRight size={14} />
+                                        </span>
+                                    </div>
+                                </button>
+                            ))}
                         </div>
                     </>
                 )}

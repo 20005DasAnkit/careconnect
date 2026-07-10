@@ -262,7 +262,7 @@ export default function Register() {
                                 flex: 1,
                             }}
                         >
-                            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 600 }}>250+</div>
+                            <div style={{ fontFamily: "'Fraunces', serif", fontSize: 24, fontWeight: 600 }}>20+</div>
                             <div style={{ fontSize: 12.5, color: "rgba(255,255,255,.7)", marginTop: 2 }}>Specialist Doctors</div>
                         </div>
                         <div
