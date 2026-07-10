@@ -201,22 +201,22 @@ public class PatientController : ControllerBase
             orderby a.BookedAt descending
 
             select new
-            {
-                a.Id,
-                DoctorId = d.Id,
-                DoctorName = u.FullName,
-                Specialization = d.Specialization,
-                Hospital = d.HospitalName,
-                AppointmentDate = s.AvailableFrom.Date,
-                AppointmentTime = s.AvailableFrom,
-                PlaceToVisit = s.Place,
-                a.Status,
-                a.PaymentStatus,
-                a.AdvanceAmount,
-                a.IsReviewed,
-                SlotId = s.Id,
-            }
-
+{
+    a.Id,
+    DoctorId = d.Id,
+    DoctorName = u.FullName,
+    Specialization = d.Specialization,
+    Hospital = d.HospitalName,
+    DoctorFee = d.Fee,
+    AppointmentDate = s.AvailableFrom.Date,
+    AppointmentTime = s.AvailableFrom,
+    PlaceToVisit = s.Place,
+    a.Status,
+    a.PaymentStatus,
+    a.AdvanceAmount,
+    a.IsReviewed,
+    SlotId = s.Id,
+}
         ).ToList();
 
         return Ok(appointments);

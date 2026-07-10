@@ -4,21 +4,24 @@ import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import {
     Calendar, Clock, Search, RefreshCw, ChevronLeft, ChevronRight,
-    IndianRupee, Building2, MapPin, Plus, ChevronRightCircle
+    IndianRupee, Building2, MapPin, Plus, ChevronRight as ChevronArrow,
+    CalendarCheck, Hourglass, CheckCircle2, Wallet,
 } from "lucide-react";
 import Footer from "../../components/Footer";
 
-/* ─── Tokens ──────────────────────────────────── */
+/* ─── Tokens (aligned with CareConnect design system) ─── */
 const T = {
-    cream: "#F5F0E8",
-    creamDark: "#EDE7D9",
-    green: "#2D5016",
+    cream: "#FAF8F3",
+    creamDark: "#F5F0E8",
+    green: "#16332B",
+    greenSoft: "#2D5016",
     greenLight: "#EBF2E3",
-    terra: "#C4622D",
+    terra: "#B5562C",
+    terraDark: "#C4622D",
     terraLight: "#FAF0EA",
-    ink: "#1A1A1A",
+    ink: "#16332B",
     muted: "#6B7280",
-    border: "#E2DACE",
+    border: "#E4DFD3",
     white: "#FFFFFF",
 };
 
@@ -72,40 +75,38 @@ function AppointmentRow({ appt, navigate, last }) {
 
     return (
         <div
-            onClick={() => navigate(`/patient/appointments/${appt.id}`)}
+            onClick={() => navigate(`/patient/appointments/${appt.id}`, { state: { appt } })}
             style={{
                 display: "grid",
-                gridTemplateColumns: "2.6fr 1.1fr 1fr 2fr 1fr 1fr 1.2fr 40px",
+                gridTemplateColumns: "2.6fr 1.1fr 1fr 2fr 1fr 1fr 1.2fr 32px",
                 alignItems: "center",
                 gap: 16,
-                padding: "18px 24px",
+                padding: "16px 24px",
                 borderBottom: last ? "none" : `1px solid ${T.border}`,
                 transition: "background .15s",
                 cursor: "pointer",
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = T.cream; }}
-            onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = T.cream; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
         >
             {/* Doctor */}
             <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
                 <div style={{
                     width: 40, height: 40, borderRadius: "50%", flexShrink: 0,
-                    background: `linear-gradient(135deg, ${T.green}, #3D6B1F)`,
+                    background: `linear-gradient(135deg, ${T.green}, ${T.greenSoft})`,
                     display: "flex", alignItems: "center", justifyContent: "center",
-                    color: T.white, fontFamily: "Fraunces, serif", fontWeight: 800, fontSize: 16,
+                    color: T.white, fontFamily: "Fraunces, serif", fontWeight: 800, fontSize: 15,
                 }}>
                     {initial}
                 </div>
                 <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 14, fontWeight: 700, color: T.green, margin: 0 }}>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: T.green, margin: 0, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {appt.doctorName}
                     </p>
                     <p style={{ fontSize: 12, color: T.terra, fontWeight: 600, margin: "2px 0 0" }}>{appt.specialization}</p>
-                    <div style={{ marginTop: 6 }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: T.muted }}>
-                            <Building2 size={11} />
-                            <span><strong>Hospital:</strong> {appt.hospital}</span>
-                        </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: T.muted, marginTop: 6 }}>
+                        <Building2 size={11} />
+                        <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{appt.hospital}</span>
                     </div>
                 </div>
             </div>
@@ -123,11 +124,11 @@ function AppointmentRow({ appt, navigate, last }) {
             </div>
 
             {/* Place to Visit */}
-            <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
-                <MapPin size={14} color={T.green} />
-                <div style={{ fontSize: 12, fontWeight: 600, color: T.green }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 6, minWidth: 0 }}>
+                <MapPin size={14} color={T.green} style={{ flexShrink: 0, marginTop: 1 }} />
+                <span style={{ fontSize: 12.5, fontWeight: 600, color: T.green, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                     {appt.placeToVisit}
-                </div>
+                </span>
             </div>
 
             {/* Payment */}
@@ -139,7 +140,7 @@ function AppointmentRow({ appt, navigate, last }) {
             </span>
 
             {/* Advance */}
-            <div style={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <IndianRupee size={13} color={T.green} />
                 <span style={{ fontFamily: "Fraunces, serif", fontWeight: 800, fontSize: 15, color: T.green }}>
                     {appt.advanceAmount}
@@ -154,20 +155,32 @@ function AppointmentRow({ appt, navigate, last }) {
                 {status.label}
             </span>
 
-            {/* Chevron affordance — signals the row is clickable */}
+            {/* Chevron affordance */}
             <div style={{ display: "flex", justifyContent: "flex-end" }}>
-                <ChevronRightCircle size={20} color={T.muted} />
+                <ChevronArrow size={17} color={T.border} strokeWidth={2.5} />
             </div>
         </div>
     );
 }
 
-/* ─── Stat Column ─────────────────────────────── */
-function StatColumn({ label, value, accent, last }) {
+/* ─── Stat Card ───────────────────────────────── */
+function StatCard({ icon, label, value, accent }) {
     return (
-        <div style={{ flex: 1, minWidth: 110, padding: "20px 24px", borderRight: last ? "none" : `1px solid ${T.border}` }}>
-            <p style={{ fontSize: 12, color: T.muted, margin: "0 0 6px", fontWeight: 500 }}>{label}</p>
-            <h3 style={{ fontFamily: "Fraunces, serif", fontWeight: 800, fontSize: 26, color: accent || T.ink, margin: 0 }}>{value}</h3>
+        <div style={{
+            flex: "1 1 160px", background: T.white, borderRadius: 18, border: `1px solid ${T.border}`,
+            padding: "20px 22px", display: "flex", alignItems: "center", gap: 14,
+        }}>
+            <div style={{
+                width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+                background: accent ? `${accent}1A` : T.greenLight,
+                display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+                {icon}
+            </div>
+            <div>
+                <p style={{ fontSize: 11.5, color: T.muted, margin: "0 0 3px", fontWeight: 600 }}>{label}</p>
+                <h3 style={{ fontFamily: "Fraunces, serif", fontWeight: 800, fontSize: 22, color: accent || T.ink, margin: 0 }}>{value}</h3>
+            </div>
         </div>
     );
 }
@@ -201,10 +214,10 @@ export default function Appointments() {
 
     const filtered = useMemo(() => {
         let d = [...appointments];
-        if (search) d = d.filter(a => (a.doctorName || "").toLowerCase().includes(search.toLowerCase()));
+        if (search) d = d.filter((a) => (a.doctorName || "").toLowerCase().includes(search.toLowerCase()));
         if (statusFilter !== "All") {
-            if (statusFilter === "Cancelled") d = d.filter(a => a.status.includes("Cancelled"));
-            else d = d.filter(a => a.status === statusFilter);
+            if (statusFilter === "Cancelled") d = d.filter((a) => a.status.includes("Cancelled"));
+            else d = d.filter((a) => a.status === statusFilter);
         }
         d.sort((a, b) => {
             const dateA = new Date(a.appointmentDate);
@@ -219,9 +232,9 @@ export default function Appointments() {
 
     const stats = {
         total: appointments.length,
-        confirmed: appointments.filter(a => a.status === "Confirmed").length,
-        pending: appointments.filter(a => a.status === "Pending").length,
-        completed: appointments.filter(a => a.status === "Completed").length,
+        confirmed: appointments.filter((a) => a.status === "Confirmed").length,
+        pending: appointments.filter((a) => a.status === "Pending").length,
+        completed: appointments.filter((a) => a.status === "Completed").length,
         totalPaid: appointments.reduce((s, a) => s + (a.advanceAmount || 0), 0),
     };
 
@@ -237,62 +250,69 @@ export default function Appointments() {
           @keyframes spin{to{transform:rotate(360deg)}}
           ::-webkit-scrollbar{width:5px;height:5px;}
           ::-webkit-scrollbar-thumb{background:${T.border};border-radius:99px;}
-          .appt-tab{position:relative; background:none; border:none; padding:10px 4px; font-size:14px; font-weight:600; cursor:pointer; color:${T.muted};}
-          .appt-tab.active{color:${T.ink};}
-          .appt-tab.active::after{content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:${T.ink};}
+          .appt-tab{position:relative; background:none; border:none; padding:10px 4px; font-size:13.5px; font-weight:600; cursor:pointer; color:${T.muted}; transition: color .15s;}
+          .appt-tab:hover{color:${T.ink};}
+          .appt-tab.active{color:${T.green};}
+          .appt-tab.active::after{content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px; background:${T.terra}; border-radius:2px;}
         `}</style>
 
-                <div className="w-full max-w-[1700px] mx-auto px-8 lg:px-16 xl:px-24 py-10">
+                <div className="w-full max-w-[1700px] mx-auto px-6 lg:px-16 xl:px-24 py-10">
 
                     {/* ── Editorial header ── */}
-                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 16, marginBottom: 32 }}>
-                        <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }} className="leading-[1.05] tracking-tight">
-                            <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)", color: T.green }}>Every visit,</span>
-                            <br />
-                            <span className="italic text-[#B5562C]" style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" }}>organized in one place.</span>
-                        </h1>
+                    <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "space-between", alignItems: "flex-end", gap: 16, marginBottom: 36 }}>
+                        <div>
+                            <p style={{ color: T.terraDark, fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: 1.2, margin: "0 0 10px" }}>
+                                CareConnect
+                            </p>
+                            <h1 style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }} className="leading-[1.05] tracking-tight">
+                                <span style={{ fontSize: "clamp(2.1rem, 4.2vw, 3.3rem)", color: T.green }}>Every visit,</span>
+                                <br />
+                                <span className="italic" style={{ fontSize: "clamp(2.1rem, 4.2vw, 3.3rem)", color: T.terra }}>organized in one place.</span>
+                            </h1>
+                        </div>
 
                         <a href="/patient/doctors" style={{
-                            display: "flex", alignItems: "center", gap: 8, padding: "13px 22px", borderRadius: 99,
-                            background: T.ink, color: T.white, fontWeight: 700, fontSize: 14, textDecoration: "none", flexShrink: 0,
+                            display: "flex", alignItems: "center", gap: 8, padding: "14px 24px", borderRadius: 99,
+                            background: T.green, color: T.white, fontWeight: 700, fontSize: 14, textDecoration: "none", flexShrink: 0,
+                            boxShadow: "0 8px 20px rgba(22,51,43,.18)",
                         }}>
                             <Plus size={16} /> Book Appointment
                         </a>
                     </div>
 
-                    {/* ── Unified stats card ── */}
-                    <div style={{ background: T.white, borderRadius: 20, border: `1px solid ${T.border}`, display: "flex", flexWrap: "wrap", marginBottom: 20, overflow: "hidden" }}>
-                        <StatColumn label="Total" value={stats.total} />
-                        <StatColumn label="Confirmed" value={stats.confirmed} accent={T.green} />
-                        <StatColumn label="Pending" value={stats.pending} accent="#D97706" />
-                        <StatColumn label="Completed" value={stats.completed} accent="#1D4ED8" />
-                        <StatColumn label="Total Paid" value={`₹${stats.totalPaid}`} accent={T.terra} last />
+                    {/* ── Stat cards ── */}
+                    <div style={{ display: "flex", flexWrap: "wrap", gap: 14, marginBottom: 24 }}>
+                        <StatCard icon={<CalendarCheck size={19} color={T.green} />} label="Total Appointments" value={stats.total} />
+                        <StatCard icon={<CheckCircle2 size={19} color={T.green} />} label="Confirmed" value={stats.confirmed} accent={T.green} />
+                        <StatCard icon={<Hourglass size={19} color="#D97706" />} label="Pending" value={stats.pending} accent="#D97706" />
+                        <StatCard icon={<CheckCircle2 size={19} color="#1D4ED8" />} label="Completed" value={stats.completed} accent="#1D4ED8" />
+                        <StatCard icon={<Wallet size={19} color={T.terra} />} label="Total Paid" value={`₹${stats.totalPaid}`} accent={T.terra} />
                     </div>
 
                     {/* ── Search / sort / tabs card ── */}
                     <div style={{ background: T.white, borderRadius: 20, border: `1px solid ${T.border}`, marginBottom: 20, overflow: "hidden" }}>
-                        <div style={{ display: "flex", gap: 8, alignItems: "center", padding: "18px 24px 14px", borderBottom: `1px solid ${T.border}`, flexWrap: "wrap" }}>
-                            {TABS.map(tab => (
+                        <div style={{ display: "flex", gap: 4, alignItems: "center", padding: "18px 24px 14px", borderBottom: `1px solid ${T.border}`, flexWrap: "wrap" }}>
+                            {TABS.map((tab) => (
                                 <button key={tab} className={`appt-tab${statusFilter === tab ? " active" : ""}`}
-                                    onClick={() => { setStatus(tab); setPage(1); }} style={{ marginRight: 18 }}>
+                                    onClick={() => { setStatus(tab); setPage(1); }} style={{ marginRight: 22 }}>
                                     {tab}
                                 </button>
                             ))}
                         </div>
-                        <div style={{ position: "relative", padding: "18px 24px", display: "flex", gap: 12, flexWrap: "wrap" }}>
+                        <div style={{ padding: "16px 24px", display: "flex", gap: 12, flexWrap: "wrap" }}>
                             <div style={{ position: "relative", flex: 1, minWidth: 220 }}>
                                 <Search size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: T.muted }} />
                                 <input
                                     value={search}
-                                    onChange={e => { setSearch(e.target.value); setPage(1); }}
+                                    onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                                     placeholder="Search by doctor name…"
                                     style={{
                                         width: "100%", height: 44, borderRadius: 12, border: `1.5px solid ${T.border}`,
-                                        paddingLeft: 38, paddingRight: 14, fontSize: 14, outline: "none", background: T.cream, color: T.ink
+                                        paddingLeft: 38, paddingRight: 14, fontSize: 14, outline: "none", background: T.cream, color: T.ink,
                                     }}
                                 />
                             </div>
-                            <select value={sortBy} onChange={e => setSort(e.target.value)}
+                            <select value={sortBy} onChange={(e) => setSort(e.target.value)}
                                 style={{ height: 44, borderRadius: 12, border: `1.5px solid ${T.border}`, padding: "0 14px", fontSize: 13, background: T.cream, color: T.ink, cursor: "pointer" }}>
                                 <option>Newest</option>
                                 <option>Oldest</option>
@@ -302,10 +322,10 @@ export default function Appointments() {
 
                     {/* ── Error ── */}
                     {error && (
-                        <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 16, padding: 28, textAlign: "center", marginBottom: 20 }}>
-                            <p style={{ color: "#DC2626", fontWeight: 700, fontSize: 16, margin: "0 0 12px" }}>{error}</p>
-                            <button onClick={load} style={{ background: "#DC2626", color: T.white, border: "none", borderRadius: 10, padding: "10px 20px", fontWeight: 700, cursor: "pointer" }}>
-                                Retry
+                        <div style={{ background: "#FEF2F2", border: "1px solid #FCA5A5", borderRadius: 16, padding: 28, textAlign: "center", marginBottom: 20, display: "flex", flexDirection: "column", alignItems: "center", gap: 14 }}>
+                            <p style={{ color: "#DC2626", fontWeight: 700, fontSize: 15, margin: 0 }}>{error}</p>
+                            <button onClick={load} style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "#DC2626", color: T.white, border: "none", borderRadius: 99, padding: "10px 22px", fontWeight: 700, cursor: "pointer", fontSize: 13.5 }}>
+                                <RefreshCw size={14} /> Retry
                             </button>
                         </div>
                     )}
@@ -317,11 +337,11 @@ export default function Appointments() {
                             {!loading && current.length > 0 && (
                                 <div style={{
                                     display: "grid",
-                                    gridTemplateColumns: "2.6fr 1.1fr 1fr 2fr 1fr 1fr 1.2fr 40px",
-                                    gap: 16, padding: "14px 24px", borderBottom: `1px solid ${T.border}`,
+                                    gridTemplateColumns: "2.6fr 1.1fr 1fr 2fr 1fr 1fr 1.2fr 32px",
+                                    gap: 16, padding: "13px 24px", borderBottom: `1px solid ${T.border}`, background: T.cream,
                                 }}>
                                     {["Doctor", "Date", "Time", "Place to Visit", "Payment", "Advance", "Status", ""].map((h, i) => (
-                                        <span key={i} style={{ fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .5 }}>
+                                        <span key={i} style={{ fontSize: 10.5, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6 }}>
                                             {h}
                                         </span>
                                     ))}
@@ -337,8 +357,9 @@ export default function Appointments() {
                                         <div key={a.id}>
                                             {currentDate !== previousDate && (
                                                 <div style={{
-                                                    background: T.creamDark, padding: "12px 24px", fontWeight: 700, fontSize: 16,
+                                                    background: T.creamDark, padding: "10px 24px", fontWeight: 700, fontSize: 13,
                                                     color: T.green, borderTop: `1px solid ${T.border}`, borderBottom: `1px solid ${T.border}`,
+                                                    textTransform: "uppercase", letterSpacing: .4,
                                                 }}>
                                                     {currentDate}
                                                 </div>
@@ -352,7 +373,7 @@ export default function Appointments() {
                                 <div style={{ padding: "64px 24px", textAlign: "center" }}>
                                     <div style={{
                                         width: 72, height: 72, borderRadius: "50%", background: T.creamDark,
-                                        display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px"
+                                        display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 18px",
                                     }}>
                                         <Calendar size={32} color={T.muted} />
                                     </div>
@@ -364,7 +385,7 @@ export default function Appointments() {
                                     </p>
                                     <a href="/patient/doctors" style={{
                                         display: "inline-flex", alignItems: "center", gap: 8, padding: "12px 22px", borderRadius: 99,
-                                        background: T.ink, color: T.white, fontWeight: 700, fontSize: 13, textDecoration: "none",
+                                        background: T.green, color: T.white, fontWeight: 700, fontSize: 13, textDecoration: "none",
                                     }}>
                                         <Plus size={14} /> Book an Appointment
                                     </a>
@@ -376,17 +397,17 @@ export default function Appointments() {
                     {/* ── Pagination ── */}
                     {!loading && totalPages > 1 && current.length > 0 && (
                         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 28 }}>
-                            <PaginationBtn onClick={() => setPage(p => p - 1)} disabled={page === 1} icon={<ChevronLeft size={16} />} />
-                            {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                            <PaginationBtn onClick={() => setPage((p) => p - 1)} disabled={page === 1} icon={<ChevronLeft size={16} />} />
+                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
                                 <button key={n} onClick={() => setPage(n)} style={{
                                     width: 38, height: 38, borderRadius: 10, fontWeight: 700, fontSize: 13, cursor: "pointer",
-                                    background: page === n ? T.ink : T.white, color: page === n ? T.white : T.ink,
+                                    background: page === n ? T.green : T.white, color: page === n ? T.white : T.ink,
                                     border: page === n ? "none" : `1.5px solid ${T.border}`,
                                 }}>
                                     {n}
                                 </button>
                             ))}
-                            <PaginationBtn onClick={() => setPage(p => p + 1)} disabled={page === totalPages} icon={<ChevronRight size={16} />} />
+                            <PaginationBtn onClick={() => setPage((p) => p + 1)} disabled={page === totalPages} icon={<ChevronRight size={16} />} />
                         </div>
                     )}
 
@@ -401,7 +422,7 @@ function PaginationBtn({ onClick, disabled, icon }) {
     return (
         <button onClick={onClick} disabled={disabled} style={{
             width: 38, height: 38, borderRadius: 10, border: `1.5px solid ${T.border}`, background: T.white,
-            cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? .4 : 1,
+            cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.4 : 1,
             display: "flex", alignItems: "center", justifyContent: "center", color: T.ink,
         }}>
             {icon}

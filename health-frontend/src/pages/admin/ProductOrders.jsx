@@ -212,7 +212,7 @@ export default function ProductOrders() {
                                                 )}
                                                 {o.status === "Delivered" && o.paymentStatus === "Paid" && (
                                                     <span style={{ color: T.greenMid, fontWeight: 700, fontSize: 12 }}>
-                                                        ✔ Completed
+                                                         Completed
                                                     </span>
                                                 )}
                                             </div>
