@@ -1,5 +1,6 @@
 namespace HEALTHCARE.DTOs;
+
 public class UpdateStockDto
 {
-    public int Stock{get; set;}
+    public int Stock { get; set; }
 }

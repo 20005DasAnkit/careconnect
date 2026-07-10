@@ -308,7 +308,7 @@ export default function Blog() {
                     </div>
                 )}
             </div>
-             <Footer />
+            <Footer />
         </div>
     );
 }

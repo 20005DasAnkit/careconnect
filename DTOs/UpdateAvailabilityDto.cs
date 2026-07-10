@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class UpdateAvailabilityDto
 {
     public int Id { get; set; }

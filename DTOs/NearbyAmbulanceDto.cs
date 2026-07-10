@@ -1,4 +1,5 @@
 namespace HEALTHCARE.Dtos;
+
 public class NearbyAmbulanceDto
 {
     public int Id { get; set; }

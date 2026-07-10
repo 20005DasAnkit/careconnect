@@ -1,4 +1,5 @@
 namespace HEALTHCARE.Models;
+
 public class AmbulanceRequest
 {
     public int Id { get; set; }

@@ -380,45 +380,45 @@ function PaymentModal({ open, amount, onClose, onSuccess }) {
 
 const labelStyle = { display: "block", fontSize: 12, fontWeight: 700, color: T.ink, margin: "0 0 6px" };
 const inputStyle = {
-                width: "100%", 
-                padding: "11px 12px", 
-                borderRadius: 10, 
-                border: `1.5px solid ${T.border}`,
-                fontSize: 14, 
-                outline: "none", 
-                background: T.cream, 
-                color: T.ink, 
-                boxSizing: "border-box",
+    width: "100%",
+    padding: "11px 12px",
+    borderRadius: 10,
+    border: `1.5px solid ${T.border}`,
+    fontSize: 14,
+    outline: "none",
+    background: T.cream,
+    color: T.ink,
+    boxSizing: "border-box",
 };
 
 /* ─── Info row ─── */
 function InfoRow({ icon, label, value, last }) {
     return (
         <div style={{
-                 display: "flex", 
-                 alignItems: "center", 
-                 justifyContent: "space-between",
-                 padding: "14px 0", borderBottom: last ? "none" : `1px solid ${T.border}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "14px 0", borderBottom: last ? "none" : `1px solid ${T.border}`,
         }}>
-        <div style={{ 
-                 display: "flex", 
-                 alignItems: "center", 
-                 gap: 8, 
-                 color: T.muted, 
-                 fontSize: 13 
-        }}>
-            {icon}
-            {label}
-        </div>
+            <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                color: T.muted,
+                fontSize: 13
+            }}>
+                {icon}
+                {label}
+            </div>
 
-        <span 
-            style={{ 
-                fontWeight: 700, 
-                fontSize: 14,
-                color: T.ink 
-            }}>{value}
-        </span>
-    </div>
+            <span
+                style={{
+                    fontWeight: 700,
+                    fontSize: 14,
+                    color: T.ink
+                }}>{value}
+            </span>
+        </div>
     );
 }
 
@@ -467,65 +467,65 @@ export default function RideStatus() {
 
     if (error || !ride) {
         return (
-            <div 
-                style={{ 
-                    minHeight: "100vh", 
-                    background: T.cream, 
-                    display: "flex", 
-                    alignItems: "center", 
-                    justifyContent: "center", 
-                    padding: 20, 
-                    fontFamily: "Inter, sans-serif" 
+            <div
+                style={{
+                    minHeight: "100vh",
+                    background: T.cream,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: 20,
+                    fontFamily: "Inter, sans-serif"
                 }}>
 
-                <div 
-                    style={{ 
-                        background: T.white, 
-                        borderRadius: 20, 
-                        border: `1px solid ${T.border}`, 
-                        padding: 36, 
-                        textAlign: "center", 
-                        maxWidth: 380 
+                <div
+                    style={{
+                        background: T.white,
+                        borderRadius: 20,
+                        border: `1px solid ${T.border}`,
+                        padding: 36,
+                        textAlign: "center",
+                        maxWidth: 380
                     }}>
 
-                    <div 
-                        style={{ 
-                            width: 56, 
-                            height: 56, 
-                            borderRadius: "50%", 
-                            background: "#FEE2E2", 
-                            display: "flex", 
-                            alignItems: "center", 
-                            justifyContent: "center", 
-                            margin: "0 auto 16px" 
+                    <div
+                        style={{
+                            width: 56,
+                            height: 56,
+                            borderRadius: "50%",
+                            background: "#FEE2E2",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            margin: "0 auto 16px"
                         }}>
                         <AlertCircle size={26} color="#DC2626" />
                     </div>
 
-                    <h2 
-                        style={{ 
-                            fontFamily: "Fraunces, serif", 
-                            fontWeight: 700, 
-                            fontSize: 18, 
-                            color: T.ink, 
-                            margin: "0 0 8px" 
+                    <h2
+                        style={{
+                            fontFamily: "Fraunces, serif",
+                            fontWeight: 700,
+                            fontSize: 18,
+                            color: T.ink,
+                            margin: "0 0 8px"
                         }}>
-                            {error || "Ride not found"}
+                        {error || "Ride not found"}
                     </h2>
 
-                    <button 
-                        onClick={() => loadRide()} 
+                    <button
+                        onClick={() => loadRide()}
                         style={{
-                            display: "inline-flex", 
-                            alignItems: "center", 
-                            gap: 8, 
-                            marginTop: 12, 
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: 8,
+                            marginTop: 12,
                             padding: "10px 20px",
-                            borderRadius: 10, 
-                            border: "none", 
-                            background: T.greenDeep, 
-                            color: T.white, 
-                            fontWeight: 700, 
+                            borderRadius: 10,
+                            border: "none",
+                            background: T.greenDeep,
+                            color: T.white,
+                            fontWeight: 700,
                             cursor: "pointer",
                         }}>
                         <RefreshCw size={14} /> Retry
@@ -538,12 +538,12 @@ export default function RideStatus() {
     const status = STATUS_CFG[ride.status] || STATUS_CFG.Pending;
 
     return (
-        <div 
-            style={{ 
-                minHeight: "100vh", 
-                background: T.cream, 
-                fontFamily: "Inter, sans-serif", 
-                color: T.ink 
+        <div
+            style={{
+                minHeight: "100vh",
+                background: T.cream,
+                fontFamily: "Inter, sans-serif",
+                color: T.ink
             }}>
 
             <style>{`
@@ -553,27 +553,27 @@ export default function RideStatus() {
         @keyframes pulseDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
       `}</style>
 
-            <div 
-                style={{ 
+            <div
+                style={{
                     maxWidth: 560,
-                    margin: "0 auto", 
-                    padding: "32px 20px 60px" 
+                    margin: "0 auto",
+                    padding: "32px 20px 60px"
                 }}>
 
                 {/* Back link */}
                 <button
                     onClick={() => navigate(-1)}
                     style={{
-                        display: "flex", 
-                        alignItems: "center", 
-                        gap: 8, 
-                        background: "none", 
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 8,
+                        background: "none",
                         border: "none",
-                        color: T.greenDeep, 
-                        fontWeight: 600, 
-                        fontSize: 14, 
-                        cursor: "pointer", 
-                        padding: 0, 
+                        color: T.greenDeep,
+                        fontWeight: 600,
+                        fontSize: 14,
+                        cursor: "pointer",
+                        padding: 0,
                         marginBottom: 22,
                     }}
                 >
@@ -581,81 +581,81 @@ export default function RideStatus() {
                 </button>
 
                 {/* ── Main card ── */}
-                <div 
-                    style={{ 
-                        background: T.white, 
-                        borderRadius: 24, 
-                        border: `1px solid ${T.border}`, 
-                        boxShadow: "0 4px 24px rgba(0,0,0,.05)", 
-                        overflow: "hidden" 
+                <div
+                    style={{
+                        background: T.white,
+                        borderRadius: 24,
+                        border: `1px solid ${T.border}`,
+                        boxShadow: "0 4px 24px rgba(0,0,0,.05)",
+                        overflow: "hidden"
                     }}>
 
                     {/* Hero status band */}
-                    <div 
+                    <div
                         style={{
                             background: `linear-gradient(135deg, ${T.greenDeep}, ${T.green})`,
-                            padding: "40px 28px 32px", 
-                            textAlign: "center", 
+                            padding: "40px 28px 32px",
+                            textAlign: "center",
                             position: "relative",
                         }}>
 
-                        <div 
+                        <div
                             style={{
-                                width: 76, 
-                                height: 76, 
-                                borderRadius: "50%", 
-                                background: T.white, 
+                                width: 76,
+                                height: 76,
+                                borderRadius: "50%",
+                                background: T.white,
                                 margin: "0 auto",
-                                display: "flex", 
-                                alignItems: "center", 
-                                justifyContent: "center", 
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
                                 position: "relative",
                             }}>
                             <Navigation size={34} color={T.green} />
                             {ride.status !== "Completed" && ride.status !== "Cancelled" && (
-                                <span 
+                                <span
                                     style={{
-                                        position: "absolute", 
-                                        inset: -6, 
+                                        position: "absolute",
+                                        inset: -6,
                                         borderRadius: "50%",
-                                        border: `2px solid ${T.white}`, 
-                                        opacity: .4, 
+                                        border: `2px solid ${T.white}`,
+                                        opacity: .4,
                                         animation: "pulseDot 2s infinite",
                                     }} />
                             )}
                         </div>
 
-                        <h1 
-                            style={{ 
-                                color: T.white, 
-                                fontFamily: "'Fraunces', Georgia, serif", 
-                                fontWeight: 700, 
-                                fontSize: 24, 
-                                margin: "20px 0 6px" 
+                        <h1
+                            style={{
+                                color: T.white,
+                                fontFamily: "'Fraunces', Georgia, serif",
+                                fontWeight: 700,
+                                fontSize: 24,
+                                margin: "20px 0 6px"
                             }}>
                             {status.label}
                         </h1>
 
-                        <p 
-                            style={{ 
-                                color: "#C9D9CC", 
-                                fontSize: 13, 
-                                margin: 0 
+                        <p
+                            style={{
+                                color: "#C9D9CC",
+                                fontSize: 13,
+                                margin: 0
                             }}>
                             Thank you for booking with CareConnect
                         </p>
 
-                        <span 
+                        <span
                             style={{
-                                display: "inline-flex", 
-                                alignItems: "center", 
-                                gap: 6, 
+                                display: "inline-flex",
+                                alignItems: "center",
+                                gap: 6,
                                 marginTop: 16,
-                                padding: "5px 14px", 
-                                borderRadius: 99, 
-                                fontSize: 11, 
+                                padding: "5px 14px",
+                                borderRadius: 99,
+                                fontSize: 11,
                                 fontWeight: 700,
-                                background: "rgba(255,255,255,.15)", 
+                                background: "rgba(255,255,255,.15)",
                                 color: T.white,
                             }}>
                             <Hash size={11} /> Request #{ride.id ?? id}
@@ -665,139 +665,139 @@ export default function RideStatus() {
                     <div style={{ padding: "28px" }}>
 
                         {/* Driver info */}
-                        <div 
+                        <div
                             style={{ marginBottom: 8 }}>
-                            <p 
-                                style={{ 
-                                    fontSize: 11, 
-                                    fontWeight: 700, 
-                                    color: T.muted, 
-                                    letterSpacing: .5, 
-                                    textTransform: "uppercase", 
-                                    margin: "0 0 4px" 
+                            <p
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: T.muted,
+                                    letterSpacing: .5,
+                                    textTransform: "uppercase",
+                                    margin: "0 0 4px"
                                 }}>
                                 Driver Details
                             </p>
 
-                            <InfoRow 
-                                icon={<User size={14} />} 
-                                label="Driver" 
-                                value={ride.driverName || "—"} 
+                            <InfoRow
+                                icon={<User size={14} />}
+                                label="Driver"
+                                value={ride.driverName || "—"}
                             />
 
-                            <InfoRow 
-                                icon={<CarFront size={14} />} 
-                                label="Vehicle" 
-                                value={ride.vehicleNumber || "—"} 
+                            <InfoRow
+                                icon={<CarFront size={14} />}
+                                label="Vehicle"
+                                value={ride.vehicleNumber || "—"}
                             />
 
-                            <InfoRow 
-                                icon={<Phone size={14} />} 
-                                label="Phone" 
-                                value={ride.driverPhone || "—"} last 
+                            <InfoRow
+                                icon={<Phone size={14} />}
+                                label="Phone"
+                                value={ride.driverPhone || "—"} last
                             />
                         </div>
 
                         {/* Route */}
-                        <div 
-                            style={{ 
-                                marginTop: 24, 
-                                paddingTop: 20, 
-                                borderTop: `1px solid ${T.border}` 
+                        <div
+                            style={{
+                                marginTop: 24,
+                                paddingTop: 20,
+                                borderTop: `1px solid ${T.border}`
                             }}>
 
-                            <p 
-                                style={{ 
-                                    fontSize: 11, 
-                                    fontWeight: 700, 
-                                    color: T.muted, 
-                                    letterSpacing: .5, 
-                                    textTransform: "uppercase", 
-                                    margin: "0 0 14px" 
+                            <p
+                                style={{
+                                    fontSize: 11,
+                                    fontWeight: 700,
+                                    color: T.muted,
+                                    letterSpacing: .5,
+                                    textTransform: "uppercase",
+                                    margin: "0 0 14px"
                                 }}>
                                 Route
                             </p>
 
-                            <div 
-                                style={{ 
-                                    display: "flex", 
-                                    gap: 12, 
-                                    marginBottom: 16 
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: 12,
+                                    marginBottom: 16
                                 }}>
-                                <div 
-                                    style={{ 
-                                        width: 32, 
-                                        height: 32, 
-                                        borderRadius: 10, 
-                                        background: T.terraLight, 
-                                        display: "flex", 
-                                        alignItems: "center", 
-                                        justifyContent: "center", 
-                                        flexShrink: 0 
+                                <div
+                                    style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: 10,
+                                        background: T.terraLight,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        flexShrink: 0
                                     }}>
                                     <MapPin size={15} color={T.terra} />
                                 </div>
 
                                 <div>
-                                    <p 
-                                        style={{ 
-                                            fontWeight: 700, 
-                                            fontSize: 13, 
-                                            color: T.ink, 
-                                            margin: 0 
+                                    <p
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: 13,
+                                            color: T.ink,
+                                            margin: 0
                                         }}>
-                                            Pickup
+                                        Pickup
                                     </p>
 
-                                    <p 
-                                        style={{ 
-                                            fontSize: 13, 
-                                            color: T.muted, 
-                                            margin: "2px 0 0" 
+                                    <p
+                                        style={{
+                                            fontSize: 13,
+                                            color: T.muted,
+                                            margin: "2px 0 0"
                                         }}>
-                                            {ride.pickupLocation}
+                                        {ride.pickupLocation}
                                     </p>
                                 </div>
                             </div>
 
-                            <div 
-                                style={{ 
-                                    display: "flex", 
-                                    gap: 12 
+                            <div
+                                style={{
+                                    display: "flex",
+                                    gap: 12
                                 }}>
 
-                                <div 
-                                    style={{ 
-                                        width: 32, 
-                                        height: 32, 
-                                        borderRadius: 10, 
-                                        background: T.greenLight, 
-                                        display: "flex", 
-                                        alignItems: "center", 
-                                        justifyContent: "center", 
+                                <div
+                                    style={{
+                                        width: 32,
+                                        height: 32,
+                                        borderRadius: 10,
+                                        background: T.greenLight,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
                                         flexShrink: 0
                                     }}>
                                     <Navigation size={15} color={T.green} />
                                 </div>
 
                                 <div>
-                                    <p 
-                                        style={{ 
-                                            fontWeight: 700, 
-                                            fontSize: 13, 
-                                            color: T.ink, 
-                                            margin: 0 
+                                    <p
+                                        style={{
+                                            fontWeight: 700,
+                                            fontSize: 13,
+                                            color: T.ink,
+                                            margin: 0
                                         }}>
-                                            Destination
+                                        Destination
                                     </p>
 
-                                    <p 
-                                        style={{ 
-                                            fontSize: 13, 
-                                            color: T.muted, 
-                                            margin: "2px 0 0" 
+                                    <p
+                                        style={{
+                                            fontSize: 13,
+                                            color: T.muted,
+                                            margin: "2px 0 0"
                                         }}>
-                                            {ride.destinationLocation}
+                                        {ride.destinationLocation}
                                     </p>
                                 </div>
                             </div>

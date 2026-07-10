@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class DriverProfileDto
 {
     public string DriverName { get; set; } = string.Empty;

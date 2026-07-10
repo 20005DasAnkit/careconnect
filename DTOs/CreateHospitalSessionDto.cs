@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class CreateHospitalSessionDto
 {
     public int HospitalId { get; set; }

@@ -1,4 +1,5 @@
 namespace HEALTHCARE.Models;
+
 public class Appointment
 {
     public int Id { get; set; }
@@ -11,7 +12,7 @@ public class Appointment
     public decimal AdvanceAmount { get; set; }
     public decimal WalletUsed { get; set; } = 0;
     public string? RazorpayPaymentId { get; set; }
-    
+
     // Navigation
     public AppUser? Patient { get; set; }
     public Doctor? Doctor { get; set; }

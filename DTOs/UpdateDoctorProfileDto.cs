@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class UpdateDoctorProfileDto
 {
     public string Name { get; set; }
@@ -11,5 +12,4 @@ public class UpdateDoctorProfileDto
     public string? Phone { get; set; }
     public string? Qualification { get; set; }
     public string? Experience { get; set; }
-
 }

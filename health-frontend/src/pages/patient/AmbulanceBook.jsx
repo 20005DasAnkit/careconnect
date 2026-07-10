@@ -12,7 +12,7 @@ import {
     ArrowRight,
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
-import Footer from "../../components/Footer"; 
+import Footer from "../../components/Footer";
 
 // Matches the real VehicleType values stored on Ambulance ("NonAC" | "AC" | "Big"),
 // not a hypothetical BLS/ALS classification that doesn't exist in the backend.
@@ -160,10 +160,10 @@ export default function Ambulance() {
         <>
             <Toaster position="top-right" />
 
-            <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]" 
-                 style={{ 
-                     fontFamily: "'Inter', system-ui, sans-serif" 
-                    }}>
+            <div className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
+                style={{
+                    fontFamily: "'Inter', system-ui, sans-serif"
+                }}>
                 <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-16">
 
                     {/* ───────────────────── HEADER ───────────────────── */}
@@ -172,9 +172,9 @@ export default function Ambulance() {
                             Emergency transport
                         </p>
                         <h1
-                            style={{ 
-                                fontFamily: "'Fraunces', Georgia, serif", 
-                                fontWeight: 500 
+                            style={{
+                                fontFamily: "'Fraunces', Georgia, serif",
+                                fontWeight: 500
                             }}
                             className="leading-[1.05] tracking-tight"
                         >
@@ -186,8 +186,8 @@ export default function Ambulance() {
 
                             <span
                                 className="italic text-[#3E7C59]"
-                                style={{ 
-                                    fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)" 
+                                style={{
+                                    fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)"
                                 }}
                             >
                                 than it feels.
@@ -213,13 +213,13 @@ export default function Ambulance() {
                         </div>
 
                         <div className="flex-1">
-                            <p 
+                            <p
                                 className="font-semibold leading-tight text-[15px]"
                             >
                                 Life-threatening emergency?
                             </p>
 
-                            <p 
+                            <p
                                 className="text-white/75 text-[13px] mt-0.5"
                             >
                                 Call 108 directly — don't wait for booking
@@ -235,9 +235,9 @@ export default function Ambulance() {
                     <div className="mb-10">
                         <div className="flex items-baseline justify-between mb-4">
                             <h3
-                                style={{ 
-                                    fontFamily: "'Fraunces', Georgia, serif", 
-                                    fontWeight: 500 
+                                style={{
+                                    fontFamily: "'Fraunces', Georgia, serif",
+                                    fontWeight: 500
                                 }}
                                 className="text-[1.15rem]"
                             >
@@ -277,22 +277,22 @@ export default function Ambulance() {
                                             />
                                         </div>
                                         <h4
-                                            style={{ 
-                                                fontFamily: "'Fraunces', Georgia, serif", 
-                                                fontWeight: 500 
+                                            style={{
+                                                fontFamily: "'Fraunces', Georgia, serif",
+                                                fontWeight: 500
                                             }}
-                                            className={`text-[15px] ${active 
-                                                ? "text-white" 
+                                            className={`text-[15px] ${active
+                                                ? "text-white"
                                                 : "text-[#16332B]"
-                                            }`}
+                                                }`}
                                         >
                                             {opt.title}
                                         </h4>
                                         <p
-                                            className={`text-[13px] mt-1 ${active 
-                                                ? "text-white/70" 
+                                            className={`text-[13px] mt-1 ${active
+                                                ? "text-white/70"
                                                 : "text-[#16332B]/50"
-                                            }`}
+                                                }`}
                                         >
                                             {opt.desc}
                                         </p>
@@ -490,9 +490,9 @@ export default function Ambulance() {
                                 <Truck size={22} className="text-[#16332B]/35" strokeWidth={1.5} />
                             </div>
                             <h2
-                                style={{ 
-                                    fontFamily: "'Fraunces', Georgia, serif", 
-                                    fontWeight: 500 
+                                style={{
+                                    fontFamily: "'Fraunces', Georgia, serif",
+                                    fontWeight: 500
                                 }}
                                 className="text-[1.3rem] mt-6"
                             >
@@ -505,7 +505,7 @@ export default function Ambulance() {
                     )}
 
                 </div>
-                <Footer/>
+                <Footer />
             </div>
         </>
     );

@@ -1,4 +1,5 @@
 namespace HEALTHCARE.Models;
+
 public class DoctorSlotRequest
 {
     public int Id { get; set; }

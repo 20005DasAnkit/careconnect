@@ -196,7 +196,7 @@ export default function AboutUs() {
                     </Link>
                 </div>
             </section>
-                <Footer />
+            <Footer />
         </div>
     );
 }

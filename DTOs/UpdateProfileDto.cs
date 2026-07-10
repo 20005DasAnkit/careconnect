@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class UpdateProfileDto
 {
     public string FullName { get; set; } = "";
@@ -12,5 +13,4 @@ public class UpdateProfileDto
     public string Country { get; set; } = "";
     public string PinCode { get; set; } = "";
     public string? AvatarUrl { get; set; }
-
 }

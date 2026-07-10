@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class AdminDashboardDto
 {
     public int TotalPatients { get; set; }

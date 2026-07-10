@@ -9,7 +9,7 @@ import {
   HeartPulse,
   MapPin,
 } from "lucide-react";
-import Footer from "../../components/Footer"; 
+import Footer from "../../components/Footer";
 
 // ── Content data ────────────────────────────────────────────────
 // Kept as data so the layout stays clean and the copy can be edited
@@ -450,7 +450,7 @@ export default function EmergencyInfo() {
           </Link>
         </div>
       </section>
-      <Footer/>
+      <Footer />
     </div>
   );
 }

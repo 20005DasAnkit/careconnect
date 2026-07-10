@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class CreateRazorpayOrderDto
 {
     public decimal Amount { get; set; }

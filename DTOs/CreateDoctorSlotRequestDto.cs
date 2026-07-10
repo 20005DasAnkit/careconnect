@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class CreateDoctorSlotRequestDto
 {
     public int HospitalId { get; set; }

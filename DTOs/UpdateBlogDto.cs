@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Http;
 
 namespace HEALTHCARE.DTOs;
+
 public class UpdateBlogDto
 {
     public string Title { get; set; } = "";

@@ -7,7 +7,7 @@ namespace HEALTHCARE.DTOs
         public string? RazorpayPaymentId { get; set; }
         public List<CartItemDto> Items { get; set; } = new();
     }
- 
+
     public class CartItemDto
     {
         public int ProductId { get; set; }

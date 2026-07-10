@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class CreateDoctorDto
 {
     public string FullName { get; set; }

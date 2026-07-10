@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class UpdateProductDto
 {
     public string Name { get; set; } = "";

@@ -13,7 +13,7 @@ import {
   LogOut,
   ShieldCheck,
 } from "lucide-react";
-import Footer from "../../components/Footer"; 
+import Footer from "../../components/Footer";
 
 /* ─── Design tokens — shared across CareConnect panels ─── */
 const T = {
@@ -1194,7 +1194,7 @@ function ProfileSkeleton() {
           ))}
         </div>
       </div>
-      <Footer/>
+      <Footer />
     </div>
   );
 }

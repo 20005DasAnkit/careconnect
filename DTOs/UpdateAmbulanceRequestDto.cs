@@ -1,4 +1,5 @@
 namespace HEALTHCARE.DTOs;
+
 public class UpdateAmbulanceRequestDto
 {
     public int RequestId { get; set; }
