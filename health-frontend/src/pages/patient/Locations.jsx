@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { Stethoscope, Ambulance, Pill, Search, ArrowRight } from "lucide-react";
 import api from "../../api/axios";
+import Footer from "../../components/Footer"; 
 
 function CardSkeleton() {
     return (
@@ -247,6 +248,7 @@ export default function Locations() {
                     </Link>
                 </div>
             </section>
+            <Footer />
         </div>
     );
 }

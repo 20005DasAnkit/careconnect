@@ -10,6 +10,7 @@ import {
     FiShield,
 } from "react-icons/fi";
 import { toast, Toaster } from "react-hot-toast";
+import Footer from "../../components/Footer";
 
 const STEPS = [
     "Select Slot",
@@ -873,6 +874,7 @@ export default function BookAppointment() {
                         </button>
 
                     </div>
+                    <Footer />
                 </div>
             )}
         </>

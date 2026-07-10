@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { Search, SlidersHorizontal, Star, MapPin, Stethoscope, X, ChevronDown, ArrowRight } from "lucide-react";
 import api from "../../api/axios";
+import Footer from "../../components/Footer";
 
 const FILTERS = [
     "All", "Cardiology", "Neurology", "Orthopedic",
@@ -373,6 +374,7 @@ export default function Doctors() {
                 </div>
 
             </div>
+            <Footer />
         </div>
     );
 }

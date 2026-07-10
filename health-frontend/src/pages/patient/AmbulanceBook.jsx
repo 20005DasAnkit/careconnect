@@ -12,6 +12,7 @@ import {
     ArrowRight,
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
+import Footer from "../../components/Footer"; 
 
 // Matches the real VehicleType values stored on Ambulance ("NonAC" | "AC" | "Big"),
 // not a hypothetical BLS/ALS classification that doesn't exist in the backend.
@@ -504,6 +505,7 @@ export default function Ambulance() {
                     )}
 
                 </div>
+                <Footer/>
             </div>
         </>
     );

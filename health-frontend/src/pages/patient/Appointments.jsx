@@ -6,6 +6,7 @@ import {
     Calendar, Clock, Search, RefreshCw, ChevronLeft, ChevronRight,
     IndianRupee, Building2, MapPin, Plus, ChevronRightCircle
 } from "lucide-react";
+import Footer from "../../components/Footer";
 
 /* ─── Tokens ──────────────────────────────────── */
 const T = {
@@ -390,6 +391,7 @@ export default function Appointments() {
                     )}
 
                 </div>
+                <Footer />
             </div>
         </>
     );

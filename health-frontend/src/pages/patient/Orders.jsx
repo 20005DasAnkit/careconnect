@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Search, Package, Plus, ChevronRight } from "lucide-react";
 import api from "../../api/axios";
+import Footer from "../../components/Footer";
 
 const C = {
     cream: "#FAF8F3",
@@ -392,6 +393,7 @@ export default function Orders() {
                     </div>
                 )}
             </div>
+            <Footer />
         </div>
     );
 }

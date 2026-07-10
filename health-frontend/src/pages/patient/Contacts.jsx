@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
 import api from "../../api/axios";
+import Footer from "../../components/Footer";
 
 const INFO_CARDS = [
     {
@@ -257,6 +258,7 @@ export default function ContactUs() {
                         </div>
                     </div>
                 </div>
+                 <Footer />
             </div>
         </>
     );

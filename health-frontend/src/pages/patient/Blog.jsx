@@ -13,6 +13,7 @@ import {
     Brain,
 } from "lucide-react";
 import api from "../../api/axios";
+import Footer from "../../components/Footer";
 
 // Icon per category — falls back to Heart if a category doesn't match.
 const CATEGORY_META = {
@@ -307,6 +308,7 @@ export default function Blog() {
                     </div>
                 )}
             </div>
+             <Footer />
         </div>
     );
 }

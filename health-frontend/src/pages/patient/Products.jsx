@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { Search, ShoppingCart, Plus, Pill, Check } from "lucide-react";
 import api from "../../api/axios";
 import { useCart } from "../../context/Cartcontext";
+import Footer from "../../components/Footer";
 
 const C = {
     cream: "#FAF8F3",
@@ -20,13 +21,13 @@ const INTER = "'Inter', system-ui, sans-serif";
 const IMG_BASE = "http://localhost:5008";
 
 const CATEGORIES = [
-    "All", 
-    "Tablets", 
-    "Syrups", 
-    "Injections", 
-    "Vitamins", 
-    "Skincare", 
-    "Devices", 
+    "All",
+    "Tablets",
+    "Syrups",
+    "Injections",
+    "Vitamins",
+    "Skincare",
+    "Devices",
     "Powder"
 ];
 
@@ -102,7 +103,7 @@ export default function Products() {
                 !search.trim() ||
                 p.name?.toLowerCase().includes(search.toLowerCase()) ||
                 p.description?.toLowerCase().includes(search.toLowerCase());
-                
+
             const matchCat = activeCategory === "All" ||
                 (p.category && p.category.toLowerCase() === activeCategory.toLowerCase());
             return matchSearch && matchCat;
@@ -145,6 +146,9 @@ export default function Products() {
                 color: C.forest,
                 fontFamily: INTER
             }}>
+            <style>{`
+                @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;1,600&family=Inter:wght@400;500;600;700&display=swap');
+            `}</style>
 
             <div
                 style={{
@@ -154,56 +158,70 @@ export default function Products() {
                     padding: "36px 32px 96px"
                 }}>
 
-                {/* ── Search-first header ── */}
+                {/* ── Editorial header ── */}
                 <div
                     style={{
                         display: "flex",
-                        alignItems: "center",
+                        flexWrap: "wrap",
                         justifyContent: "space-between",
-                        gap: 24,
+                        alignItems: "flex-end",
+                        gap: 16,
                         marginBottom: 8,
                         borderBottom: `1px solid ${C.border}`,
-                        paddingBottom: 20,
+                        paddingBottom: 28,
                     }}
                 >
-                    <p style={{ margin: 0 }}>
-                        <span
+                    <div>
+                        <p
                             style={{
-                                fontFamily: FRAUNCES,
-                                fontWeight: 600,
-                                fontSize: "1.6rem",
-                                letterSpacing: "0.06em",
+                                fontSize: 11,
+                                fontWeight: 700,
+                                letterSpacing: "0.14em",
                                 textTransform: "uppercase",
-                                color: C.green,
-                                display: "inline-block",
-                                paddingBottom: 12,
-                                borderBottom: `2px solid ${C.green}`,
+                                color: C.terracotta,
+                                margin: "0 0 10px",
                             }}
                         >
-                            Pharmacy
-                        </span>
-                    </p>
+                            Pharmacy, CareConnect
+                        </p>
+
+                        <h1
+                            style={{ fontFamily: FRAUNCES, fontWeight: 500, margin: 0 }}
+                            className="leading-[1.05] tracking-tight"
+                        >
+                            <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)", color: C.forest }}>
+                                Everything you need,
+                            </span>
+                            <br />
+                            <span
+                                className="italic"
+                                style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.5rem)", color: C.terracotta }}
+                            >
+                                delivered to your door.
+                            </span>
+                        </h1>
+                    </div>
 
                     <Link
                         to="/patient/cart"
                         style={{
-                            width: 40,
-                            height: 40,
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 8,
+                            padding: "13px 22px",
                             borderRadius: 999,
                             backgroundColor: C.forest,
                             color: C.white,
-                            display: "flex",
-                            alignItems: "center",
-                            justifyContent: "center",
+                            fontWeight: 700,
+                            fontSize: 14,
                             textDecoration: "none",
-                            transition: "background-color 0.2s ease",
                             flexShrink: 0,
+                            transition: "background-color 0.2s ease",
                         }}
                         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = C.forestHover)}
                         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = C.forest)}
-                        title="View cart"
                     >
-                        <ShoppingCart size={17} />
+                        <ShoppingCart size={16} /> View Cart
                     </Link>
                 </div>
 
@@ -383,11 +401,11 @@ export default function Products() {
                                             onMouseLeave={() => setHoveredCard(null)}
                                             style={{ position: "relative" }}
                                         >
-                                            <Link to={`/patient/products/${p.id}`} 
-                                            style={{ 
-                                                textDecoration: "none", 
-                                                color: "inherit" 
-                                            }}>
+                                            <Link to={`/patient/products/${p.id}`}
+                                                style={{
+                                                    textDecoration: "none",
+                                                    color: "inherit"
+                                                }}>
 
                                                 <div style={{
                                                     position: "relative",
@@ -423,23 +441,23 @@ export default function Products() {
                                                     )}
 
                                                     {p.stock === 0 && (
-                                                        <div 
-                                                            style={{ 
-                                                                position: "absolute", 
-                                                                inset: 0, 
-                                                                backgroundColor: `${C.white}CC`, 
-                                                                display: "flex", 
-                                                                alignItems: "center", 
-                                                                justifyContent: "center" 
+                                                        <div
+                                                            style={{
+                                                                position: "absolute",
+                                                                inset: 0,
+                                                                backgroundColor: `${C.white}CC`,
+                                                                display: "flex",
+                                                                alignItems: "center",
+                                                                justifyContent: "center"
                                                             }}>
-                                                            <span 
-                                                                style={{ 
-                                                                    backgroundColor: C.forest, 
-                                                                    color: C.white, 
-                                                                    fontSize: 11, 
-                                                                    fontWeight: 600, 
-                                                                    padding: "6px 14px", 
-                                                                    borderRadius: 999 
+                                                            <span
+                                                                style={{
+                                                                    backgroundColor: C.forest,
+                                                                    color: C.white,
+                                                                    fontSize: 11,
+                                                                    fontWeight: 600,
+                                                                    padding: "6px 14px",
+                                                                    borderRadius: 999
                                                                 }}>
                                                                 Out of stock
                                                             </span>
@@ -447,52 +465,54 @@ export default function Products() {
                                                     )}
                                                 </div>
 
-                                                <p 
-                                                    style={{ 
-                                                        fontSize: 11.5, 
-                                                        color: C.terracotta, 
-                                                        fontWeight: 600, 
-                                                        textTransform: "uppercase", 
-                                                        letterSpacing: "0.04em", 
-                                                        margin: "0 0 3px" 
+                                                <p
+                                                    style={{
+                                                        fontSize: 11.5,
+                                                        color: C.terracotta,
+                                                        fontWeight: 600,
+                                                        textTransform: "uppercase",
+                                                        letterSpacing: "0.04em",
+                                                        margin: "0 0 3px"
                                                     }}>
                                                     {p.category || "Medicine"}
                                                 </p>
-                                                <p 
-                                                    style={{ 
-                                                        fontSize: 14, 
-                                                        fontWeight: 500, 
-                                                        color: C.forest, 
-                                                        margin: 0, 
-                                                        whiteSpace: "nowrap", 
-                                                        overflow: "hidden", 
-                                                        textOverflow: "ellipsis" 
+                                                <p
+                                                    style={{
+                                                        fontSize: 14,
+                                                        fontWeight: 500,
+                                                        color: C.forest,
+                                                        margin: 0,
+                                                        whiteSpace: "nowrap",
+                                                        overflow: "hidden",
+                                                        textOverflow: "ellipsis"
                                                     }}>
                                                     {p.name}
                                                 </p>
-                                                <div 
-                                                    style={{ 
-                                                        display: "flex", 
-                                                        alignItems: "baseline", 
-                                                        gap: 6, 
-                                                        marginTop: 5 
+                                                <div
+                                                    style={{
+                                                        display: "flex",
+                                                        alignItems: "baseline",
+                                                        gap: 6,
+                                                        marginTop: 5
                                                     }}>
 
-                                                    <span 
-                                                        style={{ 
-                                                            fontSize: 13.5, 
-                                                            color: `${C.forest}80` }}
-                                                            >
-                                                                ₹{p.price}
+                                                    <span
+                                                        style={{
+                                                            fontSize: 13.5,
+                                                            color: `${C.forest}80`
+                                                        }}
+                                                    >
+                                                        ₹{p.price}
                                                     </span>
 
                                                     {p.mrp && p.mrp > p.price && (
-                                                        <span 
-                                                            style={{ 
-                                                                fontSize: 11.5, 
-                                                                color: `${C.forest}35`, 
-                                                                textDecoration: "line-through" }}>
-                                                                    ₹{p.mrp}
+                                                        <span
+                                                            style={{
+                                                                fontSize: 11.5,
+                                                                color: `${C.forest}35`,
+                                                                textDecoration: "line-through"
+                                                            }}>
+                                                            ₹{p.mrp}
                                                         </span>
                                                     )}
                                                 </div>
@@ -504,14 +524,14 @@ export default function Products() {
                                                 disabled={p.stock === 0}
                                                 title="Add to cart"
                                                 style={{
-                                                    position: "absolute", 
-                                                    top: 10, 
+                                                    position: "absolute",
+                                                    top: 10,
                                                     right: 10,
-                                                    width: 32, 
-                                                    height: 32, 
+                                                    width: 32,
+                                                    height: 32,
                                                     borderRadius: 999,
-                                                    display: "flex", 
-                                                    alignItems: "center", 
+                                                    display: "flex",
+                                                    alignItems: "center",
                                                     justifyContent: "center",
                                                     backgroundColor: justAdded === p.id ? C.green : C.white,
                                                     color: justAdded === p.id ? C.white : C.forest,
@@ -531,64 +551,65 @@ export default function Products() {
                         )}
 
                         {!loading && filteredProducts.length === 0 && (
-                            <div 
-                                style={{ 
-                                    padding: "72px 20px", 
-                                    textAlign: "center" 
+                            <div
+                                style={{
+                                    padding: "72px 20px",
+                                    textAlign: "center"
                                 }}>
 
-                                <div 
-                                    style={{ 
-                                        width: 60, 
-                                        height: 60, 
-                                        margin: "0 auto", 
-                                        borderRadius: 16, 
-                                        backgroundColor: C.cardAlt, 
-                                        display: "flex", 
-                                        alignItems: "center", 
-                                        justifyContent: "center", 
-                                        marginBottom: 18 
+                                <div
+                                    style={{
+                                        width: 60,
+                                        height: 60,
+                                        margin: "0 auto",
+                                        borderRadius: 16,
+                                        backgroundColor: C.cardAlt,
+                                        display: "flex",
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                        marginBottom: 18
                                     }}>
-                                    <Pill 
-                                        color={`${C.forest}59`} 
-                                        size={24} 
-                                        strokeWidth={1.5} 
+                                    <Pill
+                                        color={`${C.forest}59`}
+                                        size={24}
+                                        strokeWidth={1.5}
                                     />
                                 </div>
 
-                                <h3 
-                                    style={{ 
-                                        fontFamily: FRAUNCES, 
-                                        fontWeight: 500, 
-                                        fontSize: "1.3rem", 
-                                        margin: 0 }}>
-                                            No products found
+                                <h3
+                                    style={{
+                                        fontFamily: FRAUNCES,
+                                        fontWeight: 500,
+                                        fontSize: "1.3rem",
+                                        margin: 0
+                                    }}>
+                                    No products found
                                 </h3>
 
-                                <p 
-                                    style={{ 
-                                        color: `${C.forest}80`, 
-                                        marginTop: 8, 
-                                        fontSize: 13.5 
+                                <p
+                                    style={{
+                                        color: `${C.forest}80`,
+                                        marginTop: 8,
+                                        fontSize: 13.5
                                     }}>
-                                    {activeCategory !== "All" 
-                                        ? `No products in "${activeCategory}" yet.` 
+                                    {activeCategory !== "All"
+                                        ? `No products in "${activeCategory}" yet.`
                                         : "Try a different search term."
                                     }
                                 </p>
 
                                 <button
                                     onClick={() => { setSearch(""); setActiveCategory("All"); }}
-                                    style={{ 
-                                        marginTop: 20, 
-                                        backgroundColor: C.forest, 
-                                        color: C.white, 
-                                        padding: "10px 24px", 
-                                        borderRadius: 999, 
-                                        fontSize: 13.5, 
-                                        fontWeight: 600, 
-                                        border: "none", 
-                                        cursor: "pointer" 
+                                    style={{
+                                        marginTop: 20,
+                                        backgroundColor: C.forest,
+                                        color: C.white,
+                                        padding: "10px 24px",
+                                        borderRadius: 999,
+                                        fontSize: 13.5,
+                                        fontWeight: 600,
+                                        border: "none",
+                                        cursor: "pointer"
                                     }}
                                 >
                                     Reset filters
@@ -598,6 +619,7 @@ export default function Products() {
                     </div>
                 </div>
             </div>
+            <Footer />
         </div>
     );
 }
