@@ -1,3 +1,4 @@
+// Dtos/AiResponseDto.cs
 namespace HEALTHCARE.Dtos;
 
 public class AiResponseDto

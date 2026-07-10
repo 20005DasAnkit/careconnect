@@ -182,7 +182,7 @@ export default function Products() {
                                 margin: "0 0 10px",
                             }}
                         >
-                            Pharmacy, CareConnect
+                            Pharmacy
                         </p>
 
                         <h1

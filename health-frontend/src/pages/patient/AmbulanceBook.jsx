@@ -29,6 +29,11 @@ const TYPE_OPTIONS = [
     { key: "Big", icon: Siren, title: "Big / ICU", desc: "Critical care" },
 ];
 
+// Pickup location is remembered across visits so a patient who just booked
+// an ambulance and gets sent back here doesn't have to re-detect their
+// location or re-search on the map every single time.
+const PICKUP_STORAGE_KEY = "careconnect_ambulance_pickup";
+
 function getTypeMeta(type) {
     return TYPE_META[type] || TYPE_META.NonAC;
 }
@@ -50,13 +55,75 @@ function AmbulanceCardSkeleton() {
 export default function Ambulance() {
     const navigate = useNavigate();
     const [ambulances, setAmbulances] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
     const [locationSelected, setLocationSelected] = useState(false);
     const [selectedType, setSelectedType] = useState("");
     const [pickup, setPickup] = useState(null);
     const [pickupLabel, setPickupLabel] = useState("");
+    const [restoring, setRestoring] = useState(true);
 
+    // ── User's current active ride, if any — checked immediately on load,
+    //    completely independent of pickup/location state. This is what
+    //    fixes "driver accepted but patient doesn't see it": the patient
+    //    no longer needs to search a location to find out. ──
+    const [activeRide, setActiveRide] = useState(null);
+    const [activeRideLoading, setActiveRideLoading] = useState(true);
+
+    useEffect(() => {
+        checkActiveRide();
+    }, []);
+
+    async function checkActiveRide() {
+        try {
+            setActiveRideLoading(true);
+            const res = await api.get("/patient/ambulance/active");
+            setActiveRide(res.data || null);
+        } catch {
+            setActiveRide(null);
+        } finally {
+            setActiveRideLoading(false);
+        }
+    }
+
+    // ── Restore a previously saved pickup location on mount, and load
+    //    ambulances for it automatically — no need to re-pick location. ──
+    useEffect(() => {
+        try {
+            const saved = localStorage.getItem(PICKUP_STORAGE_KEY);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                if (parsed?.lat && parsed?.lng) {
+                    setPickup({ lat: parsed.lat, lng: parsed.lng });
+                    setPickupLabel(parsed.label || "");
+                    setLocationSelected(true);
+                    // Kick off the ambulance search right away using the
+                    // restored coordinates (state hasn't flushed yet, so
+                    // we pass them directly instead of reading `pickup`).
+                    loadAmbulancesFor(parsed.lat, parsed.lng);
+                }
+            }
+        } catch {
+            // corrupted/old storage value — ignore and start fresh
+        } finally {
+            setRestoring(false);
+        }
+    }, []);
+
+    function savePickup(lat, lng, label) {
+        setPickup({ lat, lng });
+        setPickupLabel(label || "");
+        setLocationSelected(true);
+        try {
+            localStorage.setItem(
+                PICKUP_STORAGE_KEY,
+                JSON.stringify({ lat, lng, label: label || "" })
+            );
+        } catch {
+            // storage might be full/unavailable — booking still works,
+            // it just won't be remembered for next time
+        }
+    }
 
     function detectLocation() {
         if (!navigator.geolocation) {
@@ -74,29 +141,18 @@ export default function Ambulance() {
             const data = await res.json();
             const address = data.display_name;
 
-            setPickup({
-                lat,
-                lng,
-            });
-
-            setPickupLabel(address);
-            setLocationSelected(true);
-
+            savePickup(lat, lng, address);
+            loadAmbulancesFor(lat, lng);
         });
     }
 
-    async function loadAmbulances() {
+    async function loadAmbulancesFor(lat, lng, type = selectedType) {
         setLoading(true);
         setError("");
         try {
-            if (!pickup) {
-                toast.error("Please select your pickup location.");
-                return;
-            }
-
-            const url = selectedType
-                ? `/patient/ambulances/nearby?lat=${pickup.lat}&lng=${pickup.lng}&type=${selectedType}`
-                : `/patient/ambulances/nearby?lat=${pickup.lat}&lng=${pickup.lng}`;
+            const url = type
+                ? `/patient/ambulances/nearby?lat=${lat}&lng=${lng}&type=${type}`
+                : `/patient/ambulances/nearby?lat=${lat}&lng=${lng}`;
 
             const res = await api.get(url);
             setAmbulances(res.data || []);
@@ -106,6 +162,14 @@ export default function Ambulance() {
         } finally {
             setLoading(false);
         }
+    }
+
+    async function loadAmbulances() {
+        if (!pickup) {
+            toast.error("Please select your pickup location.");
+            return;
+        }
+        await loadAmbulancesFor(pickup.lat, pickup.lng);
     }
 
     function goToBooking(amb) {
@@ -122,9 +186,6 @@ export default function Ambulance() {
             type: amb.type,
         });
 
-        console.log(amb);
-        console.log(params.toString());
-
         navigate(
             `/patient/ambulance/request?${params.toString()}`,
             {
@@ -140,7 +201,9 @@ export default function Ambulance() {
         );
     }
 
-    const filtered = ambulances;
+    // The booked ambulance already has its own "Your booking" card above —
+    // drop it here so it doesn't also appear in the searchable list.
+    const filtered = ambulances.filter((a) => !a.myRide);
 
     const grouped = filtered.reduce((acc, a) => {
         const type = a.type || "NonAC";
@@ -231,6 +294,52 @@ export default function Ambulance() {
                         </span>
                     </a>
 
+                    {/* ───────────────────── YOUR BOOKING ─────────────────────
+                        Shows only the ambulance the patient has actually
+                        booked, separately from the searchable list below —
+                        no need to re-search location to see it. */}
+                    {!activeRideLoading && activeRide && (
+                        <div className="mb-10">
+                            <h3
+                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                className="text-[1.15rem] mb-4"
+                            >
+                                Your booking
+                            </h3>
+
+                            <div className="bg-white rounded-[20px] border-2 border-[#16332B] p-5 flex items-center gap-4">
+                                <div className="w-14 h-14 rounded-xl bg-[#FAF8F3] border border-[#E4DFD3] flex items-center justify-center shrink-0">
+                                    <Truck size={22} className="text-[#16332B]/35" strokeWidth={1.5} />
+                                </div>
+
+                                <div className="flex-1 min-w-0">
+                                    <p className="font-semibold text-[#16332B] text-[15px] truncate">
+                                        {activeRide.driverName || "Driver"}
+                                    </p>
+                                    <p className="text-[13px] text-[#16332B]/50 mt-1">
+                                        {activeRide.vehicleNumber}
+                                    </p>
+                                    <div className="flex items-center gap-1.5 mt-2">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#3E7C59]" />
+                                        <span className="text-[12px] font-medium text-[#3E7C59]">
+                                            {activeRide.status === "Pending"
+                                                ? "Finding your driver…"
+                                                : "Driver is on the way"}
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <button
+                                    onClick={() => navigate(`/patient/ride/${activeRide.id}`)}
+                                    className="shrink-0 flex items-center gap-2 px-5 py-2.5 rounded-full bg-[#16332B] text-white hover:bg-[#0F231D] transition"
+                                >
+                                    On The Way
+                                    <ArrowRight size={14} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
                     {/* ───────────────────── TYPE SELECTOR ───────────────────── */}
                     <div className="mb-10">
                         <div className="flex items-baseline justify-between mb-4">
@@ -245,7 +354,10 @@ export default function Ambulance() {
                             </h3>
                             {selectedType && (
                                 <button
-                                    onClick={() => setSelectedType("")}
+                                    onClick={() => {
+                                        setSelectedType("");
+                                        if (pickup) loadAmbulancesFor(pickup.lat, pickup.lng, "");
+                                    }}
                                     className="text-[13px] text-[#16332B]/45 hover:text-[#16332B] transition"
                                 >
                                     Clear filter
@@ -260,7 +372,11 @@ export default function Ambulance() {
                                 return (
                                     <button
                                         key={opt.key}
-                                        onClick={() => setSelectedType(active ? "" : opt.key)}
+                                        onClick={() => {
+                                            const next = active ? "" : opt.key;
+                                            setSelectedType(next);
+                                            if (pickup) loadAmbulancesFor(pickup.lat, pickup.lng, next);
+                                        }}
                                         className={`text-left p-5 rounded-[20px] border transition-all ${active
                                             ? "bg-[#16332B] border-[#16332B] shadow-[0_15px_35px_-22px_rgba(22,51,43,0.4)]"
                                             : "bg-white border-[#E4DFD3] hover:border-[#16332B]/25"
@@ -305,12 +421,38 @@ export default function Ambulance() {
                     {/* ───────────────────── SEARCH ───────────────────── */}
                     <div className="mb-10">
 
-                        <h3
-                            className="text-xl font-semibold mb-5"
-                            style={{ fontFamily: "'Fraunces', Georgia, serif" }}
-                        >
-                            Choose Pickup Location
-                        </h3>
+                        <div className="flex items-center justify-between mb-5">
+                            <h3
+                                className="text-xl font-semibold"
+                                style={{ fontFamily: "'Fraunces', Georgia, serif" }}
+                            >
+                                Pickup Location
+                            </h3>
+
+                            {locationSelected && (
+                                <button
+                                    onClick={() => {
+                                        setLocationSelected(false);
+                                        setPickup(null);
+                                        setPickupLabel("");
+                                        setAmbulances([]);
+                                        try {
+                                            localStorage.removeItem(PICKUP_STORAGE_KEY);
+                                        } catch { }
+                                    }}
+                                    className="text-[13px] text-[#16332B]/45 hover:text-[#16332B] transition"
+                                >
+                                    Change location
+                                </button>
+                            )}
+                        </div>
+
+                        {locationSelected && pickupLabel && (
+                            <div className="flex items-start gap-3 bg-white border border-[#E4DFD3] rounded-2xl p-4 mb-5">
+                                <MapPin size={17} className="text-[#B5562C] shrink-0 mt-0.5" />
+                                <p className="text-[14px] text-[#16332B]/75 leading-6">{pickupLabel}</p>
+                            </div>
+                        )}
 
                         <button
                             onClick={detectLocation}
@@ -323,10 +465,12 @@ export default function Ambulance() {
                             currentLocation={pickup}
                             destination={pickup}
                             setDestination={(loc) => {
-                                setPickup(loc);
-                                setLocationSelected(true);
+                                savePickup(loc.lat, loc.lng, pickupLabel);
                             }}
-                            setAddress={setPickupLabel}
+                            setAddress={(label) => {
+                                setPickupLabel(label);
+                                if (pickup) savePickup(pickup.lat, pickup.lng, label);
+                            }}
                         />
                         <div className="mt-5">
                             <button
@@ -355,7 +499,7 @@ export default function Ambulance() {
                     )}
 
                     {/* ───────────────────── LOADING ───────────────────── */}
-                    {loading && (
+                    {(loading || restoring) && (
                         <div className="space-y-3">
                             {[1, 2, 3].map((i) => (
                                 <AmbulanceCardSkeleton key={i} />
@@ -364,7 +508,7 @@ export default function Ambulance() {
                     )}
 
                     {/* ───────────────────── RESULTS, grouped by vehicle type ───────────────────── */}
-                    {!loading && hasResults && (
+                    {!loading && !restoring && hasResults && (
                         <div className="space-y-10">
                             {orderedGroups.map((type) => {
                                 const meta = getTypeMeta(type);
@@ -484,7 +628,7 @@ export default function Ambulance() {
                     )}
 
                     {/* ───────────────────── EMPTY STATE ───────────────────── */}
-                    {!loading && !hasResults && !error && (
+                    {!loading && !restoring && !hasResults && !error && locationSelected && (
                         <div className="bg-white rounded-[24px] border border-[#E4DFD3] py-20 px-6 text-center">
                             <div className="w-14 h-14 mx-auto rounded-full bg-[#FAF8F3] flex items-center justify-center">
                                 <Truck size={22} className="text-[#16332B]/35" strokeWidth={1.5} />

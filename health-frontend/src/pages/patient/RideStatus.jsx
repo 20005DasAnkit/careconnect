@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import {
     Phone, CarFront, MapPin, IndianRupee, Navigation, ArrowLeft,
     CheckCircle2, X, CreditCard, Lock, Loader2, User, Hash,
-    AlertCircle, RefreshCw,
+    AlertCircle, RefreshCw, IdCard,
 } from "lucide-react";
 import api from "../../api/axios";
 
@@ -689,6 +689,12 @@ export default function RideStatus() {
                                 icon={<CarFront size={14} />}
                                 label="Vehicle"
                                 value={ride.vehicleNumber || "—"}
+                            />
+
+                            <InfoRow
+                                icon={<IdCard size={14} />}
+                                label="License No."
+                                value={ride.licenseNumber || "—"}
                             />
 
                             <InfoRow

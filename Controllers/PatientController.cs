@@ -201,22 +201,22 @@ public class PatientController : ControllerBase
             orderby a.BookedAt descending
 
             select new
-{
-    a.Id,
-    DoctorId = d.Id,
-    DoctorName = u.FullName,
-    Specialization = d.Specialization,
-    Hospital = d.HospitalName,
-    DoctorFee = d.Fee,
-    AppointmentDate = s.AvailableFrom.Date,
-    AppointmentTime = s.AvailableFrom,
-    PlaceToVisit = s.Place,
-    a.Status,
-    a.PaymentStatus,
-    a.AdvanceAmount,
-    a.IsReviewed,
-    SlotId = s.Id,
-}
+            {
+                a.Id,
+                DoctorId = d.Id,
+                DoctorName = u.FullName,
+                Specialization = d.Specialization,
+                Hospital = d.HospitalName,
+                DoctorFee = d.Fee,
+                AppointmentDate = s.AvailableFrom.Date,
+                AppointmentTime = s.AvailableFrom,
+                PlaceToVisit = s.Place,
+                a.Status,
+                a.PaymentStatus,
+                a.AdvanceAmount,
+                a.IsReviewed,
+                SlotId = s.Id,
+            }
         ).ToList();
 
         return Ok(appointments);
@@ -364,21 +364,20 @@ public class PatientController : ControllerBase
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        // Only available ambulances
-        var ambulanceQuery = _context.Ambulances
-            .Where(a => a.IsAvailable);
+        // Same fix as /ambulances/nearby — don't filter by IsAvailable at
+        // the query level, or the patient's own booked ambulance vanishes
+        // from the list the moment it's locked.
+        var ambulanceQuery = _context.Ambulances.AsQueryable();
 
-        // Filter by vehicle type (NonAC / AC / Big)
         if (!string.IsNullOrWhiteSpace(type))
         {
             ambulanceQuery = ambulanceQuery
                 .Where(a => a.Type == type);
         }
 
-        var ambulances =
+        var result =
         (
             from a in ambulanceQuery
-
             let activeRequest = _context.AmbulanceRequests
                 .Where(r =>
                     r.AmbulanceId == a.Id &&
@@ -387,9 +386,9 @@ public class PatientController : ControllerBase
                     r.Status != "Cancelled")
                 .OrderByDescending(r => r.RequestTime)
                 .FirstOrDefault()
-
+            let myRide = activeRequest != null && activeRequest.UserId == userId
+            where a.IsAvailable || myRide
             orderby a.DriverName
-
             select new
             {
                 a.Id,
@@ -400,27 +399,13 @@ public class PatientController : ControllerBase
                 a.Rating,
                 a.BaseLocation,
                 IsAvailable = a.IsAvailable,
-
-                MyRide =
-                    activeRequest != null &&
-                    activeRequest.UserId == userId,
-
-                RequestId =
-                    activeRequest != null &&
-                    activeRequest.UserId == userId
-                        ? activeRequest.Id
-                        : (int?)null,
-
-                RideStatus =
-                    activeRequest != null &&
-                    activeRequest.UserId == userId
-                        ? activeRequest.Status
-                        : null
+                MyRide = myRide,
+                RequestId = myRide ? activeRequest!.Id : (int?)null,
+                RideStatus = myRide ? activeRequest!.Status : null,
             }
-
         ).ToList();
 
-        return Ok(ambulances);
+        return Ok(result);
     }
 
     private static readonly Dictionary<string, string[]> CityKeywords = new()
@@ -632,8 +617,15 @@ public class PatientController : ControllerBase
             request.DistanceKm,
             request.VehicleType,
             request.RequestTime,
-            DriverName = ambulance != null ? ambulance.DriverName : null,
-            VehicleNumber = ambulance != null ? ambulance.VehicleNumber : null
+
+            DriverName = ambulance?.DriverName,
+            DriverPhone = ambulance?.DriverPhone,
+            VehicleNumber = ambulance?.VehicleNumber,
+            LicenseNumber = ambulance?.LicenseNumber,
+            Rating = ambulance?.Rating,
+            BaseLocation = ambulance?.BaseLocation,
+            YearsActive = ambulance?.YearsActive,
+            Verified = ambulance?.Verified
         });
     }
 
@@ -774,9 +766,7 @@ public class PatientController : ControllerBase
         var ride =
             (from r in _context.AmbulanceRequests
              join a in _context.Ambulances on r.AmbulanceId equals a.Id
-
              where r.Id == id && r.UserId == userId
-
              select new
              {
                  r.Id,
@@ -785,15 +775,44 @@ public class PatientController : ControllerBase
                  r.DistanceKm,
                  r.PickupLocation,
                  r.DestinationLocation,
+                 // r.PaymentStatus — uncomment this line once you confirm
+                 // AmbulanceRequest has a PaymentStatus column (see step 2).
                  DriverName = a.DriverName,
                  DriverPhone = a.DriverPhone,
-                 VehicleNumber = a.VehicleNumber
+                 VehicleNumber = a.VehicleNumber,
+                 LicenseNumber = a.LicenseNumber,   // ← was missing, this is the actual bug
+                 Rating = a.Rating,
+                 Verified = a.Verified,
              }).FirstOrDefault();
 
         if (ride == null)
             return NotFound();
 
         return Ok(ride);
+    }
+
+    // NEW — persists the "Pay Now" click. Without this, RideStatus.jsx calls
+    // PUT /patient/ambulance-request/{id}/pay on every successful payment,
+    // but that route didn't exist, so the payment never actually saved.
+    [Authorize(Roles = "Patient")]
+    [HttpPut("ambulance-request/{id}/pay")]
+    public IActionResult MarkAmbulancePaid(int id)
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var request = _context.AmbulanceRequests
+            .FirstOrDefault(x => x.Id == id && x.UserId == userId);
+
+        if (request == null)
+            return NotFound("Request not found");
+
+        // Requires a PaymentStatus column on AmbulanceRequest — see step 2
+        // if this doesn't compile yet.
+        request.PaymentStatus = "Paid";
+        _context.SaveChanges();
+
+        return Ok(new { Message = "Payment recorded", PaymentStatus = request.PaymentStatus });
     }
 
     [HttpPost("contact")]
@@ -973,8 +992,11 @@ public class PatientController : ControllerBase
         var userId = int.Parse(
             User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
 
-        var ambulanceQuery = _context.Ambulances
-            .Where(a => a.IsAvailable);
+        // NOTE: no longer filtering by IsAvailable here — an ambulance the
+        // current user just booked has IsAvailable = false, and filtering
+        // it out at the query level meant it silently disappeared from the
+        // list instead of showing "Driver is on the way".
+        var ambulanceQuery = _context.Ambulances.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(type))
         {
@@ -982,10 +1004,8 @@ public class PatientController : ControllerBase
                 .Where(a => a.Type == type);
         }
 
-        // First load from database
         var ambulances = ambulanceQuery.ToList();
 
-        // Then calculate distance in C#
         var result = ambulances
             .Select(a =>
             {
@@ -997,6 +1017,8 @@ public class PatientController : ControllerBase
                         r.Status != "Cancelled")
                     .OrderByDescending(r => r.RequestTime)
                     .FirstOrDefault();
+
+                bool myRide = activeRequest != null && activeRequest.UserId == userId;
 
                 var distance = DistanceKm(
                     lat,
@@ -1015,24 +1037,16 @@ public class PatientController : ControllerBase
                     a.BaseLocation,
                     DistanceKm = Math.Round(distance, 2),
                     IsAvailable = a.IsAvailable,
-
-                    MyRide =
-                        activeRequest != null &&
-                        activeRequest.UserId == userId,
-
-                    RequestId =
-                        activeRequest != null &&
-                        activeRequest.UserId == userId
-                            ? activeRequest.Id
-                            : (int?)null,
-
-                    RideStatus =
-                        activeRequest != null &&
-                        activeRequest.UserId == userId
-                            ? activeRequest.Status
-                            : null
+                    MyRide = myRide,
+                    RequestId = myRide ? activeRequest!.Id : (int?)null,
+                    RideStatus = myRide ? activeRequest!.Status : null,
                 };
             })
+            // Keep: ambulances still free to book, PLUS the one the current
+            // user has an active request on (even though it's now locked).
+            // Drop: other ambulances someone else has locked — those should
+            // stay invisible, exactly like before.
+            .Where(x => x.IsAvailable || x.MyRide)
             .OrderBy(x => x.DistanceKm)
             .Take(10)
             .ToList();
@@ -1189,6 +1203,47 @@ public class PatientController : ControllerBase
             pdf,
             "application/pdf",
             $"MedicineInvoice-{order.Id}.pdf");
+    }
+
+    // NEW — lets the frontend show "your ambulance is on the way" immediately
+    // on page load, without requiring the patient to pick a location first.
+    // This is location-independent by design: an active booking should be
+    // visible the instant the page opens, on any device.
+    [Authorize(Roles = "Patient")]
+    [HttpGet("ambulance/active")]
+    public IActionResult GetActiveAmbulanceRequest()
+    {
+        var userId = int.Parse(
+            User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+
+        var active = _context.AmbulanceRequests
+            .Where(r =>
+                r.UserId == userId &&
+                r.Status != "Completed" &&
+                r.Status != "Rejected" &&
+                r.Status != "Cancelled")
+            .OrderByDescending(r => r.RequestTime)
+            .FirstOrDefault();
+
+        if (active == null)
+            return Ok(null);
+
+        var ambulance = _context.Ambulances
+            .FirstOrDefault(a => a.Id == active.AmbulanceId);
+
+        return Ok(new
+        {
+            active.Id,
+            active.Status,
+            active.PickupLocation,
+            active.DestinationLocation,
+            active.Fare,
+            active.DistanceKm,
+            active.VehicleType,
+            DriverName = ambulance?.DriverName,
+            DriverPhone = ambulance?.DriverPhone,
+            VehicleNumber = ambulance?.VehicleNumber,
+        });
     }
 
 }

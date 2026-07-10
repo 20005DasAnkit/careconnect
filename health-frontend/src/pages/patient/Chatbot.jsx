@@ -44,38 +44,45 @@ export default function ChatbotWidget() {
         }
     }, [messages, open, loading]);
 
-    const sendMessage = async () => {
-        const trimmed = input.trim();
-        if (!trimmed || loading) return;
+const sendMessage = async () => {
+    const trimmed = input.trim();
+    if (!trimmed || loading) return;
 
-        setMessages((prev) => [...prev, { role: "user", text: trimmed }]);
-        setInput("");
-        setLoading(true);
+    const updated = [...messages, { role: "user", text: trimmed }];
+    setMessages(updated);
+    setInput("");
+    setLoading(true);
 
-        try {
-            const res = await api.post("/ai/chat", { message: trimmed });
-            const { reply, action } = res.data;
+    try {
+        // Map to {role, content} for the backend, skip the initial greeting bubble
+        const history = updated
+            .slice(1) // drop the hardcoded welcome message
+            .slice(0, -1) // drop the message we're sending now (sent separately)
+            .map((m) => ({
+                role: m.role === "user" ? "user" : "assistant",
+                content: m.text,
+            }));
 
-            setMessages((prev) => [...prev, { role: "bot", text: reply }]);
+        const res = await api.post("/ai/chat", { message: trimmed, history });
+        const { reply, action } = res.data;
 
-            if (action && action !== "none" && ROUTE_MAP[action]) {
-                setTimeout(() => {
-                    navigate(ROUTE_MAP[action]);
-                    setOpen(false);
-                }, 700);
-            }
-        } catch (err) {
-            setMessages((prev) => [
-                ...prev,
-                {
-                    role: "bot",
-                    text: "Sorry, something went wrong. Please try again in a moment.",
-                },
-            ]);
-        } finally {
-            setLoading(false);
+        setMessages((prev) => [...prev, { role: "bot", text: reply }]);
+
+        if (action && action !== "none" && ROUTE_MAP[action]) {
+            setTimeout(() => {
+                navigate(ROUTE_MAP[action]);
+                setOpen(false);
+            }, 700);
         }
-    };
+    } catch (err) {
+        setMessages((prev) => [
+            ...prev,
+            { role: "bot", text: "Sorry, something went wrong. Please try again in a moment." },
+        ]);
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleKeyDown = (e) => {
         if (e.key === "Enter" && !e.shiftKey) {

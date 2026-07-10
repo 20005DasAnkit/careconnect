@@ -16,5 +16,6 @@ public class AmbulanceRequest
     public double DestinationLng { get; set; }
     public string VehicleType { get; set; } = "NonAC";
     public double DistanceKm { get; set; }
+    public string PaymentStatus { get; set; } = "Pending"; // "Pending" | "Paid"
 
 }
