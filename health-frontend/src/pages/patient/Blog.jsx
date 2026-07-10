@@ -87,7 +87,9 @@ export default function Blog() {
     return (
         <div
             className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            style={{
+                fontFamily: "'Inter', system-ui, sans-serif"
+            }}
         >
             <div
                 className="w-full mx-auto"
@@ -103,16 +105,24 @@ export default function Blog() {
                         Health & wellness
                     </p>
                     <h1
-                        style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                        style={{
+                            fontFamily: "'Fraunces', Georgia, serif",
+                            fontWeight: 500
+                        }}
                         className="leading-[1.05] tracking-tight"
                     >
-                        <span style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.25rem)" }}>
+                        <span
+                            style={{
+                                fontSize: "clamp(2.25rem, 4.5vw, 3.25rem)"
+                            }}>
                             Stories worth
                         </span>
                         <br />
                         <span
                             className="italic text-[#3E7C59]"
-                            style={{ fontSize: "clamp(2.25rem, 4.5vw, 3.25rem)" }}
+                            style={{
+                                fontSize: "clamp(2.25rem, 4.5vw, 3.25rem)"
+                            }}
                         >
                             your attention.
                         </span>
@@ -209,7 +219,10 @@ export default function Blog() {
                                         </span>
 
                                         <h2
-                                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                            style={{
+                                                fontFamily: "'Fraunces', Georgia, serif",
+                                                fontWeight: 500
+                                            }}
                                             className="text-[1.5rem] leading-tight mb-3"
                                         >
                                             {post.title}
@@ -250,7 +263,10 @@ export default function Blog() {
                             <Search size={22} className="text-[#16332B]/35" strokeWidth={1.5} />
                         </div>
                         <h2
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                            style={{
+                                fontFamily: "'Fraunces', Georgia, serif",
+                                fontWeight: 500
+                            }}
                             className="text-[1.3rem] mt-6"
                         >
                             No articles found

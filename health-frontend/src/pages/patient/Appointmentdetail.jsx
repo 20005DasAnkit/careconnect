@@ -630,19 +630,23 @@ export default function AppointmentDetail() {
     const [downloadingBill, setDownloadingBill] = useState(false);
 
     useEffect(() => {
-        if (!passedAppt) loadFromList();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        loadAppointment();
     }, [id]);
 
-    async function loadFromList() {
+    async function loadAppointment() {
         try {
             setLoading(true);
             setError("");
-            const res = await api.get("/patient/appointments");
-            const match = (res.data || []).find((a) => String(a.id) === String(id));
-            if (!match) setError("Appointment not found.");
-            else setAppt(match);
-        } catch {
+
+            const res = await api.get(`/patient/appointment/${id}`);
+
+            setAppt(prev => ({
+                ...(prev || {}),
+                ...res.data
+            }));
+
+        } catch (err) {
+            console.error(err);
             setError("Unable to load appointment.");
         } finally {
             setLoading(false);
@@ -1045,19 +1049,80 @@ export default function AppointmentDetail() {
                                     icon={<MapPin size={16} color={T.green} />}
                                     label="Place to Visit" value={appt.placeToVisit}
                                 />
-                                <DetailRow
-                                    icon={<IndianRupee size={16} color={T.green} />}
-                                    label="Payment"
-                                    value={
-                                        <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
-                                            ₹{appt.doctorFee}
-                                            <span style={{ fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 99, background: payment.bg, color: payment.text }}>
-                                                {appt.paymentStatus}
-                                            </span>
-                                        </span>
-                                    }
-                                    last
-                                />
+                                <div
+                                    style={{
+                                        padding: "18px 0",
+                                        borderTop: `1px solid ${T.border}`
+                                    }}
+                                >
+                                    <h4
+                                        style={{
+                                            margin: "0 0 16px",
+                                            fontSize: 14,
+                                            fontWeight: 700,
+                                            color: T.green
+                                        }}
+                                    >
+                                        Payment Summary
+                                    </h4>
+
+                                    <PaymentRow
+                                        title="Doctor Fee"
+                                        value={appt.doctorFee}
+                                    />
+
+                                    <PaymentRow
+                                        title="Paid Online"
+                                        value={appt.paidOnline}
+                                    />
+
+                                    {appt.status === "CancelledByUser" && (
+                                        <>
+                                            <PaymentRow
+                                                title="Refund"
+                                                value={appt.refundAmount}
+                                                color="#16A34A"
+                                            />
+
+                                            <PaymentRow
+                                                title="Final Paid"
+                                                value={appt.finalPaid}
+                                                bold
+                                            />
+                                        </>
+                                    )}
+
+                                    {appt.status === "NotVisited" && (
+                                        <>
+                                            <PaymentRow
+                                                title="Refund"
+                                                value={0}
+                                            />
+
+                                            <PaymentRow
+                                                title="Outstanding"
+                                                value={appt.remainingAmount}
+                                                color="#D97706"
+                                                bold
+                                            />
+                                        </>
+                                    )}
+
+                                    {appt.status === "Completed" && (
+                                        <>
+                                            <PaymentRow
+                                                title="Paid at Hospital"
+                                                value={appt.remainingAmount}
+                                            />
+
+                                            <PaymentRow
+                                                title="Total Paid"
+                                                value={appt.doctorFee}
+                                                bold
+                                            />
+                                        </>
+                                    )}
+                                </div>
                             </div>
 
                             {status.step >= 0 && (
@@ -1246,5 +1311,38 @@ export default function AppointmentDetail() {
                 </div>
             </div>
         </>
+    );
+}
+function PaymentRow({
+    title,
+    value,
+    color = "#16332B",
+    bold = false
+}) {
+    return (
+        <div
+            style={{
+                display: "flex",
+                justifyContent: "space-between",
+                marginBottom: 12
+            }}
+        >
+            <span
+                style={{
+                    color: "#6B7280"
+                }}
+            >
+                {title}
+            </span>
+
+            <span
+                style={{
+                    color,
+                    fontWeight: bold ? 700 : 600
+                }}
+            >
+                ₹{value}
+            </span>
+        </div>
     );
 }

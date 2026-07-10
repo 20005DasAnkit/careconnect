@@ -314,6 +314,7 @@ public class PatientController : ControllerBase
             {
                 oi.OrderId,
                 ProductName = p != null ? p.Name : "Product removed",
+                ImageUrl = p != null ? p.ImageUrl : null,
                 oi.Quantity,
                 oi.UnitPrice
             }
@@ -326,6 +327,7 @@ public class PatientController : ControllerBase
         g => g.Select(i => new OrderItemSummaryDto
         {
             ProductName = i.ProductName,
+            ImageUrl = i.ImageUrl,
             Quantity = i.Quantity,
             UnitPrice = i.UnitPrice,
             LineTotal = i.Quantity * i.UnitPrice
@@ -765,18 +767,18 @@ public class PatientController : ControllerBase
              where r.Id == id && r.UserId == userId
              select new
              {
-                r.Id,
-                r.Status,
-                r.Fare,
-                r.DistanceKm,
-                r.PickupLocation,
-                r.DestinationLocation,
-                DriverName = a.DriverName,
-                DriverPhone = a.DriverPhone,
-                VehicleNumber = a.VehicleNumber,
-                LicenseNumber = a.LicenseNumber,
-                Rating = a.Rating,
-                Verified = a.Verified,
+                 r.Id,
+                 r.Status,
+                 r.Fare,
+                 r.DistanceKm,
+                 r.PickupLocation,
+                 r.DestinationLocation,
+                 DriverName = a.DriverName,
+                 DriverPhone = a.DriverPhone,
+                 VehicleNumber = a.VehicleNumber,
+                 LicenseNumber = a.LicenseNumber,
+                 Rating = a.Rating,
+                 Verified = a.Verified,
              }).FirstOrDefault();
 
         if (ride == null)
@@ -940,16 +942,34 @@ public class PatientController : ControllerBase
 
              select new
              {
-                a.Id,
-                a.Status,
-                a.PaymentStatus,
-                a.AdvanceAmount,
-                a.IsReviewed,
-                AppointmentDate = s.AvailableFrom,
-                AppointmentTime = s.AvailableFrom,
-                Place = s.Place,
-                DoctorId = d.Id,
-                d.HospitalName
+                 a.Id,
+                 a.Status,
+                 a.PaymentStatus,
+                 a.AdvanceAmount,
+                 a.IsReviewed,
+
+                 DoctorFee = d.Fee,
+
+                 PaidOnline = a.AdvanceAmount,
+
+                 RemainingAmount = d.Fee - a.AdvanceAmount,
+
+                 RefundAmount =
+                     a.Status == "CancelledByUser"
+                         ? Math.Round(a.AdvanceAmount * 0.5m, 2)
+                         : 0,
+
+                 FinalPaid =
+                     a.Status == "CancelledByUser"
+                         ? a.AdvanceAmount - Math.Round(a.AdvanceAmount * 0.5m, 2)
+                         : a.AdvanceAmount,
+
+                 AppointmentDate = s.AvailableFrom,
+                 AppointmentTime = s.AvailableFrom,
+                 Place = s.Place,
+
+                 DoctorId = d.Id,
+                 d.HospitalName
              })
             .FirstOrDefault();
 
@@ -958,7 +978,6 @@ public class PatientController : ControllerBase
 
         return Ok(appointment);
     }
-
     private static double DistanceKm(double lat1, double lon1, double lat2, double lon2)
     {
         const double R = 6371;

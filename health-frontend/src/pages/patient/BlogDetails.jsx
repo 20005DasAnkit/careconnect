@@ -15,8 +15,6 @@ import {
     Brain,
 } from "lucide-react";
 
-// Same category → icon/color map as the blog list page, kept in sync
-// so a missing cover image falls back to a consistent visual.
 const CATEGORY_META = {
     "Heart Health": { icon: Heart, color: "#9E211A" },
     "General Wellness": { icon: Activity, color: "#3E7C59" },
@@ -32,7 +30,10 @@ function getCategoryMeta(category) {
 
 function BlogDetailsSkeleton() {
     return (
-        <div className="min-h-screen bg-[#FAF8F3]" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+        <div className="min-h-screen bg-[#FAF8F3]" 
+            style={{ 
+                fontFamily: "'Inter', system-ui, sans-serif" 
+            }}>
             <div className="w-full px-8 lg:px-16 xl:px-24 2xl:px-32 py-16 max-w-[900px] mx-auto animate-pulse">
                 <div className="h-4 bg-[#EFEAE0] rounded-full w-32 mb-10" />
                 <div className="bg-white rounded-[24px] border border-[#E4DFD3] overflow-hidden">
@@ -88,14 +89,23 @@ export default function BlogDetails() {
         return (
             <div
                 className="min-h-screen bg-[#FAF8F3] flex items-center justify-center px-8"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                style={{ 
+                    fontFamily: "'Inter', system-ui, sans-serif" 
+                }}
             >
                 <div className="text-center">
                     <div className="w-14 h-14 mx-auto rounded-full bg-white border border-[#E4DFD3] flex items-center justify-center">
-                        <Tag size={22} className="text-[#16332B]/35" strokeWidth={1.5} />
+                        <Tag 
+                            size={22} 
+                            className="text-[#16332B]/35" 
+                            strokeWidth={1.5} 
+                        />
                     </div>
                     <h2
-                        style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                        style={{ 
+                            fontFamily: "'Fraunces', Georgia, serif", 
+                            fontWeight: 500 
+                        }}
                         className="text-[1.4rem] text-[#16332B] mt-6"
                     >
                         Article not found
@@ -118,7 +128,9 @@ export default function BlogDetails() {
         return (
             <div
                 className="min-h-screen bg-[#FAF8F3] flex items-center justify-center px-8"
-                style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+                style={{ 
+                    fontFamily: "'Inter', system-ui, sans-serif" 
+                }}
             >
                 <div className="bg-[#FBEAE5] border border-[#E8B8AA] rounded-2xl p-6 text-center max-w-sm">
                     <p className="text-[#9E3A20] text-sm mb-4">{error}</p>
@@ -138,7 +150,9 @@ export default function BlogDetails() {
     return (
         <div
             className="min-h-screen bg-[#FAF8F3] text-[#16332B]"
-            style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+            style={{ 
+                fontFamily: "'Inter', system-ui, sans-serif" 
+            }}
         >
             <div
                 className="w-full mx-auto"
@@ -172,7 +186,11 @@ export default function BlogDetails() {
                             />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center">
-                                <CategoryIcon size={48} strokeWidth={1.5} style={{ color: categoryColor }} />
+                                <CategoryIcon 
+                                    size={48} 
+                                    strokeWidth={1.5} 
+                                    style={{ color: categoryColor }} 
+                                />
                             </div>
                         )}
                     </div>
@@ -180,13 +198,19 @@ export default function BlogDetails() {
                     <div className="p-6 sm:p-10">
                         <span
                             className="inline-block text-[12px] font-semibold uppercase tracking-wide px-3 py-1.5 rounded-full mb-5"
-                            style={{ background: "#EBF2E3", color: categoryColor }}
+                            style={{ 
+                                background: "#EBF2E3", 
+                                color: categoryColor 
+                            }}
                         >
                             {blog.category || "Wellness"}
                         </span>
 
                         <h1
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                            style={{ 
+                                fontFamily: "'Fraunces', Georgia, serif", 
+                                fontWeight: 500 
+                            }}
                             className="text-[1.75rem] sm:text-[2.25rem] leading-tight mb-4"
                         >
                             {blog.title}
@@ -231,7 +255,10 @@ export default function BlogDetails() {
                 {related.length > 0 && (
                     <div className="mt-14">
                         <h2
-                            style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                            style={{ 
+                                fontFamily: "'Fraunces', Georgia, serif", 
+                                fontWeight: 500 
+                            }}
                             className="text-[1.35rem] mb-6"
                         >
                             Related articles
@@ -271,12 +298,16 @@ export default function BlogDetails() {
                                                 {item.category || "Wellness"}
                                             </span>
                                             <h3
-                                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                                style={{ 
+                                                    fontFamily: "'Fraunces', Georgia, serif", 
+                                                    fontWeight: 500 
+                                                }}
                                                 className="text-[14.5px] leading-snug mb-2 line-clamp-2"
                                             >
                                                 {item.title}
                                             </h3>
-                                            <span className="flex items-center gap-1.5 text-[11px] text-[#16332B]/40">
+                                            <span 
+                                                className="flex items-center gap-1.5 text-[11px] text-[#16332B]/40">
                                                 <Clock size={12} />
                                                 {item.readTimeMinutes || 5} min read
                                             </span>

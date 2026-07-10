@@ -30,15 +30,35 @@ namespace HEALTHCARE.Services
                     page.Content().Column(col =>
                     {
                         // ── Top brand bar ──
-                        col.Item().Background(Green).Padding(20).Row(row =>
+                        col.Item()
+                        .Background(Green)
+                        .Padding(20)
+                        .Row(row =>
                         {
-                            row.RelativeItem().Text("CareConnect")
-                                .FontSize(20).Bold().FontColor(Colors.White);
+                            row.RelativeItem().Column(c =>
+                            {
+                                c.Item()
+                                .Text("CareConnect")
+                                .FontSize(24)
+                                .Bold()
+                                .FontColor(Colors.White);
 
-                            row.ConstantItem(220).AlignRight().Text("BOOKING INVOICE")
-                                .FontSize(13).Bold().FontColor(Colors.White).LetterSpacing(0.05f);
+                                c.Item()
+                                    .PaddingTop(2)
+                                    .Text("Care You Can Trust, Anytime")
+                                    .FontSize(10)
+                                    .FontColor("#E8F5E9")
+                                    .Italic();
+                            });
+
+                            row.ConstantItem(220)
+                                .AlignRight()
+                                .Text("BILLING INVOICE")
+                                .FontSize(13)
+                                .Bold()
+                                .FontColor(Colors.White)
+                                .LetterSpacing(0.05f);
                         });
-
                         col.Item().Padding(28).Column(body =>
                         {
                             // ── Invoice No. / Date ──
@@ -81,8 +101,8 @@ namespace HEALTHCARE.Services
 
                                     c.Item().Text($"Email : {b.PatientEmail}")
                                         .FontSize(9).FontColor(MutedText);
-                                    
-                                    c.Item() .Text($"Address : {b.PatientAddress}")
+
+                                    c.Item().Text($"Address : {b.PatientAddress}")
                                         .FontSize(9).FontColor(MutedText);
                                 });
 
