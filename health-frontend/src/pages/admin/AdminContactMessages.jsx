@@ -86,19 +86,28 @@ export default function AdminContactMessages() {
                                 Admin
                             </p>
                             <h1
-                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                style={{ 
+                                    fontFamily: "'Fraunces', Georgia, serif", 
+                                    fontWeight: 500 
+                                }}
                                 className="leading-[1.05] tracking-tight"
                             >
-                                <span style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)" }}>
+                                <span 
+                                    style={{ 
+                                        fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)" 
+                                    }}>
                                     Contact
                                 </span>{" "}
                                 <span
                                     className="italic text-[#3E7C59]"
-                                    style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)" }}
+                                    style={{ 
+                                        fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)" 
+                                    }}
                                 >
                                     messages.
                                 </span>
                             </h1>
+
                             <p className="mt-3 text-[15px] text-[#16332B]/55">
                                 Manage customer enquiries sent from the website.
                             </p>
@@ -125,7 +134,10 @@ export default function AdminContactMessages() {
                                 <Mail size={20} strokeWidth={1.75} className="text-[#3E7C59]" />
                             </div>
                             <h3
-                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700 }}
+                                style={{ 
+                                    fontFamily: "'Fraunces', Georgia, serif", 
+                                    fontWeight: 700 
+                                }}
                                 className="text-[2rem] text-[#16332B]"
                             >
                                 {messages.length}
@@ -135,10 +147,17 @@ export default function AdminContactMessages() {
 
                         <div className="bg-white rounded-[20px] border border-[#E4DFD3] p-6">
                             <div className="w-11 h-11 rounded-xl bg-[#EBF2E3] flex items-center justify-center mb-4">
-                                <MessageSquare size={20} strokeWidth={1.75} className="text-[#3E7C59]" />
+                                <MessageSquare 
+                                    size={20} 
+                                    strokeWidth={1.75} 
+                                    className="text-[#3E7C59]" 
+                                />
                             </div>
                             <h3
-                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700 }}
+                                style={{ 
+                                    fontFamily: "'Fraunces', Georgia, serif", 
+                                    fontWeight: 700 
+                                }}
                                 className="text-[2rem] text-[#16332B]"
                             >
                                 {filtered.length}
@@ -148,10 +167,17 @@ export default function AdminContactMessages() {
 
                         <div className="bg-white rounded-[20px] border border-[#E4DFD3] p-6">
                             <div className="w-11 h-11 rounded-xl bg-[#EBF2E3] flex items-center justify-center mb-4">
-                                <User size={20} strokeWidth={1.75} className="text-[#3E7C59]" />
+                                <User 
+                                    size={20}
+                                    strokeWidth={1.75} 
+                                    className="text-[#3E7C59]" 
+                                />
                             </div>
                             <h3
-                                style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 700 }}
+                                style={{ 
+                                    fontFamily: "'Fraunces', Georgia, serif", 
+                                    fontWeight: 700 
+                                }}
                                 className="text-[2rem] text-[#16332B]"
                             >
                                 {new Set(messages.map((x) => x.email)).size}
@@ -169,10 +195,17 @@ export default function AdminContactMessages() {
                         ) : filtered.length === 0 ? (
                             <div className="py-24 text-center">
                                 <div className="w-14 h-14 mx-auto rounded-full bg-[#FAF8F3] flex items-center justify-center">
-                                    <Mail size={22} className="text-[#16332B]/35" strokeWidth={1.5} />
+                                    <Mail 
+                                        size={22} 
+                                        className="text-[#16332B]/35" 
+                                        strokeWidth={1.5} 
+                                    />
                                 </div>
                                 <h3
-                                    style={{ fontFamily: "'Fraunces', Georgia, serif", fontWeight: 500 }}
+                                    style={{ 
+                                        fontFamily: "'Fraunces', Georgia, serif", 
+                                        fontWeight: 500 
+                                    }}
                                     className="text-[1.3rem] mt-6"
                                 >
                                     No messages found

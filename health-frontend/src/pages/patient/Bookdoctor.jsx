@@ -54,7 +54,8 @@ function StepHeader({ step, doctorName }) {
                 {STEPS.map((s, i) => (
                     <div
                         key={s}
-                        className={`h-1.5 flex-1 rounded-full transition-colors ${i <= step ? "bg-[#16332B]" : "bg-[#E7E2D6]"
+                        className={`h-1.5 flex-1 rounded-full transition-colors 
+                            ${i <= step ? "bg-[#16332B]" : "bg-[#E7E2D6]"
                             }`}
                     />
                 ))}
@@ -78,6 +79,7 @@ function SlotSkeleton() {
 
 export default function BookAppointment() {
     const [searchParams] = useSearchParams();
+
     const navigate = useNavigate();
     const doctorId = searchParams.get("doctorId");
     const [step, setStep] = useState(0);
@@ -244,7 +246,11 @@ export default function BookAppointment() {
 
                     {step < 3 && (
                         <button
-                            onClick={() => (step === 0 ? navigate(-1) : setStep((s) => s - 1))}
+                            onClick={() =>
+                                step === 0
+                                    ? navigate("/patient/doctors")
+                                    : setStep((s) => s - 1)
+                            }
                             className="flex items-center gap-1.5 text-sm text-[#6B6458] hover:text-[#16332B] mb-6 transition"
                         >
                             <FiArrowLeft size={15} />

@@ -39,12 +39,12 @@ namespace HEALTHCARE.Controllers
             if (appointment.Status != "Confirmed" && appointment.Status != "Completed")
                 return BadRequest(new { message = "Bill is available once the appointment is confirmed." });
 
-                var totalFee = appointment.Doctor?.Fee ?? (appointment.AdvanceAmount * 2);
-                var advance = appointment.AdvanceAmount;
-                var creditApplied = appointment.WalletUsed;
-                var advancePaid = Math.Max(advance - creditApplied, 0);
-                var balanceDue = Math.Max(totalFee - advance, 0);
-                var balancePaid = appointment.Status == "Completed";
+            var totalFee = appointment.Doctor?.Fee ?? (appointment.AdvanceAmount * 2);
+            var advance = appointment.AdvanceAmount;
+            var creditApplied = appointment.WalletUsed;
+            var advancePaid = Math.Max(advance - creditApplied, 0);
+            var balanceDue = Math.Max(totalFee - advance, 0);
+            var balancePaid = appointment.Status == "Completed";
 
             var dto = new BillingResponseDto
             {
@@ -64,7 +64,7 @@ namespace HEALTHCARE.Controllers
                 PlaceToVisit = appointment.DoctorAvailability?.Place ?? "",
                 TotalFee = totalFee,
                 AdvanceAmount = advance,
-                CreditApplied = creditApplied,  
+                CreditApplied = creditApplied,
                 AdvancePayable = advancePaid,
                 BalanceDue = balanceDue,
                 BalancePaid = balancePaid,

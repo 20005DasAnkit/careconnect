@@ -634,19 +634,35 @@ export default function Dashboard() {
                                     <tr>
                                         <th className="text-left p-5 font-medium">Medicine</th>
                                         <th className="text-left p-5 font-medium">Date</th>
+                                        <th className="text-left p-5 font-medium">Payment</th>
                                         <th className="text-left p-5 font-medium">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {orders.slice(0, 5).map((order) => (
+                                    {orders.slice(0, 1).map((order) => (
                                         <tr
                                             key={order.id}
                                             className="border-t border-[#E4DFD3] hover:bg-[#FAF8F3]/60"
                                         >
-                                            <td className="p-5">{order.productName}</td>
+                                            <td className="p-5">
+                                                {order.productName}
+                                            </td>
+
                                             <td className="p-5">
                                                 {new Date(order.orderDate).toLocaleDateString("en-IN")}
                                             </td>
+
+                                            <td className="p-5">
+                                                <span
+                                                    className={`px-3 py-1 rounded-full text-sm ${order.paymentMode === "Online"
+                                                        ? "bg-blue-100 text-blue-700"
+                                                        : "bg-amber-100 text-amber-700"
+                                                        }`}
+                                                >
+                                                    {order.paymentMode}
+                                                </span>
+                                            </td>
+
                                             <td className="p-5">
                                                 <span className="bg-[#3E7C59]/10 text-[#3E7C59] px-3 py-1 rounded-full">
                                                     {order.status}

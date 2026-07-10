@@ -138,116 +138,116 @@ export default function Ambulances() {
     };
 
     return (
-            <>
+        <>
 
-                <style>{`
+            <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
                     * { box-sizing: border-box; }
                 `}</style>
 
-                <div style={{ padding: 28 }}>
+            <div style={{ padding: 28 }}>
 
-                    {/* Header */}
-                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 14 }}>
-                        <div>
-                            <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 28, margin: 0, color: T.ink }}>
-                                Ambulance Drivers
-                            </h1>
-                            <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>
-                                Manage registered ambulance drivers and vehicles
-                            </p>
-                        </div>
-                        <button
-                            onClick={() => setShowForm(true)}
-                            style={{
-                                display: "flex", alignItems: "center", gap: 8,
-                                background: T.terra, color: T.white, border: "none",
-                                borderRadius: 12, padding: "12px 20px", fontWeight: 700, fontSize: 14,
-                                cursor: "pointer", transition: "background .15s",
-                            }}
-                            onMouseEnter={(e) => e.currentTarget.style.background = "#9A481F"}
-                            onMouseLeave={(e) => e.currentTarget.style.background = T.terra}
-                        >
-                            <Plus size={16} /> Create Ambulance
-                        </button>
+                {/* Header */}
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 28, flexWrap: "wrap", gap: 14 }}>
+                    <div>
+                        <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 28, margin: 0, color: T.ink }}>
+                            Ambulance Drivers
+                        </h1>
+                        <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>
+                            Manage registered ambulance drivers and vehicles
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setShowForm(true)}
+                        style={{
+                            display: "flex", alignItems: "center", gap: 8,
+                            background: T.terra, color: T.white, border: "none",
+                            borderRadius: 12, padding: "12px 20px", fontWeight: 700, fontSize: 14,
+                            cursor: "pointer", transition: "background .15s",
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = "#9A481F"}
+                        onMouseLeave={(e) => e.currentTarget.style.background = T.terra}
+                    >
+                        <Plus size={16} /> Create Ambulance
+                    </button>
+                </div>
+
+                {/* Stats */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
+                    <StatCard label="Total Drivers" value={ambulances.length} accent={T.green} icon={<Truck size={22} />} />
+                    <StatCard label="Active Fleet" value={ambulances.length} accent={T.greenMid} icon={<Users size={22} />} />
+                </div>
+
+                {/* Table */}
+                <div style={card}>
+                    <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, background: T.cream, display: "flex", alignItems: "center", gap: 8 }}>
+                        <Truck size={17} color={T.green} />
+                        <span style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, color: T.ink }}>Driver List</span>
                     </div>
 
-                    {/* Stats */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
-                        <StatCard label="Total Drivers" value={ambulances.length} accent={T.green} icon={<Truck size={22} />} />
-                        <StatCard label="Active Fleet" value={ambulances.length} accent={T.greenMid} icon={<Users size={22} />} />
-                    </div>
-
-                    {/* Table */}
-                    <div style={card}>
-                        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, background: T.cream, display: "flex", alignItems: "center", gap: 8 }}>
-                            <Truck size={17} color={T.green} />
-                            <span style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, color: T.ink }}>Driver List</span>
-                        </div>
-
-                        <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                <thead>
-                                    <tr style={{ background: T.cream }}>
-                                        {["#", "Driver", "Email", "Phone", "Vehicle", "Action"].map((h) => (
-                                            <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan={6} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
-                                                Loading ambulances…
-                                            </td>
-                                        </tr>
-                                    ) : ambulances.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={6} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
-                                                <Truck size={44} style={{ opacity: .3, display: "block", margin: "0 auto 12px" }} />
-                                                No ambulance driver found.
-                                            </td>
-                                        </tr>
-                                    ) : ambulances.map((a, i) => (
-                                        <tr key={a.id} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = T.cream}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                                        >
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted, fontWeight: 600 }}>{i + 1}</td>
-                                            <td style={{ padding: "15px 20px", fontWeight: 700, color: T.ink }}>{a.driverName}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted }}>{a.email}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{a.driverPhone}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{a.vehicleNumber}</td>
-                                            <td style={{ padding: "15px 20px" }}>
-                                                <button
-                                                    onClick={() => remove(a.id)}
-                                                    style={{
-                                                        width: 34, height: 34, borderRadius: 8, border: "none", cursor: "pointer",
-                                                        background: T.dangerLight, color: T.danger, display: "flex",
-                                                        alignItems: "center", justifyContent: "center", transition: "opacity .15s",
-                                                    }}
-                                                    onMouseEnter={(e) => e.currentTarget.style.opacity = ".75"}
-                                                    onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                                                >
-                                                    <Trash2 size={15} />
-                                                </button>
-                                            </td>
-                                        </tr>
+                    <div style={{ overflowX: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <thead>
+                                <tr style={{ background: T.cream }}>
+                                    {["#", "Driver", "Email", "Phone", "Vehicle", "Action"].map((h) => (
+                                        <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>
+                                            {h}
+                                        </th>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={6} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
+                                            Loading ambulances…
+                                        </td>
+                                    </tr>
+                                ) : ambulances.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={6} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
+                                            <Truck size={44} style={{ opacity: .3, display: "block", margin: "0 auto 12px" }} />
+                                            No ambulance driver found.
+                                        </td>
+                                    </tr>
+                                ) : ambulances.map((a, i) => (
+                                    <tr key={a.id} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = T.cream}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                                    >
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted, fontWeight: 600 }}>{i + 1}</td>
+                                        <td style={{ padding: "15px 20px", fontWeight: 700, color: T.ink }}>{a.driverName}</td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted }}>{a.email}</td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{a.driverPhone}</td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{a.vehicleNumber}</td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            <button
+                                                onClick={() => remove(a.id)}
+                                                style={{
+                                                    width: 34, height: 34, borderRadius: 8, border: "none", cursor: "pointer",
+                                                    background: T.dangerLight, color: T.danger, display: "flex",
+                                                    alignItems: "center", justifyContent: "center", transition: "opacity .15s",
+                                                }}
+                                                onMouseEnter={(e) => e.currentTarget.style.opacity = ".75"}
+                                                onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                                            >
+                                                <Trash2 size={15} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                        <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, background: T.cream }}>
-                            <span style={{ fontSize: 12, color: T.muted }}>
-                                Showing <b style={{ color: T.ink }}>{ambulances.length}</b> driver{ambulances.length !== 1 ? "s" : ""}
-                            </span>
-                        </div>
+                    <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, background: T.cream }}>
+                        <span style={{ fontSize: 12, color: T.muted }}>
+                            Showing <b style={{ color: T.ink }}>{ambulances.length}</b> driver{ambulances.length !== 1 ? "s" : ""}
+                        </span>
                     </div>
                 </div>
-           
+            </div>
+
 
             {/* Create modal */}
             {showForm && (
@@ -315,6 +315,6 @@ export default function Ambulances() {
                     </div>
                 </div>
             )}
-       </>
+        </>
     );
 }

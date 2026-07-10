@@ -338,9 +338,11 @@ public class PatientController : ControllerBase
                 ? itemsByOrder[o.Id]
                 : new List<OrderItemSummaryDto>();
 
+
             return new
             {
                 o.Id,
+                ProductName = items.FirstOrDefault()?.ProductName,
                 o.TotalAmount,
                 o.OrderDate,
                 o.Status,

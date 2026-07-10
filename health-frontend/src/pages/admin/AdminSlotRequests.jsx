@@ -120,142 +120,304 @@ export default function AdminSlotRequests() {
     const rejected = requests.filter((x) => x.status === "Rejected").length;
 
     return (
-            <>
+        <>
 
-                <style>{`
+            <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
                     * { box-sizing: border-box; }
                 `}</style>
 
-                <div style={{ padding: 28 }}>
+            <div style={{ padding: 28 }}>
 
-                    {/* Header */}
-                    <div style={{ marginBottom: 28 }}>
-                        <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 28, margin: 0, color: T.ink }}>
-                            Doctor Slot Requests
-                        </h1>
-                        <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>
-                            Review and respond to extra availability requests from doctors
-                        </p>
+                {/* Header */}
+                <div style={{ marginBottom: 28 }}>
+                    <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 28, margin: 0, color: T.ink }}>
+                        Doctor Slot Requests
+                    </h1>
+                    <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>
+                        Review and respond to extra availability requests from doctors
+                    </p>
+                </div>
+
+                {/* Stats */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
+                    <StatCard 
+                        label="Total Requests" 
+                        value={requests.length} 
+                        accent={T.green} 
+                        icon={<ClipboardList size={22} />} 
+                    />
+                    <StatCard 
+                        label="Pending" 
+                        value={pending} 
+                        accent="#D97706" 
+                        icon={<Clock3 size={22} />} 
+                    />
+                    <StatCard 
+                        label="Approved" 
+                        value={approved} 
+                        accent={T.greenMid} 
+                        icon={<CheckCircle2 size={22} />} 
+                    />
+                    <StatCard 
+                        label="Rejected" 
+                        value={rejected} 
+                        accent={T.danger} 
+                        icon={<XCircle size={22} />} 
+                    />
+                </div>
+
+                {/* Table */}
+                <div style={card}>
+                    <div 
+                        style={{ 
+                            padding: "18px 24px", 
+                            borderBottom: `1px solid ${T.border}`, 
+                            background: T.cream, 
+                            display: "flex", 
+                            alignItems: "center", 
+                            gap: 8 
+                        }}>
+                        <ClipboardList 
+                            size={17} 
+                            color={T.green} 
+                        />
+                        <span 
+                            style={{ 
+                                fontFamily: "Fraunces, serif", 
+                                fontWeight: 700, 
+                                fontSize: 17, 
+                                color: T.ink 
+                            }}>
+                                Request List
+                        </span>
                     </div>
 
-                    {/* Stats */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
-                        <StatCard label="Total Requests" value={requests.length} accent={T.green} icon={<ClipboardList size={22} />} />
-                        <StatCard label="Pending" value={pending} accent="#D97706" icon={<Clock3 size={22} />} />
-                        <StatCard label="Approved" value={approved} accent={T.greenMid} icon={<CheckCircle2 size={22} />} />
-                        <StatCard label="Rejected" value={rejected} accent={T.danger} icon={<XCircle size={22} />} />
-                    </div>
-
-                    {/* Table */}
-                    <div style={card}>
-                        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, background: T.cream, display: "flex", alignItems: "center", gap: 8 }}>
-                            <ClipboardList size={17} color={T.green} />
-                            <span style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, color: T.ink }}>Request List</span>
-                        </div>
-
-                        <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                <thead>
-                                    <tr style={{ background: T.cream }}>
-                                        {["Doctor", "Hospital", "From", "To", "Patients", "Status", "Action"].map((h) => (
-                                            <th key={h} style={{ padding: "13px 20px", textAlign: h === "Action" ? "center" : "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan={7} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
-                                                Loading requests…
-                                            </td>
-                                        </tr>
-                                    ) : requests.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={7} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
-                                                <ClipboardList size={44} style={{ opacity: .3, display: "block", margin: "0 auto 12px" }} />
-                                                No slot requests found.
-                                            </td>
-                                        </tr>
-                                    ) : requests.map((r) => (
-                                        <tr key={r.id} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = T.cream}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                                        >
-                                            <td style={{ padding: "15px 20px", fontWeight: 700, color: T.ink }}>{r.doctorName}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                    <Building2 size={13} color={T.greenMid} />
-                                                    {r.hospital}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, whiteSpace: "nowrap" }}>
-                                                {new Date(r.requestedFrom).toLocaleString()}
-                                            </td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, whiteSpace: "nowrap" }}>
-                                                {new Date(r.requestedTo).toLocaleString()}
-                                            </td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>
-                                                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                                    <Users size={13} color={T.greenMid} />
-                                                    {r.maxPatients}
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: "15px 20px" }}>
-                                                <StatusBadge status={r.status} />
-                                            </td>
-                                            <td style={{ padding: "15px 20px" }}>
-                                                {r.status === "Pending" ? (
-                                                    <div style={{ display: "flex", justifyContent: "center", gap: 8 }}>
-                                                        <button
-                                                            onClick={() => approve(r.id)}
-                                                            style={{
-                                                                display: "flex", alignItems: "center", gap: 6,
-                                                                background: T.greenLight, color: T.greenMid, border: "none",
-                                                                padding: "8px 14px", borderRadius: 8, fontWeight: 700, fontSize: 12,
-                                                                cursor: "pointer", transition: "opacity .15s",
-                                                            }}
-                                                            onMouseEnter={(e) => e.currentTarget.style.opacity = ".75"}
-                                                            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                                                        >
-                                                            <CheckCircle2 size={13} /> Approve
-                                                        </button>
-                                                        <button
-                                                            onClick={() => reject(r.id)}
-                                                            style={{
-                                                                display: "flex", alignItems: "center", gap: 6,
-                                                                background: T.dangerLight, color: T.danger, border: "none",
-                                                                padding: "8px 14px", borderRadius: 8, fontWeight: 700, fontSize: 12,
-                                                                cursor: "pointer", transition: "opacity .15s",
-                                                            }}
-                                                            onMouseEnter={(e) => e.currentTarget.style.opacity = ".75"}
-                                                            onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
-                                                        >
-                                                            <XCircle size={13} /> Reject
-                                                        </button>
-                                                    </div>
-                                                ) : (
-                                                    <div style={{ textAlign: "center", color: T.muted, fontSize: 12, fontWeight: 600 }}>
-                                                        Completed
-                                                    </div>
-                                                )}
-                                            </td>
-                                        </tr>
+                    <div style={{ overflowX: "auto" }}>
+                        <table 
+                            style={{ 
+                                width: "100%", 
+                                borderCollapse: "collapse" 
+                            }}>
+                            <thead>
+                                <tr 
+                                    style={{ background: T.cream }}>
+                                    {["Doctor", 
+                                      "Hospital", 
+                                      "From", 
+                                      "To", 
+                                      "Patients", 
+                                      "Status", 
+                                      "Action"
+                                    ].map((h) => (
+                                        <th 
+                                            key={h} 
+                                            style={{ 
+                                                padding: "13px 20px", 
+                                                textAlign: h === "Action" ? "center" : "left", 
+                                                fontSize: 11, 
+                                                fontWeight: 700, 
+                                                color: T.muted, 
+                                                textTransform: "uppercase", 
+                                                letterSpacing: .6, 
+                                                whiteSpace: "nowrap" 
+                                            }}>
+                                            {h}
+                                        </th>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </tr>
+                            </thead>
 
-                        <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, background: T.cream }}>
-                            <span style={{ fontSize: 12, color: T.muted }}>
-                                Showing <b style={{ color: T.ink }}>{requests.length}</b> request{requests.length !== 1 ? "s" : ""}
-                            </span>
-                        </div>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td 
+                                            colSpan={7} 
+                                            style={{ 
+                                                textAlign: "center", 
+                                                padding: "56px 0", 
+                                                color: T.muted 
+                                            }}>
+                                            Loading requests…
+                                        </td>
+                                    </tr>
+                                ) : requests.length === 0 ? (
+                                    <tr>
+                                        <td 
+                                            colSpan={7} 
+                                            style={{ 
+                                                textAlign: "center", 
+                                                padding: "56px 0", 
+                                                color: T.muted 
+                                            }}>
+                                            <ClipboardList 
+                                                size={44} 
+                                                style={{ 
+                                                    opacity: .3, 
+                                                    display: "block", 
+                                                    margin: "0 auto 12px" 
+                                                }} 
+                                            />
+                                            No slot requests found.
+                                        </td>
+                                    </tr>
+                                ) : requests.map((r) => (
+                                    <tr key={r.id} 
+                                        style={{ 
+                                            borderTop: `1px solid ${T.border}`, 
+                                            transition: "background .12s" 
+                                        }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = T.cream}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                                    >
+                                        <td 
+                                            style={{ 
+                                                padding: "15px 20px", 
+                                                fontWeight: 700, 
+                                                color: T.ink 
+                                            }}>
+                                                {r.doctorName}
+                                        </td>
+                                        <td 
+                                            style={{ 
+                                                padding: "15px 20px", 
+                                                fontSize: 13, 
+                                                color: T.ink 
+                                            }}>
+                                            <div 
+                                                style={{ 
+                                                    display: "flex", 
+                                                    alignItems: "center", 
+                                                    gap: 6 
+                                                }}>
+                                                <Building2 size={13} color={T.greenMid} />
+                                                {r.hospital}
+                                            </div>
+                                        </td>
+                                        <td 
+                                            style={{ 
+                                                padding: "15px 20px", 
+                                                fontSize: 13, 
+                                                color: T.ink, 
+                                                whiteSpace: "nowrap" 
+                                            }}>
+                                            {new Date(r.requestedFrom).toLocaleString()}
+                                        </td>
+                                        <td style={{ 
+                                                padding: "15px 20px", 
+                                                fontSize: 13, 
+                                                color: T.ink, 
+                                                whiteSpace: "nowrap" 
+                                            }}>
+                                            {new Date(r.requestedTo).toLocaleString()}
+                                        </td>
+                                        <td 
+                                            style={{ 
+                                                padding: "15px 20px", 
+                                                fontSize: 13, 
+                                                color: T.ink 
+                                            }}>
+                                            <div 
+                                                style={{ 
+                                                    display: "flex", 
+                                                    alignItems: "center", 
+                                                    gap: 6 
+                                                }}>
+                                                <Users size={13} color={T.greenMid} />
+                                                {r.maxPatients}
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            <StatusBadge status={r.status} />
+                                        </td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            {r.status === "Pending" ? (
+                                                <div 
+                                                    style={{ 
+                                                        display: "flex", 
+                                                        justifyContent: "center", 
+                                                        gap: 8 
+                                                    }}>
+                                                    <button
+                                                        onClick={() => approve(r.id)}
+                                                        style={{
+                                                            display: "flex", 
+                                                            alignItems: "center", 
+                                                            gap: 6,
+                                                            background: T.greenLight, 
+                                                            color: T.greenMid, 
+                                                            border: "none",
+                                                            padding: "8px 14px", 
+                                                            borderRadius: 8, 
+                                                            fontWeight: 700, 
+                                                            fontSize: 12,
+                                                            cursor: "pointer", 
+                                                            transition: "opacity .15s",
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.opacity = ".75"}
+                                                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                                                    >
+                                                        <CheckCircle2 size={13} /> Approve
+                                                    </button>
+                                                    <button
+                                                        onClick={() => reject(r.id)}
+                                                        style={{
+                                                            display: "flex", 
+                                                            alignItems: "center", 
+                                                            gap: 6,
+                                                            background: T.dangerLight, 
+                                                            color: T.danger, 
+                                                            border: "none",
+                                                            padding: "8px 14px", 
+                                                            borderRadius: 8, 
+                                                            fontWeight: 700, 
+                                                            fontSize: 12,
+                                                            cursor: "pointer", 
+                                                            transition: "opacity .15s",
+                                                        }}
+                                                        onMouseEnter={(e) => e.currentTarget.style.opacity = ".75"}
+                                                        onMouseLeave={(e) => e.currentTarget.style.opacity = "1"}
+                                                    >
+                                                        <XCircle size={13} /> Reject
+                                                    </button>
+                                                </div>
+                                            ) : (
+                                                <div 
+                                                    style={{ 
+                                                        textAlign: "center", 
+                                                        color: T.muted, 
+                                                        fontSize: 12, 
+                                                        fontWeight: 600 
+                                                    }}>
+                                                    Completed
+                                                </div>
+                                            )}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style={{ 
+                             padding: "14px 24px", 
+                             borderTop: `1px solid ${T.border}`, 
+                             background: T.cream 
+                            }}>
+                        <span 
+                            style={{ 
+                                fontSize: 12, 
+                                color: T.muted 
+                            }}>
+                            Showing 
+                            <b 
+                                style={{ color: T.ink }}>
+                                    {requests.length}
+                            </b> request{requests.length !== 1 ? "s" : ""}
+                        </span>
                     </div>
                 </div>
-</>
+            </div>
+        </>
     );
 }

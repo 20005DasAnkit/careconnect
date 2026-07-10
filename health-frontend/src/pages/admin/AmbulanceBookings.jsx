@@ -84,105 +84,105 @@ export default function AmbulanceBookings() {
     const completedCount = bookings.filter((b) => b.status === "Completed").length;
 
     return (
-            <>
+        <>
 
-                <style>{`
+            <style>{`
                     @import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=Inter:wght@400;500;600;700&display=swap');
                     * { box-sizing: border-box; }
                 `}</style>
 
-                <div style={{ padding: 28 }}>
+            <div style={{ padding: 28 }}>
 
-                    {/* Header */}
-                    <div style={{ marginBottom: 28 }}>
-                        <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 28, margin: 0, color: T.ink }}>
-                            Ambulance Bookings
-                        </h1>
-                        <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>
-                            Track all patient ambulance requests and dispatch status
-                        </p>
+                {/* Header */}
+                <div style={{ marginBottom: 28 }}>
+                    <h1 style={{ fontFamily: "Fraunces, serif", fontWeight: 900, fontSize: 28, margin: 0, color: T.ink }}>
+                        Ambulance Bookings
+                    </h1>
+                    <p style={{ fontSize: 14, color: T.muted, margin: "6px 0 0" }}>
+                        Track all patient ambulance requests and dispatch status
+                    </p>
+                </div>
+
+                {/* Stats */}
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
+                    <StatCard label="Total Bookings" value={bookings.length} accent={T.green} icon={<Ambulance size={22} />} />
+                    <StatCard label="Active" value={activeCount} accent="#D97706" icon={<Navigation2 size={22} />} />
+                    <StatCard label="Completed" value={completedCount} accent={T.greenMid} icon={<Users size={22} />} />
+                </div>
+
+                {/* Table */}
+                <div style={card}>
+                    <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, background: T.cream, display: "flex", alignItems: "center", gap: 8 }}>
+                        <Ambulance size={17} color={T.green} />
+                        <span style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, color: T.ink }}>Booking List</span>
                     </div>
 
-                    {/* Stats */}
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 24 }}>
-                        <StatCard label="Total Bookings" value={bookings.length} accent={T.green} icon={<Ambulance size={22} />} />
-                        <StatCard label="Active" value={activeCount} accent="#D97706" icon={<Navigation2 size={22} />} />
-                        <StatCard label="Completed" value={completedCount} accent={T.greenMid} icon={<Users size={22} />} />
-                    </div>
-
-                    {/* Table */}
-                    <div style={card}>
-                        <div style={{ padding: "18px 24px", borderBottom: `1px solid ${T.border}`, background: T.cream, display: "flex", alignItems: "center", gap: 8 }}>
-                            <Ambulance size={17} color={T.green} />
-                            <span style={{ fontFamily: "Fraunces, serif", fontWeight: 700, fontSize: 17, color: T.ink }}>Booking List</span>
-                        </div>
-
-                        <div style={{ overflowX: "auto" }}>
-                            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                                <thead>
-                                    <tr style={{ background: T.cream }}>
-                                        {["Patient", "Email", "Driver", "Vehicle", "Pickup", "Destination", "Status", "Date"].map((h) => (
-                                            <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>
-                                                {h}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                </thead>
-
-                                <tbody>
-                                    {loading ? (
-                                        <tr>
-                                            <td colSpan={8} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
-                                                Loading bookings…
-                                            </td>
-                                        </tr>
-                                    ) : bookings.length === 0 ? (
-                                        <tr>
-                                            <td colSpan={8} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
-                                                <Ambulance size={44} style={{ opacity: .3, display: "block", margin: "0 auto 12px" }} />
-                                                No ambulance bookings found.
-                                            </td>
-                                        </tr>
-                                    ) : bookings.map((b) => (
-                                        <tr key={b.bookingId} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = T.cream}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
-                                        >
-                                            <td style={{ padding: "15px 20px", fontWeight: 700, color: T.ink }}>{b.patientName}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted }}>{b.patientEmail}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{b.driverName}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{b.vehicleNumber}</td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, maxWidth: 180 }}>
-                                                <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
-                                                    <MapPin size={13} color={T.greenMid} style={{ marginTop: 2, flexShrink: 0 }} />
-                                                    <span>{b.pickupLocation}</span>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, maxWidth: 180 }}>
-                                                <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
-                                                    <Navigation2 size={13} color={T.terra} style={{ marginTop: 2, flexShrink: 0 }} />
-                                                    <span>{b.destinationLocation}</span>
-                                                </div>
-                                            </td>
-                                            <td style={{ padding: "15px 20px" }}>
-                                                <StatusBadge status={b.status} />
-                                            </td>
-                                            <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, whiteSpace: "nowrap" }}>
-                                                {new Date(b.requestTime).toLocaleString()}
-                                            </td>
-                                        </tr>
+                    <div style={{ overflowX: "auto" }}>
+                        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                            <thead>
+                                <tr style={{ background: T.cream }}>
+                                    {["Patient", "Email", "Driver", "Vehicle", "Pickup", "Destination", "Status", "Date"].map((h) => (
+                                        <th key={h} style={{ padding: "13px 20px", textAlign: "left", fontSize: 11, fontWeight: 700, color: T.muted, textTransform: "uppercase", letterSpacing: .6, whiteSpace: "nowrap" }}>
+                                            {h}
+                                        </th>
                                     ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                </tr>
+                            </thead>
 
-                        <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, background: T.cream }}>
-                            <span style={{ fontSize: 12, color: T.muted }}>
-                                Showing <b style={{ color: T.ink }}>{bookings.length}</b> booking{bookings.length !== 1 ? "s" : ""}
-                            </span>
-                        </div>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td colSpan={8} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
+                                            Loading bookings…
+                                        </td>
+                                    </tr>
+                                ) : bookings.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={8} style={{ textAlign: "center", padding: "56px 0", color: T.muted }}>
+                                            <Ambulance size={44} style={{ opacity: .3, display: "block", margin: "0 auto 12px" }} />
+                                            No ambulance bookings found.
+                                        </td>
+                                    </tr>
+                                ) : bookings.map((b) => (
+                                    <tr key={b.bookingId} style={{ borderTop: `1px solid ${T.border}`, transition: "background .12s" }}
+                                        onMouseEnter={(e) => e.currentTarget.style.background = T.cream}
+                                        onMouseLeave={(e) => e.currentTarget.style.background = "transparent"}
+                                    >
+                                        <td style={{ padding: "15px 20px", fontWeight: 700, color: T.ink }}>{b.patientName}</td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.muted }}>{b.patientEmail}</td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{b.driverName}</td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink }}>{b.vehicleNumber}</td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, maxWidth: 180 }}>
+                                            <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
+                                                <MapPin size={13} color={T.greenMid} style={{ marginTop: 2, flexShrink: 0 }} />
+                                                <span>{b.pickupLocation}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, maxWidth: 180 }}>
+                                            <div style={{ display: "flex", alignItems: "flex-start", gap: 6 }}>
+                                                <Navigation2 size={13} color={T.terra} style={{ marginTop: 2, flexShrink: 0 }} />
+                                                <span>{b.destinationLocation}</span>
+                                            </div>
+                                        </td>
+                                        <td style={{ padding: "15px 20px" }}>
+                                            <StatusBadge status={b.status} />
+                                        </td>
+                                        <td style={{ padding: "15px 20px", fontSize: 13, color: T.ink, whiteSpace: "nowrap" }}>
+                                            {new Date(b.requestTime).toLocaleString()}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style={{ padding: "14px 24px", borderTop: `1px solid ${T.border}`, background: T.cream }}>
+                        <span style={{ fontSize: 12, color: T.muted }}>
+                            Showing <b style={{ color: T.ink }}>{bookings.length}</b> booking{bookings.length !== 1 ? "s" : ""}
+                        </span>
                     </div>
                 </div>
-</>
+            </div>
+        </>
     );
 }

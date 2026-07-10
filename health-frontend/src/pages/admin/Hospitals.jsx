@@ -163,166 +163,166 @@ export default function Hospitals() {
     }
   }
 
-return (
-  <div
-    style={{
-      background: C.cream,
-      minHeight: "100vh",
-      padding: "32px 36px",
-      fontFamily: "'Inter', sans-serif",
-    }}
-  >
-          <div
+  return (
+    <div
+      style={{
+        background: C.cream,
+        minHeight: "100vh",
+        padding: "32px 36px",
+        fontFamily: "'Inter', sans-serif",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 28,
+        }}
+      >
+        <div>
+          <p style={{
+            ...body,
+            color: C.terracotta,
+            fontSize: 12,
+            letterSpacing: 1.5,
+            textTransform: "uppercase",
+            margin: "0 0 4px"
+          }}>
+            Network
+          </p>
+          <h2 style={{ ...heading, fontSize: 30 }}>Hospitals</h2>
+        </div>
+
+        <button
+          style={primaryBtn}
+          onMouseOver={(e) => (e.currentTarget.style.background = C.forestDark)}
+          onMouseOut={(e) => (e.currentTarget.style.background = C.forest)}
+          onClick={() => {
+            setShowForm(!showForm);
+            setEditingId(null);
+            setForm(emptyForm);
+          }}
+        >
+          {showForm ? "Close" : "+ Add Hospital"}
+        </button>
+      </div>
+
+      {showForm && (
+        <div
+          style={{
+            background: C.surface,
+            border: `1px solid ${C.border}`,
+            borderRadius: 16,
+            padding: 24,
+            marginBottom: 28,
+            maxWidth: 480,
+          }}
+        >
+          <h3 style={{ ...heading, fontSize: 18, marginBottom: 16 }}>
+            {editingId ? "Update Hospital" : "New Hospital"}
+          </h3>
+
+          <input
+            style={inputStyle}
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            placeholder="Hospital name"
+          />
+
+          <input
+            style={inputStyle}
+            name="address"
+            value={form.address}
+            onChange={handleChange}
+            placeholder="Address"
+          />
+
+          <input
+            style={inputStyle}
+            name="city"
+            value={form.city}
+            onChange={handleChange}
+            placeholder="City"
+          />
+
+          <input
+            style={inputStyle}
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            placeholder="Phone"
+          />
+
+          <button
             style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 28,
+              ...primaryBtn,
+              width: "100%",
+              opacity: saving ? 0.7 : 1
             }}
+            onClick={saveHospital}
+            disabled={saving}
           >
-            <div>
-              <p style={{ 
-                     ...body, 
-                     color: C.terracotta, 
-                     fontSize: 12, 
-                     letterSpacing: 1.5, 
-                     textTransform: "uppercase", 
-                     margin: "0 0 4px" 
-                    }}>
-                Network
-              </p>
-              <h2 style={{ ...heading, fontSize: 30 }}>Hospitals</h2>
-            </div>
+            {saving ? "Saving..." : editingId ? "Update Hospital" : "Create Hospital"}
+          </button>
+        </div>
+      )}
 
-            <button
-              style={primaryBtn}
-              onMouseOver={(e) => (e.currentTarget.style.background = C.forestDark)}
-              onMouseOut={(e) => (e.currentTarget.style.background = C.forest)}
-              onClick={() => {
-                setShowForm(!showForm);
-                setEditingId(null);
-                setForm(emptyForm);
-              }}
-            >
-              {showForm ? "Close" : "+ Add Hospital"}
-            </button>
-          </div>
-
-          {showForm && (
+      {hospitals.length === 0 ? (
+        <div
+          style={{
+            background: C.surface,
+            border: `1px dashed ${C.border}`,
+            borderRadius: 16,
+            padding: "48px 24px",
+            textAlign: "center",
+          }}
+        >
+          <p style={{
+            ...body,
+            color: C.muted,
+            fontSize: 15
+          }}>
+            No hospitals yet. Add the first one to start building sessions and slots.
+          </p>
+        </div>
+      ) : (
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: 18,
+          }}
+        >
+          {hospitals.map((h) => (
             <div
+              key={h.id}
               style={{
                 background: C.surface,
                 border: `1px solid ${C.border}`,
                 borderRadius: 16,
-                padding: 24,
-                marginBottom: 28,
-                maxWidth: 480,
+                padding: 22,
               }}
             >
-              <h3 style={{ ...heading, fontSize: 18, marginBottom: 16 }}>
-                {editingId ? "Update Hospital" : "New Hospital"}
-              </h3>
+              <h3 style={{ ...heading, fontSize: 19, marginBottom: 10 }}>{h.name}</h3>
 
-              <input 
-                  style={inputStyle} 
-                  name="name" 
-                  value={form.name} 
-                  onChange={handleChange} 
-                  placeholder="Hospital name" 
-              />
+              <p style={{ ...body, color: C.muted, fontSize: 13.5, margin: "0 0 4px" }}>{h.address}</p>
+              <p style={{ ...body, color: C.muted, fontSize: 13.5, margin: "0 0 4px" }}>{h.city}</p>
+              <p style={{ ...body, color: C.muted, fontSize: 13.5, margin: "0 0 16px" }}>{h.phone}</p>
 
-              <input 
-                  style={inputStyle} 
-                  name="address" 
-                  value={form.address} 
-                  onChange={handleChange} 
-                  placeholder="Address" 
-              />
-
-              <input 
-                  style={inputStyle} 
-                  name="city" 
-                  value={form.city} 
-                  onChange={handleChange} 
-                  placeholder="City" 
-              />
-
-              <input 
-                  style={inputStyle} 
-                  name="phone" 
-                  value={form.phone} 
-                  onChange={handleChange} 
-                  placeholder="Phone" 
-              />
-
-              <button
-                style={{ 
-                    ...primaryBtn, 
-                    width: "100%", 
-                    opacity: saving ? 0.7 : 1 
-                  }}
-                onClick={saveHospital}
-                disabled={saving}
-              >
-                {saving ? "Saving..." : editingId ? "Update Hospital" : "Create Hospital"}
-              </button>
+              <div style={{ display: "flex", gap: 8 }}>
+                <button style={editBtn} onClick={() => editHospital(h)}>
+                  Edit
+                </button>
+                <button style={dangerGhostBtn} onClick={() => removeHospital(h.id)}>
+                  Delete
+                </button>
+              </div>
             </div>
-          )}
-
-          {hospitals.length === 0 ? (
-            <div
-              style={{
-                background: C.surface,
-                border: `1px dashed ${C.border}`,
-                borderRadius: 16,
-                padding: "48px 24px",
-                textAlign: "center",
-              }}
-            >
-              <p style={{ 
-                      ...body, 
-                      color: C.muted, 
-                      fontSize: 15 
-                    }}>
-                No hospitals yet. Add the first one to start building sessions and slots.
-              </p>
-            </div>
-          ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
-                gap: 18,
-              }}
-            >
-              {hospitals.map((h) => (
-                <div
-                  key={h.id}
-                  style={{
-                    background: C.surface,
-                    border: `1px solid ${C.border}`,
-                    borderRadius: 16,
-                    padding: 22,
-                  }}
-                >
-                  <h3 style={{ ...heading, fontSize: 19, marginBottom: 10 }}>{h.name}</h3>
-
-                  <p style={{ ...body, color: C.muted, fontSize: 13.5, margin: "0 0 4px" }}>{h.address}</p>
-                  <p style={{ ...body, color: C.muted, fontSize: 13.5, margin: "0 0 4px" }}>{h.city}</p>
-                  <p style={{ ...body, color: C.muted, fontSize: 13.5, margin: "0 0 16px" }}>{h.phone}</p>
-
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <button style={editBtn} onClick={() => editHospital(h)}>
-                      Edit
-                    </button>
-                    <button style={dangerGhostBtn} onClick={() => removeHospital(h.id)}>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          ))}
         </div>
+      )}
+    </div>
   );
 }

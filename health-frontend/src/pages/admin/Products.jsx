@@ -309,143 +309,143 @@ export default function Products() {
   };
 
   return (
-  <div
-    style={{
-      minHeight: "100vh",
-      background: C.cream,
-      padding: "32px 36px",
-      fontFamily: "'Inter', sans-serif",
-    }}
-  >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
-            <div>
-              <p style={{ ...body, color: C.terracotta, fontSize: 12, letterSpacing: 1.5, textTransform: "uppercase", margin: "0 0 4px" }}>
-                Pharmacy
-              </p>
-              <h2 style={{ ...heading, fontSize: 30 }}>Products</h2>
-            </div>
+    <div
+      style={{
+        minHeight: "100vh",
+        background: C.cream,
+        padding: "32px 36px",
+        fontFamily: "'Inter', sans-serif",
+      }}
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+        <div>
+          <p style={{ ...body, color: C.terracotta, fontSize: 12, letterSpacing: 1.5, textTransform: "uppercase", margin: "0 0 4px" }}>
+            Pharmacy
+          </p>
+          <h2 style={{ ...heading, fontSize: 30 }}>Products</h2>
+        </div>
 
-            <button style={primaryBtn} onClick={() => setShowForm(!showForm)}>
-              {showForm ? "Close" : "+ Add Product"}
-            </button>
-          </div>
+        <button style={primaryBtn} onClick={() => setShowForm(!showForm)}>
+          {showForm ? "Close" : "+ Add Product"}
+        </button>
+      </div>
 
-          {showForm && (
-            <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24, marginBottom: 24, maxWidth: 460 }}>
-              <input style={inputStyle} name="name" onChange={handleChange} value={form.name} placeholder="Product name *" />
-              <input style={inputStyle} name="description" onChange={handleChange} value={form.description} placeholder="Description" />
-              <input style={inputStyle} name="price" type="number" onChange={handleChange} value={form.price} placeholder="Price *" />
-              <input style={inputStyle} name="stock" type="number" onChange={handleChange} value={form.stock} placeholder="Stock *" />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) =>
-                  setForm({
-                    ...form,
-                    image: e.target.files[0]
-                  })
-                }
-              />
+      {showForm && (
+        <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, padding: 24, marginBottom: 24, maxWidth: 460 }}>
+          <input style={inputStyle} name="name" onChange={handleChange} value={form.name} placeholder="Product name *" />
+          <input style={inputStyle} name="description" onChange={handleChange} value={form.description} placeholder="Description" />
+          <input style={inputStyle} name="price" type="number" onChange={handleChange} value={form.price} placeholder="Price *" />
+          <input style={inputStyle} name="stock" type="number" onChange={handleChange} value={form.stock} placeholder="Stock *" />
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) =>
+              setForm({
+                ...form,
+                image: e.target.files[0]
+              })
+            }
+          />
 
-              <select
-                name="category"
-                onChange={handleChange}
-                value={form.category}
-                style={{ ...inputStyle, marginBottom: 18, cursor: "pointer" }}
-              >
-                <option value="">Select category (optional)</option>
-                {CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+          <select
+            name="category"
+            onChange={handleChange}
+            value={form.category}
+            style={{ ...inputStyle, marginBottom: 18, cursor: "pointer" }}
+          >
+            <option value="">Select category (optional)</option>
+            {CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
 
-              <button style={{ ...primaryBtn, width: "100%" }} onClick={createProduct}>
-                Create Product
-              </button>
-            </div>
-          )}
+          <button style={{ ...primaryBtn, width: "100%" }} onClick={createProduct}>
+            Create Product
+          </button>
+        </div>
+      )}
 
-          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, overflow: "hidden" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead>
-                <tr style={{ background: C.forestSoft }}>
-                  {["ID", "Image", "Name", "Category", "Price", "Stock", "Actions"].map((h) => (
-                    <th key={h} style={{ ...body, textAlign: "left", padding: "12px 16px", fontSize: 12, letterSpacing: 0.5, textTransform: "uppercase", color: C.forestDark }}>
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((p) => (
-                  <tr key={p.id} style={{ borderTop: `1px solid ${C.border}` }}>
-                    <td style={{ ...body, padding: "14px 16px", color: C.muted, fontSize: 13.5 }}>{p.id}</td>
-                    <td>
-                      {p.imageUrl ? (
-                        <img
-                          src={`http://localhost:5008${p.imageUrl}`}
-                          alt=""
-                          style={{
-                            width: 60,
-                            height: 60,
-                            objectFit: "cover",
-                            borderRadius: 8
-                          }}
-                        />
-                      ) : (
-                        "No Image"
-                      )}
+      <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 16, overflow: "hidden" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+          <thead>
+            <tr style={{ background: C.forestSoft }}>
+              {["ID", "Image", "Name", "Category", "Price", "Stock", "Actions"].map((h) => (
+                <th key={h} style={{ ...body, textAlign: "left", padding: "12px 16px", fontSize: 12, letterSpacing: 0.5, textTransform: "uppercase", color: C.forestDark }}>
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((p) => (
+              <tr key={p.id} style={{ borderTop: `1px solid ${C.border}` }}>
+                <td style={{ ...body, padding: "14px 16px", color: C.muted, fontSize: 13.5 }}>{p.id}</td>
+                <td>
+                  {p.imageUrl ? (
+                    <img
+                      src={`http://localhost:5008${p.imageUrl}`}
+                      alt=""
+                      style={{
+                        width: 60,
+                        height: 60,
+                        objectFit: "cover",
+                        borderRadius: 8
+                      }}
+                    />
+                  ) : (
+                    "No Image"
+                  )}
 
-                    </td>
-                    <td style={{ ...body, padding: "14px 16px", fontWeight: 600, fontSize: 14 }}>{p.name}</td>
-                    <td style={{ padding: "14px 16px" }}>
-                      {p.category ? (
-                        <span style={{ ...body, background: C.forestSoft, color: C.forestDark, fontSize: 11.5, fontWeight: 600, padding: "4px 10px", borderRadius: 999 }}>
-                          {p.category}
-                        </span>
-                      ) : (
-                        <span style={{ ...body, background: C.cream, color: C.muted, fontSize: 11.5, padding: "4px 10px", borderRadius: 999 }}>
-                          Unassigned
-                        </span>
-                      )}
-                    </td>
-                    <td style={{ ...body, padding: "14px 16px", fontSize: 13.5 }}>₹{p.price}</td>
-                    <td style={{ padding: "14px 16px" }}>
-                      <span style={{ ...body, fontSize: 13.5, fontWeight: p.stock < 10 ? 700 : 400, color: p.stock < 10 ? C.danger : C.ink }}>
-                        {p.stock}
-                      </span>
-                    </td>
-                    <td style={{ padding: "14px 16px" }}>
-                      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                        <button style={smallBtn(C.terracottaSoft, C.terracottaDark)} onClick={() => openEditCat(p)}>
-                          Set Category
-                        </button>
-                        <button style={smallBtn(C.forestSoft, C.forestDark)} onClick={() => openStockModal(p)}>
-                          Add Stock
-                        </button>
-                        <button
-                          style={smallBtn(C.forestSoft, C.forestDark)}
-                          onClick={() => setImageProduct(p)}
-                        >
-                          {p.imageUrl ? "Change Image" : "Add Image"}
-                        </button>
-                        <button style={smallBtn(C.dangerSoft, C.danger)} onClick={() => remove(p.id)}>
-                          Delete
-                        </button>
-                        <button
-                          style={smallBtn(C.terracottaSoft, C.terracottaDark)}
-                          onClick={() => openEditProduct(p)}
-                        >
-                          Edit
-                        </button>
-                      </div>
-                    </td>
+                </td>
+                <td style={{ ...body, padding: "14px 16px", fontWeight: 600, fontSize: 14 }}>{p.name}</td>
+                <td style={{ padding: "14px 16px" }}>
+                  {p.category ? (
+                    <span style={{ ...body, background: C.forestSoft, color: C.forestDark, fontSize: 11.5, fontWeight: 600, padding: "4px 10px", borderRadius: 999 }}>
+                      {p.category}
+                    </span>
+                  ) : (
+                    <span style={{ ...body, background: C.cream, color: C.muted, fontSize: 11.5, padding: "4px 10px", borderRadius: 999 }}>
+                      Unassigned
+                    </span>
+                  )}
+                </td>
+                <td style={{ ...body, padding: "14px 16px", fontSize: 13.5 }}>₹{p.price}</td>
+                <td style={{ padding: "14px 16px" }}>
+                  <span style={{ ...body, fontSize: 13.5, fontWeight: p.stock < 10 ? 700 : 400, color: p.stock < 10 ? C.danger : C.ink }}>
+                    {p.stock}
+                  </span>
+                </td>
+                <td style={{ padding: "14px 16px" }}>
+                  <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+                    <button style={smallBtn(C.terracottaSoft, C.terracottaDark)} onClick={() => openEditCat(p)}>
+                      Set Category
+                    </button>
+                    <button style={smallBtn(C.forestSoft, C.forestDark)} onClick={() => openStockModal(p)}>
+                      Add Stock
+                    </button>
+                    <button
+                      style={smallBtn(C.forestSoft, C.forestDark)}
+                      onClick={() => setImageProduct(p)}
+                    >
+                      {p.imageUrl ? "Change Image" : "Add Image"}
+                    </button>
+                    <button style={smallBtn(C.dangerSoft, C.danger)} onClick={() => remove(p.id)}>
+                      Delete
+                    </button>
+                    <button
+                      style={smallBtn(C.terracottaSoft, C.terracottaDark)}
+                      onClick={() => openEditProduct(p)}
+                    >
+                      Edit
+                    </button>
+                  </div>
+                </td>
 
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
 
       {editCatProduct && (
@@ -543,9 +543,9 @@ export default function Products() {
 
             <div style={{ display: "flex", gap: 10 }}>
               <button style={secondaryBtn} onClick={() => {
-                  setImageProduct(null);
-                  setImageFile(null);
-                }}>
+                setImageProduct(null);
+                setImageFile(null);
+              }}>
                 Cancel
               </button>
 
